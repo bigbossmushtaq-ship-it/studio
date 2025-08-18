@@ -86,9 +86,9 @@ function SidebarNav() {
 
       <SidebarMenu className="mt-4">
         <SidebarMenuItem>
-          <SidebarMenuButton tooltip={isMobile ? undefined : "Create Playlist"}>
-            <Plus />
-            Create Playlist
+          <SidebarMenuButton tooltip={isMobile ? undefined : "Upload Playlist"}>
+            <Upload />
+            Upload Playlist
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
@@ -105,7 +105,7 @@ function SidebarNav() {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex h-screen w-full flex-col">
+      <div className="flex h-screen w-full flex-col bg-card">
         <div className="flex flex-1 overflow-hidden">
           <Sidebar>
             <SidebarHeader className="p-4">
@@ -121,7 +121,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </SidebarContent>
           </Sidebar>
           <SidebarInset className="flex flex-col">
-            <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
+            <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
               <SidebarTrigger className="md:hidden" />
               <div className="flex-1">
                 {/* Header content like search bar can go here */}
@@ -137,6 +137,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <AvatarImage
                         src="https://placehold.co/100x100.png"
                         alt="User"
+                        data-ai-hint="user avatar"
                       />
                       <AvatarFallback>U</AvatarFallback>
                     </Avatar>

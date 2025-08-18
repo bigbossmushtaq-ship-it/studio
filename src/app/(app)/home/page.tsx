@@ -6,6 +6,9 @@ import { SongCard } from "@/components/song-card";
 import { PlaylistCard } from "@/components/playlist-card";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Play } from "lucide-react";
 
 export default function HomePage() {
   const [recommended, setRecommended] = React.useState<Song[]>([]);
@@ -45,17 +48,33 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
+      <div className="flex items-center gap-4">
+          <Button variant="primary" className="rounded-full bg-primary text-primary-foreground">All</Button>
+          <Button variant="ghost" className="rounded-full bg-muted text-muted-foreground">Music</Button>
+          <Button variant="ghost" className="rounded-full bg-muted text-muted-foreground">Podcasts</Button>
+      </div>
       <div>
-        <h2 className="text-3xl font-bold tracking-tight mb-4">Good Afternoon</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {playlists.slice(0, 3).map((playlist) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {playlists.slice(0, 8).map((playlist) => (
             <PlaylistCard key={playlist.id} playlist={playlist} />
           ))}
         </div>
       </div>
+       <div>
+        <h3 className="text-2xl font-bold tracking-tight mb-4">New release from Maroon 5</h3>
+        <div className="bg-card p-4 rounded-lg flex items-center gap-4">
+           <Image src="https://placehold.co/200x200.png" alt="Love is Like" width={128} height={128} className="rounded-md w-32 h-32" data-ai-hint="album cover" />
+           <div className="flex-1">
+            <p className="text-sm text-muted-foreground">Album</p>
+            <h4 className="text-2xl font-bold">Love Is Like</h4>
+            <p className="text-muted-foreground">Maroon 5</p>
+           </div>
+           <Button size="icon" className="h-12 w-12 rounded-full bg-primary text-primary-foreground"><Play className="h-6 w-6 fill-current" /></Button>
+        </div>
+      </div>
 
       <div>
-        <h3 className="text-2xl font-bold tracking-tight mb-4">Made For You</h3>
+        <h3 className="text-2xl font-bold tracking-tight mb-4">Jump back in</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {loading && Array.from({ length: 6 }).map((_, i) => (
              <div key={i} className="space-y-2">
@@ -65,15 +84,6 @@ export default function HomePage() {
             </div>
           ))}
           {!loading && recommended.map((song) => (
-            <SongCard key={song.id} song={song} />
-          ))}
-        </div>
-      </div>
-      
-      <div>
-        <h3 className="text-2xl font-bold tracking-tight mb-4">Recently Played</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {songs.slice(0, 6).map((song) => (
             <SongCard key={song.id} song={song} />
           ))}
         </div>

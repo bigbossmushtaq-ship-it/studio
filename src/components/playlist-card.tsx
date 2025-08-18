@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Play } from "lucide-react";
 import { Playlist } from "@/lib/data";
 import { Button } from "./ui/button";
-import { Card } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 
 export function PlaylistCard({ playlist }: { playlist: Playlist }) {
   return (
@@ -15,12 +15,12 @@ export function PlaylistCard({ playlist }: { playlist: Playlist }) {
         className="h-20 w-20 object-cover"
         data-ai-hint="album cover"
       />
-      <p className="flex-1 font-semibold truncate">{playlist.name}</p>
+      <p className="flex-1 font-semibold truncate pr-2">{playlist.name}</p>
       <Button
         size="icon"
-        className="mr-4 h-10 w-10 rounded-full bg-primary text-primary-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100"
+        className="mr-4 h-12 w-12 rounded-full bg-primary text-primary-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 scale-0 group-hover:scale-100"
       >
-        <Play className="h-5 w-5 fill-current" />
+        <Play className="h-6 w-6 fill-current" />
       </Button>
     </Card>
   );

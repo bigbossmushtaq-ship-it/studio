@@ -17,31 +17,28 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-const SpectrumBar = ({ height }: { height: number }) => (
-  <div
-    className="w-1 bg-accent transition-all duration-300 ease-in-out"
-    style={{ height: `${height}px` }}
-  />
-);
 
-const AudioSpectrum = () => {
-  const [heights, setHeights] = useState([10, 20, 15, 25, 12, 18, 22, 14]);
+const GeminiSpectrum = () => {
+  const [rotation, setRotation] = useState(0);
 
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
-      setHeights(heights.map(() => Math.random() * 25 + 5));
-    }, 200);
+      setRotation(r => r + 1);
+    }, 10);
     return () => clearInterval(interval);
-  });
+  }, []);
 
   return (
-    <div className="absolute inset-x-0 bottom-full h-8 flex justify-center items-end gap-1 pointer-events-none">
-      {heights.map((h, i) => (
-        <SpectrumBar key={i} height={h} />
-      ))}
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 h-24 w-24 pointer-events-none">
+       <div className="relative w-full h-full" style={{transform: `rotate(${rotation}deg)`}}>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-8 bg-primary rounded-full" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-8 bg-accent rounded-full" />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-2 w-8 bg-blue-500 rounded-full" />
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 h-2 w-8 bg-green-500 rounded-full" />
+      </div>
     </div>
   );
 };
@@ -52,7 +49,7 @@ export function MusicPlayer() {
 
   return (
     <footer className="relative z-10 border-t bg-card text-card-foreground shadow-lg">
-      <AudioSpectrum />
+      {isPlaying && <GeminiSpectrum />}
       <div className="grid h-24 grid-cols-3 items-center px-4">
         <div className="flex items-center gap-3">
           <Image
@@ -85,7 +82,7 @@ export function MusicPlayer() {
               className="h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setIsPlaying(!isPlaying)}
             >
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+              {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <SkipForward className="h-5 w-5" />

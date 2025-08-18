@@ -2,10 +2,11 @@ import Image from "next/image";
 import { Play } from "lucide-react";
 import { Song } from "@/lib/data";
 import { Button } from "./ui/button";
+import { Card } from "./ui/card";
 
 export function SongCard({ song }: { song: Song }) {
   return (
-    <div className="group flex flex-col gap-2">
+    <Card className="group flex flex-col gap-2 p-4 bg-card hover:bg-muted/80 transition-colors">
       <div className="relative">
         <Image
           src={song.albumArt}
@@ -17,15 +18,15 @@ export function SongCard({ song }: { song: Song }) {
         />
         <Button
           size="icon"
-          className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-primary text-primary-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 group-hover:bottom-3"
+          className="absolute bottom-2 right-2 h-12 w-12 rounded-full bg-primary text-primary-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 group-hover:bottom-3 scale-0 group-hover:scale-100"
         >
-          <Play className="h-5 w-5 fill-current" />
+          <Play className="h-6 w-6 fill-current" />
         </Button>
       </div>
-      <div className="truncate">
+      <div className="truncate pt-2">
         <p className="font-semibold truncate">{song.title}</p>
         <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
       </div>
-    </div>
+    </Card>
   );
 }
