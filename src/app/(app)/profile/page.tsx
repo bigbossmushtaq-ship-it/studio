@@ -1,139 +1,40 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
-import { UploadCloud } from "lucide-react";
 
 export default function ProfilePage() {
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-      <Card>
+    <div className="space-y-8 flex flex-col items-center">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
+        <p className="text-muted-foreground">
+          Update your profile picture.
+        </p>
+      </div>
+      <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Account</CardTitle>
+          <CardTitle>Profile Picture</CardTitle>
           <CardDescription>
-            Manage your account settings.
+            Upload a new photo for your profile.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center space-x-4">
-            <div className="relative group">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-              <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
-                Upload
-                <Input id="avatar-upload" type="file" className="hidden" />
-              </label>
-            </div>
-            <div>
-              <p className="font-semibold text-lg">User</p>
-              <p className="text-sm text-muted-foreground">user@example.com</p>
-            </div>
+        <CardContent className="space-y-6 flex flex-col items-center">
+          <div className="relative group">
+            <Avatar className="h-48 w-48">
+              <AvatarImage src="https://placehold.co/200x200.png" alt="User" data-ai-hint="user avatar" />
+              <AvatarFallback>U</AvatarFallback>
+            </Avatar>
+            <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+              Upload
+              <Input id="avatar-upload" type="file" className="hidden" />
+            </label>
           </div>
-          <Button variant="outline">Logout</Button>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Theme</CardTitle>
-          <CardDescription>
-            Customize your app's appearance.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div>
-              <Label htmlFor="theme-switch" className="font-semibold">Dark Mode</Label>
-              <p className="text-sm text-muted-foreground">
-                Enable or disable dark mode.
-              </p>
-            </div>
-            <Switch id="theme-switch" defaultChecked />
+          <div>
+            <p className="font-semibold text-2xl">User</p>
+            <p className="text-sm text-center text-muted-foreground">user@example.com</p>
           </div>
-          <div className="space-y-4 rounded-lg border p-4">
-              <Label className="font-semibold">Accent Color</Label>
-              <p className="text-sm text-muted-foreground">
-                Choose an accent color for the UI.
-              </p>
-              <div className="flex gap-2 pt-2">
-                <Button style={{backgroundColor: '#673AB7'}} className="h-8 w-8 rounded-full" />
-                <Button style={{backgroundColor: '#00BCD4'}} className="h-8 w-8 rounded-full" />
-                <Button style={{backgroundColor: '#E91E63'}} className="h-8 w-8 rounded-full" />
-                <Button style={{backgroundColor: '#4CAF50'}} className="h-8 w-8 rounded-full" />
-                <Button style={{backgroundColor: '#FFC107'}} className="h-8 w-8 rounded-full" />
-                <Button style={{backgroundColor: '#F44336'}} className="h-8 w-8 rounded-full" />
-                <Button style={{backgroundColor: '#2196F3'}} className="h-8 w-8 rounded-full" />
-                <Button style={{backgroundColor: '#9C27B0'}} className="h-8 w-8 rounded-full" />
-              </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Playback</CardTitle>
-          <CardDescription>
-            Manage your playback settings.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-           <div className="space-y-4 rounded-lg border p-4">
-            <Label className="font-semibold">Audio Quality</Label>
-            <RadioGroup defaultValue="auto" className="pt-2">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="auto" id="q-auto" />
-                <Label htmlFor="q-auto">Auto</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="low" id="q-low" />
-                <Label htmlFor="q-low">Low</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="medium" id="q-medium" />
-                <Label htmlFor="q-medium">Medium</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="high" id="q-high" />
-                <Label htmlFor="q-high">High</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div>
-              <Label htmlFor="visualizer-switch" className="font-semibold">Audio Visualizer</Label>
-              <p className="text-sm text-muted-foreground">
-                Enable or disable the audio visualizer.
-              </p>
-            </div>
-            <Switch id="visualizer-switch" defaultChecked />
-          </div>
-           <div className="space-y-4 rounded-lg border p-4">
-            <Label className="font-semibold">Visualizer Placement</Label>
-             <p className="text-sm text-muted-foreground">
-                Choose where to display the visualizer.
-              </p>
-            <RadioGroup defaultValue="center" className="pt-2">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="center" id="v-center" />
-                <Label htmlFor="v-center">Center</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="edges" id="v-edges" />
-                <Label htmlFor="v-edges">Edges</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="offscreen" id="v-offscreen" />
-                <Label htmlFor="v-offscreen">Off-screen</Label>
-              </div>
-            </RadioGroup>
-          </div>
+          <Button>Save Changes</Button>
         </CardContent>
       </Card>
     </div>
