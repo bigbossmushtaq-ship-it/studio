@@ -99,10 +99,38 @@ function SidebarNav() {
   );
 }
 
+const BottomNavBar = () => {
+  const pathname = usePathname();
+  const isActive = (path: string) => pathname === path;
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-20 md:hidden">
+      <div className="flex justify-around h-16 items-center">
+        <Link href="/home" className={`flex flex-col items-center gap-1 ${isActive('/home') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Home />
+          <span className="text-xs">Home</span>
+        </Link>
+         <Link href="/search" className={`flex flex-col items-center gap-1 ${isActive('/search') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Search />
+          <span className="text-xs">Search</span>
+        </Link>
+         <Link href="/library" className={`flex flex-col items-center gap-1 ${isActive('/library') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Library />
+          <span className="text-xs">Library</span>
+        </Link>
+        <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Upload />
+          <span className="text-xs">Upload</span>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex h-screen w-full flex-col bg-card">
+      <div className="flex h-screen w-full flex-col bg-background">
         <div className="flex flex-1 overflow-hidden">
           <Sidebar>
             <SidebarHeader className="p-4">
@@ -154,12 +182,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </header>
-            <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6">
+            <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-24 md:pb-8">
               {children}
             </main>
           </SidebarInset>
         </div>
         <MusicPlayer />
+        <BottomNavBar />
       </div>
     </SidebarProvider>
   );
