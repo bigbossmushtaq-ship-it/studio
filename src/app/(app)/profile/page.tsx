@@ -60,6 +60,9 @@ export default function ProfilePage() {
                 <Button style={{backgroundColor: '#E91E63'}} className="h-8 w-8 rounded-full" />
                 <Button style={{backgroundColor: '#4CAF50'}} className="h-8 w-8 rounded-full" />
                 <Button style={{backgroundColor: '#FFC107'}} className="h-8 w-8 rounded-full" />
+                <Button style={{backgroundColor: '#F44336'}} className="h-8 w-8 rounded-full" />
+                <Button style={{backgroundColor: '#2196F3'}} className="h-8 w-8 rounded-full" />
+                <Button style={{backgroundColor: '#9C27B0'}} className="h-8 w-8 rounded-full" />
               </div>
           </div>
         </CardContent>
@@ -102,6 +105,26 @@ export default function ProfilePage() {
               </p>
             </div>
             <Switch id="visualizer-switch" defaultChecked />
+          </div>
+           <div className="space-y-4 rounded-lg border p-4">
+            <Label className="font-semibold">Visualizer Placement</Label>
+             <p className="text-sm text-muted-foreground">
+                Choose where to display the visualizer.
+              </p>
+            <RadioGroup defaultValue="center" className="pt-2">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="center" id="v-center" />
+                <Label htmlFor="v-center">Center</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="edges" id="v-edges" />
+                <Label htmlFor="v-edges">Edges</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="offscreen" id="v-offscreen" />
+                <Label htmlFor="v-offscreen">Off-screen</Label>
+              </div>
+            </RadioGroup>
           </div>
         </CardContent>
       </Card>

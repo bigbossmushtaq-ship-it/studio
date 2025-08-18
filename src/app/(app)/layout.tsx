@@ -125,17 +125,13 @@ const BottomNavBar = () => {
           <Search />
           <span className="text-xs">Search</span>
         </Link>
-         <Link href="/library" className={`flex flex-col items-center gap-1 ${isActive('/library') ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Library />
-          <span className="text-xs">Library</span>
-        </Link>
-        <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
+         <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
           <Upload />
           <span className="text-xs">Upload</span>
         </Link>
-        <Link href="/profile" className={`flex flex-col items-center gap-1 ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Settings />
-          <span className="text-xs">Settings</span>
+        <Link href="/library" className={`flex flex-col items-center gap-1 ${isActive('/library') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Library />
+          <span className="text-xs">Library</span>
         </Link>
       </div>
     </div>
@@ -146,8 +142,8 @@ const BottomNavBar = () => {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex h-screen w-full flex-col bg-background">
-        <div className="flex flex-1 overflow-hidden">
+      <div className="grid h-screen w-full grid-rows-[1fr_auto] bg-background">
+        <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarHeader className="p-4">
               <div className="flex items-center gap-2">
@@ -203,8 +199,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </main>
           </SidebarInset>
         </div>
-        <MusicPlayer />
-        <BottomNavBar />
+        <div className="md:pl-[5rem]">
+            <MusicPlayer />
+            <BottomNavBar />
+        </div>
       </div>
     </SidebarProvider>
   );

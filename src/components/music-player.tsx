@@ -76,7 +76,7 @@ export function MusicPlayer() {
   const [isLiked, setIsLiked] = useState(false);
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-50 bg-player shadow-t-lg md:bottom-auto md:relative">
+    <footer className="bg-player shadow-t-lg">
       <div className="grid grid-cols-[auto_1fr_auto] items-center px-4 h-24">
         {/* Left Side: Album Art & Song Info */}
         <div className="flex items-center gap-4 w-64">
