@@ -143,7 +143,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarNav />
             </SidebarContent>
              <SidebarFooter>
-              <DropdownMenu>
+               <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
