@@ -1,0 +1,168 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Home,
+  Library,
+  PanelLeft,
+  Plus,
+  Search,
+  Settings,
+  User,
+  Upload,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Logo } from "@/components/icons/logo";
+import { MusicPlayer } from "@/components/music-player";
+
+function SidebarNav() {
+  const pathname = usePathname();
+  const isActive = (path: string) => pathname === path;
+  const { isMobile } = useSidebar();
+
+  return (
+    <>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            asChild
+            isActive={isActive("/home")}
+            tooltip={isMobile ? undefined : "Home"}
+          >
+            <Link href="/home">
+              <Home />
+              Home
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            asChild
+            isActive={isActive("/search")}
+            tooltip={isMobile ? undefined : "Search"}
+          >
+            <Link href="/search">
+              <Search />
+              Search
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            asChild
+            isActive={isActive("/library")}
+            tooltip={isMobile ? undefined : "Your Library"}
+          >
+            <Link href="/library">
+              <Library />
+              Your Library
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+
+      <SidebarMenu className="mt-4">
+        <SidebarMenuItem>
+          <SidebarMenuButton tooltip={isMobile ? undefined : "Create Playlist"}>
+            <Plus />
+            Create Playlist
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton tooltip={isMobile ? undefined : "Upload Song"}>
+            <Upload />
+            Upload Song
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </>
+  );
+}
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider defaultOpen>
+      <div className="flex h-screen w-full flex-col">
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar>
+            <SidebarHeader className="p-4">
+              <div className="flex items-center gap-2">
+                <Logo className="h-8 w-8 text-primary" />
+                <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
+                  TuneFlow
+                </span>
+              </div>
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarNav />
+            </SidebarContent>
+          </Sidebar>
+          <SidebarInset className="flex flex-col">
+            <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
+              <SidebarTrigger className="md:hidden" />
+              <div className="flex-1">
+                {/* Header content like search bar can go here */}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative h-8 w-8 rounded-full"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src="https://placehold.co/100x100.png"
+                        alt="User"
+                      />
+                      <AvatarFallback>U</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile"><Settings className="mr-2 h-4 w-4" />Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>Support</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/">Logout</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </header>
+            <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6">
+              {children}
+            </main>
+          </SidebarInset>
+        </div>
+        <MusicPlayer />
+      </div>
+    </SidebarProvider>
+  );
+}
