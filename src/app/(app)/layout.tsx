@@ -9,6 +9,7 @@ import {
   Search,
   Settings,
   Upload,
+  User
 } from "lucide-react";
 import {
   Sidebar,
@@ -132,47 +133,64 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarHeader className="p-4">
-              <div className="flex items-center gap-2">
-                <Logo className="h-8 w-8 text-primary" />
-                <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-                  TuneFlow
-                </span>
+               <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Logo className="h-8 w-8 text-primary" />
+                  <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
+                    TuneFlow
+                  </span>
+                </div>
+                 <div className="group-data-[collapsible=icon]:hidden">
+                   <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <User />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right" align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/profile"><Settings className="mr-2 h-4 w-4" />Settings</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>Support</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/">Logout</Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                 </div>
               </div>
             </SidebarHeader>
             <SidebarContent>
               <SidebarNav />
             </SidebarContent>
              <SidebarFooter>
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-2"
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src="https://placehold.co/100x100.png"
-                          alt="User"
-                          data-ai-hint="user avatar"
-                        />
-                        <AvatarFallback>U</AvatarFallback>
-                      </Avatar>
-                      <span className="group-data-[collapsible=icon]:hidden">User</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="right" align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile"><Settings className="mr-2 h-4 w-4" />Settings</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>Support</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/">Logout</Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <div className="group-data-[collapsible=icon]:hidden">
+                {/* Footer content can go here when expanded */}
+              </div>
+              <div className="hidden group-data-[collapsible=icon]:block">
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <User />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right" align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/profile"><Settings className="mr-2 h-4 w-4" />Settings</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>Support</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/">Logout</Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+              </div>
             </SidebarFooter>
           </Sidebar>
           <SidebarInset className="flex flex-col">
