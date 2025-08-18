@@ -21,6 +21,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   useSidebar,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -91,18 +92,6 @@ function SidebarNav() {
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            isActive={isActive("/profile")}
-            tooltip={isMobile ? undefined : "Settings"}
-          >
-            <Link href="/profile">
-              <Settings />
-              Settings
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
       </SidebarMenu>
     </>
   );
@@ -153,6 +142,38 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarContent>
               <SidebarNav />
             </SidebarContent>
+             <SidebarFooter>
+              <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-2"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src="https://placehold.co/100x100.png"
+                          alt="User"
+                          data-ai-hint="user avatar"
+                        />
+                        <AvatarFallback>U</AvatarFallback>
+                      </Avatar>
+                      <span className="group-data-[collapsible=icon]:hidden">User</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="right" align="end">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile"><Settings className="mr-2 h-4 w-4" />Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>Support</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/">Logout</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+            </SidebarFooter>
           </Sidebar>
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
@@ -160,36 +181,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex-1">
                 {/* Header content like search bar can go here */}
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative h-8 w-8 rounded-full"
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src="https://placehold.co/100x100.png"
-                        alt="User"
-                        data-ai-hint="user avatar"
-                      />
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile"><Settings className="mr-2 h-4 w-4" />Settings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>Support</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/">Logout</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </header>
             <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-40 md:pb-32">
               {children}
