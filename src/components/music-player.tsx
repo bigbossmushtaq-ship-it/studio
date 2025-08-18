@@ -48,7 +48,7 @@ export function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <footer className="relative z-10 border-t bg-card text-card-foreground shadow-lg">
+    <footer className="relative z-10 bg-transparent text-card-foreground">
       {isPlaying && <GeminiSpectrum />}
       <div className="grid h-24 grid-cols-3 items-center px-4">
         <div className="flex items-center gap-3">
