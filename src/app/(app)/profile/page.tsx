@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
+import { UploadCloud } from "lucide-react";
 
 export default function ProfilePage() {
   return (
@@ -19,12 +21,18 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center space-x-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
+            <div className="relative group">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+              <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                Upload
+                <Input id="avatar-upload" type="file" className="hidden" />
+              </label>
+            </div>
             <div>
-              <p className="font-semibold">User</p>
+              <p className="font-semibold text-lg">User</p>
               <p className="text-sm text-muted-foreground">user@example.com</p>
             </div>
           </div>

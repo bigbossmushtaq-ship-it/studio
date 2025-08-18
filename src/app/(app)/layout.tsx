@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Library,
+  LogOut,
   Search,
   Settings,
   Upload,
@@ -24,14 +25,6 @@ import {
   useSidebar,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/icons/logo";
@@ -93,6 +86,18 @@ function SidebarNav() {
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
+         <SidebarMenuItem>
+          <SidebarMenuButton
+            asChild
+            isActive={isActive("/profile")}
+            tooltip={isMobile ? undefined : "Settings"}
+          >
+            <Link href="/profile">
+              <Settings />
+              Settings
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarMenu>
     </>
   );
@@ -140,57 +145,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     TuneFlow
                   </span>
                 </div>
-                 <div className="group-data-[collapsible=icon]:hidden">
-                   <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <User />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent side="right" align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/profile"><Settings className="mr-2 h-4 w-4" />Settings</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Support</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/">Logout</Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                 </div>
+              </div>
+              <div className="flex justify-center items-center py-4 group-data-[collapsible=icon]:hidden">
+                 <Button variant="ghost" size="icon" asChild className="h-16 w-16">
+                    <Link href="/profile">
+                      <User className="h-8 w-8" />
+                    </Link>
+                  </Button>
+              </div>
+               <div className="hidden group-data-[collapsible=icon]:flex justify-center items-center py-4">
+                 <Button variant="ghost" size="icon" asChild>
+                    <Link href="/profile">
+                      <User />
+                    </Link>
+                  </Button>
               </div>
             </SidebarHeader>
             <SidebarContent>
               <SidebarNav />
             </SidebarContent>
              <SidebarFooter>
-              <div className="group-data-[collapsible=icon]:hidden">
-                {/* Footer content can go here when expanded */}
-              </div>
-              <div className="hidden group-data-[collapsible=icon]:block">
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <User />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent side="right" align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/profile"><Settings className="mr-2 h-4 w-4" />Settings</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Support</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/">Logout</Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-              </div>
+                <div className="group-data-[collapsible=icon]:hidden">
+                    <Button variant="destructive" className="w-full justify-center" asChild>
+                      <Link href="/"><LogOut className="mr-2 h-4 w-4" />Logout</Link>
+                    </Button>
+                </div>
+                <div className="hidden group-data-[collapsible=icon]:block">
+                     <Button variant="destructive" size="icon" asChild>
+                      <Link href="/"><LogOut /></Link>
+                    </Button>
+                </div>
             </SidebarFooter>
           </Sidebar>
           <SidebarInset className="flex flex-col">
