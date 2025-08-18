@@ -8,7 +8,6 @@ import {
   Library,
   LogOut,
   Search,
-  Settings,
   Upload,
   User
 } from "lucide-react";
@@ -26,7 +25,6 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/icons/logo";
 import { MusicPlayer } from "@/components/music-player";
 
@@ -83,18 +81,6 @@ function SidebarNav() {
             <Link href="/upload">
               <Upload />
               Upload
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-         <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            isActive={isActive("/profile")}
-            tooltip={isMobile ? undefined : "Settings"}
-          >
-            <Link href="/profile">
-              <Settings />
-              Settings
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
