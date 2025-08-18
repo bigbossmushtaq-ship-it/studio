@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function ProfilePage() {
   return (
     <div className="space-y-8">
+      <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>
@@ -33,39 +34,74 @@ export default function ProfilePage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Settings</CardTitle>
+          <CardTitle>Theme</CardTitle>
           <CardDescription>
-            Customize your app experience.
+            Customize your app&apos;s appearance.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div>
-              <Label htmlFor="theme-switch" className="font-semibold">Theme</Label>
+              <Label htmlFor="theme-switch" className="font-semibold">Dark Mode</Label>
               <p className="text-sm text-muted-foreground">
-                Switch between light and dark mode.
+                Enable or disable dark mode.
               </p>
             </div>
             <Switch id="theme-switch" defaultChecked />
           </div>
+          <div className="space-y-4 rounded-lg border p-4">
+              <Label className="font-semibold">Accent Color</Label>
+              <p className="text-sm text-muted-foreground">
+                Choose an accent color for the UI.
+              </p>
+              <div className="flex gap-2 pt-2">
+                <Button className="h-8 w-8 rounded-full bg-primary" />
+                <Button className="h-8 w-8 rounded-full bg-red-500" />
+                <Button className="h-8 w-8 rounded-full bg-blue-500" />
+                <Button className="h-8 w-8 rounded-full bg-green-500" />
+                <Button className="h-8 w-8 rounded-full bg-yellow-500" />
+              </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Playback</CardTitle>
+          <CardDescription>
+            Manage your playback settings.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+           <div className="space-y-4 rounded-lg border p-4">
+            <Label className="font-semibold">Audio Quality</Label>
+            <RadioGroup defaultValue="auto" className="pt-2">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="auto" id="q-auto" />
+                <Label htmlFor="q-auto">Auto</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="low" id="q-low" />
+                <Label htmlFor="q-low">Low</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="medium" id="q-medium" />
+                <Label htmlFor="q-medium">Medium</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="high" id="q-high" />
+                <Label htmlFor="q-high">High</Label>
+              </div>
+            </RadioGroup>
+          </div>
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div>
-              <Label htmlFor="audio-quality" className="font-semibold">Audio Quality</Label>
-               <p className="text-sm text-muted-foreground">
-                Set the quality for streaming music.
+              <Label htmlFor="visualizer-switch" className="font-semibold">Audio Visualizer</Label>
+              <p className="text-sm text-muted-foreground">
+                Enable or disable the audio visualizer.
               </p>
             </div>
-            <Select defaultValue="auto">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select quality" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="auto">Auto</SelectItem>
-              </SelectContent>
-            </Select>
+            <Switch id="visualizer-switch" defaultChecked />
           </div>
         </CardContent>
       </Card>

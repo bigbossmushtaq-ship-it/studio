@@ -25,28 +25,51 @@ const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
   const [bars, setBars] = useState<number[]>([]);
 
   useEffect(() => {
+    const visualizerState = {
+      intervalId: null as NodeJS.Timeout | null,
+    };
+
     if (isPlaying) {
-      const interval = setInterval(() => {
-        const newBars = Array.from({ length: 32 }, () => Math.random() * 0.8 + 0.2);
+      visualizerState.intervalId = setInterval(() => {
+        const newBars = Array.from({ length: 60 }, () => Math.random() * 0.9 + 0.1);
         setBars(newBars);
-      }, 150);
-      return () => clearInterval(interval);
+      }, 120);
     } else {
+      if (visualizerState.intervalId) {
+        clearInterval(visualizerState.intervalId);
+      }
       setBars([]);
     }
+
+    return () => {
+      if (visualizerState.intervalId) {
+        clearInterval(visualizerState.intervalId);
+      }
+    };
   }, [isPlaying]);
 
   return (
     <div className="absolute inset-0 flex items-center justify-center w-full h-full">
-      <div className="flex items-end h-full gap-px">
-        {bars.map((height, i) => (
-          <div
-            key={i}
-            className="bg-primary/50 transition-all duration-150 ease-in-out"
-            style={{ height: `${height * 100}%`, width: '3px' }}
-          ></div>
-        ))}
-      </div>
+        {bars.map((height, i) => {
+          const angle = (i / bars.length) * 360;
+          return (
+            <div
+              key={i}
+              className="absolute h-full w-[4px] origin-bottom"
+              style={{ transform: `rotate(${angle}deg)` }}
+            >
+              <div
+                className="bg-primary/70 rounded-full"
+                style={{
+                  height: `${height * 25 + 5}%`,
+                  width: "100%",
+                  transform: `translateY(-160px)`,
+                  transition: `all 0.1s ease-in-out`,
+                }}
+              ></div>
+            </div>
+          );
+        })}
     </div>
   );
 };
@@ -63,13 +86,16 @@ export function MusicPlayer() {
         <div className="flex items-center gap-4 w-64">
             <div className="relative h-16 w-16 flex-shrink-0">
                <Image
-                src="https://placehold.co/64x64.png"
+                src="https://placehold.co/128x128.png"
                 width={64}
                 height={64}
                 alt="Album Art"
-                className="rounded-md aspect-square object-cover"
+                className="rounded-full aspect-square object-cover"
                 data-ai-hint="album cover"
               />
+              <div className="absolute inset-0">
+                <SpectrumVisualizer isPlaying={isPlaying} />
+              </div>
             </div>
              <div className="text-left overflow-hidden">
                 <p className="font-semibold truncate">Midnight City</p>
