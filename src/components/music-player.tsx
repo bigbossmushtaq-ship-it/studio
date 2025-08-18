@@ -25,31 +25,26 @@ const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
   const [bars, setBars] = useState<number[]>([]);
 
   useEffect(() => {
-    const visualizerState = {
-      intervalId: null as NodeJS.Timeout | null,
-    };
+    let intervalId: NodeJS.Timeout | null = null;
 
     if (isPlaying) {
-      visualizerState.intervalId = setInterval(() => {
+      intervalId = setInterval(() => {
         const newBars = Array.from({ length: 60 }, () => Math.random() * 0.9 + 0.1);
         setBars(newBars);
       }, 120);
     } else {
-      if (visualizerState.intervalId) {
-        clearInterval(visualizerState.intervalId);
-      }
       setBars([]);
     }
 
     return () => {
-      if (visualizerState.intervalId) {
-        clearInterval(visualizerState.intervalId);
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     };
   }, [isPlaying]);
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center w-full h-full">
+    <div className="absolute inset-0 flex items-center justify-center w-full h-full pointer-events-none">
         {bars.map((height, i) => {
           const angle = (i / bars.length) * 360;
           return (
@@ -59,12 +54,13 @@ const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
               style={{ transform: `rotate(${angle}deg)` }}
             >
               <div
-                className="bg-primary/70 rounded-full"
+                className="bg-accent rounded-full"
                 style={{
                   height: `${height * 25 + 5}%`,
                   width: "100%",
                   transform: `translateY(-160px)`,
                   transition: `all 0.1s ease-in-out`,
+                  opacity: 0.7
                 }}
               ></div>
             </div>
@@ -80,7 +76,7 @@ export function MusicPlayer() {
   const [isLiked, setIsLiked] = useState(false);
 
   return (
-    <footer className="z-10 bg-player shadow-t-lg">
+    <footer className="fixed bottom-0 left-0 right-0 z-50 bg-player shadow-t-lg md:bottom-auto md:relative">
       <div className="grid grid-cols-[auto_1fr_auto] items-center px-4 h-24">
         {/* Left Side: Album Art & Song Info */}
         <div className="flex items-center gap-4 w-64">
@@ -93,9 +89,7 @@ export function MusicPlayer() {
                 className="rounded-full aspect-square object-cover"
                 data-ai-hint="album cover"
               />
-              <div className="absolute inset-0">
-                <SpectrumVisualizer isPlaying={isPlaying} />
-              </div>
+              <SpectrumVisualizer isPlaying={isPlaying} />
             </div>
              <div className="text-left overflow-hidden">
                 <p className="font-semibold truncate">Midnight City</p>

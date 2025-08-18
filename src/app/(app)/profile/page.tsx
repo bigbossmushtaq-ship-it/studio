@@ -36,7 +36,7 @@ export default function ProfilePage() {
         <CardHeader>
           <CardTitle>Theme</CardTitle>
           <CardDescription>
-            Customize your app&apos;s appearance.
+            Customize your app's appearance.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -55,11 +55,11 @@ export default function ProfilePage() {
                 Choose an accent color for the UI.
               </p>
               <div className="flex gap-2 pt-2">
-                <Button className="h-8 w-8 rounded-full bg-primary" />
-                <Button className="h-8 w-8 rounded-full bg-red-500" />
-                <Button className="h-8 w-8 rounded-full bg-blue-500" />
-                <Button className="h-8 w-8 rounded-full bg-green-500" />
-                <Button className="h-8 w-8 rounded-full bg-yellow-500" />
+                <Button style={{backgroundColor: '#673AB7'}} className="h-8 w-8 rounded-full" />
+                <Button style={{backgroundColor: '#00BCD4'}} className="h-8 w-8 rounded-full" />
+                <Button style={{backgroundColor: '#E91E63'}} className="h-8 w-8 rounded-full" />
+                <Button style={{backgroundColor: '#4CAF50'}} className="h-8 w-8 rounded-full" />
+                <Button style={{backgroundColor: '#FFC107'}} className="h-8 w-8 rounded-full" />
               </div>
           </div>
         </CardContent>

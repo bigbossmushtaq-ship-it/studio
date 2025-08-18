@@ -11,19 +11,20 @@ export default function HomePage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4">
-          <Button variant="primary" className="rounded-full bg-primary text-primary-foreground">All</Button>
+          <Button variant="default" className="rounded-full">All</Button>
           <Button variant="ghost" className="rounded-full bg-muted text-muted-foreground">Music</Button>
           <Button variant="ghost" className="rounded-full bg-muted text-muted-foreground">Podcasts</Button>
       </div>
       <div>
+        <h3 className="text-2xl font-bold tracking-tight mb-4">Your Playlists</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {playlists.slice(0, 8).map((playlist) => (
+          {playlists.slice(0, 4).map((playlist) => (
             <PlaylistCard key={playlist.id} playlist={playlist} />
           ))}
         </div>
       </div>
        <div>
-        <h3 className="text-2xl font-bold tracking-tight mb-4">New release from Maroon 5</h3>
+        <h3 className="text-2xl font-bold tracking-tight mb-4">New Release from Maroon 5</h3>
         <div className="bg-card p-4 rounded-lg flex items-center gap-4">
            <Image src="https://placehold.co/200x200.png" alt="Love is Like" width={128} height={128} className="rounded-md w-32 h-32" data-ai-hint="album cover" />
            <div className="flex-1">

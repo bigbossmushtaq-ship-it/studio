@@ -129,6 +129,10 @@ const BottomNavBar = () => {
           <Library />
           <span className="text-xs">Library</span>
         </Link>
+        <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Upload />
+          <span className="text-xs">Upload</span>
+        </Link>
         <Link href="/profile" className={`flex flex-col items-center gap-1 ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`}>
           <Settings />
           <span className="text-xs">Settings</span>
