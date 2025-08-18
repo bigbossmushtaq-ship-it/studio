@@ -11,14 +11,17 @@ const themes = [
   { name: 'Forest', primary: 'bg-green-500' },
   { name: 'Sunset', primary: 'bg-orange-500' },
   { name: 'Amethyst', primary: 'bg-purple-500' },
-]
+  { name: 'Ruby', primary: 'bg-red-500' },
+  { name: 'Gold', primary: 'bg-yellow-500' },
+  { name: 'Emerald', primary: 'bg-emerald-500' },
+];
 
 export default function ProfilePage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4">
         <Avatar className="h-24 w-24">
-          <AvatarImage src="https://placehold.co/100x100.png" alt="User" />
+          <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>
         <div>

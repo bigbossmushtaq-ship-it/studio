@@ -72,19 +72,17 @@ export function MusicPlayer() {
                 data-ai-hint="album cover"
               />
             </div>
-        </div>
-
-        {/* Middle: Title, Artist & Progress Bar */}
-        <div className="flex flex-col items-center gap-2">
-            <div className="text-center">
+             <div className="text-left">
                 <p className="font-semibold truncate">Midnight City</p>
                 <p className="text-sm text-muted-foreground">M83</p>
             </div>
-            <div className="flex w-full max-w-md items-center gap-2">
-                <span className="text-xs text-muted-foreground">1:21</span>
-                <Slider defaultValue={[33]} max={100} step={1} className="w-full" />
-                <span className="text-xs text-muted-foreground">4:04</span>
-            </div>
+        </div>
+
+        {/* Middle: Progress Bar */}
+        <div className="flex w-full max-w-md items-center gap-2 mx-auto">
+            <span className="text-xs text-muted-foreground">1:21</span>
+            <Slider defaultValue={[33]} max={100} step={1} className="w-full" />
+            <span className="text-xs text-muted-foreground">4:04</span>
         </div>
         
         {/* Right Side: Player Controls */}

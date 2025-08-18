@@ -82,19 +82,16 @@ function SidebarNav() {
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
-      </SidebarMenu>
-
-      <SidebarMenu className="mt-4">
-        <SidebarMenuItem>
-          <SidebarMenuButton tooltip={isMobile ? undefined : "Upload Playlist"}>
-            <Upload />
-            Upload Playlist
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton tooltip={isMobile ? undefined : "Upload Song"}>
-            <Upload />
-            Upload Song
+         <SidebarMenuItem>
+          <SidebarMenuButton
+            asChild
+            isActive={isActive("/upload")}
+            tooltip={isMobile ? undefined : "Upload"}
+          >
+            <Link href="/upload">
+              <Upload />
+              Upload
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
