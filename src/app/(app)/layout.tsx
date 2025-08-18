@@ -6,11 +6,8 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Library,
-  PanelLeft,
-  Plus,
   Search,
   Settings,
-  User,
   Upload,
 } from "lucide-react";
 import {
@@ -194,13 +191,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </header>
-            <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-24 md:pb-8">
+            <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-40 md:pb-32">
               {children}
             </main>
           </SidebarInset>
         </div>
-        <div className="md:pl-[5rem]">
-            <MusicPlayer />
+        <div className="fixed bottom-0 w-full z-20 md:pl-[3rem] group-data-[state=expanded]:md:pl-[16rem] transition-all duration-200 ease-linear">
+            <div className="md:px-2">
+              <MusicPlayer />
+            </div>
             <BottomNavBar />
         </div>
       </div>
