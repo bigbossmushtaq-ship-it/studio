@@ -1,10 +1,30 @@
 
+'use client';
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import React from "react";
 
-export default function ProfilePage() {
+export default function ProfilePage({ setProfilePic }: { setProfilePic: (url: string) => void }) {
+  const [preview, setPreview] = React.useState("https://placehold.co/200x200.png");
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setPreview(result);
+        if (setProfilePic) {
+            setProfilePic(result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="flex justify-center items-start pt-8">
       <Card className="w-full max-w-md">
@@ -21,7 +41,7 @@ export default function ProfilePage() {
               className="cursor-pointer"
             >
                 <Avatar className="h-48 w-48">
-                <AvatarImage src="https://placehold.co/200x200.png" alt="User" data-ai-hint="user avatar" />
+                <AvatarImage src={preview} alt="User" data-ai-hint="user avatar" />
                 <AvatarFallback>U</AvatarFallback>
                 </Avatar>
                 <div
@@ -30,7 +50,7 @@ export default function ProfilePage() {
                 <span>Upload</span>
                 </div>
             </Label>
-             <Input id="avatar-upload" type="file" accept="image/*" className="hidden" />
+             <Input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           </div>
         </CardContent>
       </Card>

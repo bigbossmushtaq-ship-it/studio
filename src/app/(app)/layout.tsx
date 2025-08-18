@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -27,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/icons/logo";
 import { MusicPlayer } from "@/components/music-player";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 function SidebarNav() {
   const pathname = usePathname();
@@ -118,6 +120,16 @@ const BottomNavBar = () => {
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const [profilePic, setProfilePic] = React.useState("https://placehold.co/200x200.png");
+
+  const childrenWithProps = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      // @ts-ignore
+      return React.cloneElement(child, { setProfilePic });
+    }
+    return child;
+  });
+
   return (
     <SidebarProvider defaultOpen>
       <div className="grid h-screen w-full grid-rows-[1fr_auto] bg-background">
@@ -135,14 +147,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex justify-center items-center py-4 group-data-[collapsible=icon]:hidden">
                  <Button variant="ghost" size="icon" asChild className="h-16 w-16">
                     <Link href="/profile">
-                      <User className="h-8 w-8" />
+                       <Avatar className="h-16 w-16">
+                        <AvatarImage src={profilePic} alt="User" />
+                        <AvatarFallback>U</AvatarFallback>
+                      </Avatar>
                     </Link>
                   </Button>
               </div>
                <div className="hidden group-data-[collapsible=icon]:flex justify-center items-center py-4">
                  <Button variant="ghost" size="icon" asChild>
                     <Link href="/profile">
-                      <User />
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={profilePic} alt="User" />
+                        <AvatarFallback>U</AvatarFallback>
+                      </Avatar>
                     </Link>
                   </Button>
               </div>
@@ -171,7 +189,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </header>
             <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-40 md:pb-32">
-              {children}
+              {childrenWithProps}
             </main>
           </SidebarInset>
         </div>
