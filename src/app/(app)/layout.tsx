@@ -146,7 +146,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="grid h-screen w-full grid-rows-[1fr_auto] bg-background">
         <div className="flex overflow-hidden">
           <Sidebar>
-            <SidebarContent className="flex flex-col p-4">
+            <SidebarContent className="flex flex-col items-center p-4">
               <div className="flex flex-col items-center py-4 border-b w-full">
                   <Avatar className="w-20 h-20">
                     <AvatarImage src={profilePic} alt="Profile" />
@@ -186,16 +186,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Sidebar>
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
-              <SidebarTrigger className="md:hidden">
+              <SidebarTrigger>
                  <MusicAvatar size={32} ringWidth={2}/>
               </SidebarTrigger>
               <div className="flex-1">
                 {/* Header content like search bar can go here */}
-              </div>
-              <div className="hidden md:flex">
-                 <SidebarTrigger>
-                    <MusicAvatar size={32} ringWidth={2} />
-                </SidebarTrigger>
               </div>
             </header>
             <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-40 md:pb-32">
