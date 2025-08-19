@@ -38,6 +38,7 @@ import { MusicAvatar } from "@/components/music-avatar";
 import { useApp } from "@/hooks/use-app";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 
 function SidebarNav() {
@@ -136,11 +137,32 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
-  const { username, profilePic } = useApp();
+  const { username, setProfilePic } = useApp();
   const pathname = usePathname();
   const router = useRouter();
   const isActive = (path: string) => pathname.startsWith(path);
   const isSettingsPage = pathname.startsWith('/settings');
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result as string);
+        toast({
+          title: "Success!",
+          description: "Profile picture updated.",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const customStyle = theme === 'theme-custom' ? {
     '--primary': customColors.primary,
@@ -156,8 +178,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarContent className="flex flex-col p-2">
                <SidebarHeader className="flex flex-col items-center justify-center p-4 gap-2">
                   <MusicAvatar size={64} ringWidth={4}/>
-                  <Button variant="link" className="text-muted-foreground" asChild>
-                    <Link href="/settings/account"><Pencil className="mr-2 h-3 w-3"/>Change Profile</Link>
+                  <input type="file" ref={fileInputRef} onChange={handleProfilePicChange} className="hidden" accept="image/*" />
+                  <Button variant="link" className="text-muted-foreground" onClick={handleUploadClick}>
+                    <Pencil className="mr-2 h-3 w-3"/>Change Profile
                   </Button>
                </SidebarHeader>
                <div className="w-full">
@@ -188,7 +211,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Sidebar>
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
-             {isSettingsPage && (
+             {pathname !== '/home' && (
                 <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8">
                   <ArrowLeft />
                 </Button>
