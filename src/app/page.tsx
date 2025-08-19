@@ -18,27 +18,27 @@ import { useApp } from '@/hooks/use-app';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setEmail, setUsername } = useApp();
+  const { setEmail, setUsername, username } = useApp();
   const [emailInput, setEmailInput] = React.useState('');
 
   React.useEffect(() => {
-    const rememberedUser = localStorage.getItem('tuneflow_user');
-    if (rememberedUser) {
-      setEmailInput(rememberedUser);
+    // If user is already logged in, redirect to home
+    if (username && username !== 'your_username') {
+      router.replace('/home');
     }
-  }, []);
+  }, [username, router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('tuneflow_user', emailInput);
     // In a real app, you'd check if it's an email or username
     // For this prototype, we'll assume it's an email if it contains '@'
     if (emailInput.includes('@')) {
       setEmail(emailInput);
+      setUsername(emailInput.split('@')[0]);
     } else {
       setUsername(emailInput);
       // You might want to fetch the associated email or handle this differently
-      setEmail('user@example.com'); // Placeholder for non-email login
+      setEmail(`${emailInput}@example.com`); // Placeholder for non-email login
     }
     router.push('/home');
   };

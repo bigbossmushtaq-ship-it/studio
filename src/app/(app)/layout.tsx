@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -137,7 +138,7 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
-  const { username, setProfilePic } = useApp();
+  const { username, setProfilePic, logout } = useApp();
   const pathname = usePathname();
   const router = useRouter();
   const isActive = (path: string) => pathname.startsWith(path);
@@ -163,6 +164,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
+  
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  }
 
   const customStyle = theme === 'theme-custom' ? {
     '--primary': customColors.primary,
@@ -201,8 +207,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                  <SidebarSeparator />
                  <div className="flex items-center justify-between p-2">
                      <p className="font-semibold truncate">{username}</p>
-                    <Button variant="destructive" size="sm" asChild>
-                      <Link href="/"><LogOut className="mr-2"/>Logout</Link>
+                    <Button variant="destructive" size="sm" onClick={handleLogout}>
+                      <LogOut className="mr-2"/>Logout
                     </Button>
                  </div>
               </div>
