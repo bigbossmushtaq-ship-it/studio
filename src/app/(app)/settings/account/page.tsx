@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, ClipboardCopy, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/hooks/use-app";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function AccountSettingsPage() {
   const { username, email, profilePic, setProfilePic } = useApp();
@@ -44,8 +44,8 @@ export default function AccountSettingsPage() {
           <CardHeader>
             <CardTitle>Profile Picture</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center gap-6">
-            <Avatar className="h-24 w-24">
+          <CardContent className="flex flex-col items-center gap-4">
+            <Avatar className="h-32 w-32">
               <AvatarImage src={profilePic} alt={username} />
               <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
@@ -56,9 +56,9 @@ export default function AccountSettingsPage() {
               className="hidden"
               accept="image/*"
             />
-            <Button onClick={() => fileInputRef.current?.click()}>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
               <Pencil className="mr-2 h-4 w-4"/>
-              Upload
+              Change your profile pic
             </Button>
           </CardContent>
         </Card>
