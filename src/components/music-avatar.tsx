@@ -2,7 +2,7 @@
 "use client"
 
 import { useMusicPlayer } from "@/hooks/use-music-player";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringWidth?: number }) {
   const { isPlaying, audioRef, profilePic } = useMusicPlayer();
@@ -14,29 +14,48 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
   useEffect(() => {
     const setupAudioContext = () => {
       if (isPlaying && audioRef?.current && !audioContextRef.current) {
+        // A new AudioContext can only be created after a user gesture.
+        // We assume the gesture to start playing music has already happened.
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         audioContextRef.current = ctx;
 
-        const source = ctx.createMediaElementSource(audioRef.current);
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 512;
-        analyserRef.current = analyser;
+        try {
+          const source = ctx.createMediaElementSource(audioRef.current);
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 512;
+          analyserRef.current = analyser;
 
-        source.connect(analyser);
-        source.connect(ctx.destination);
+          source.connect(analyser);
+          analyser.connect(ctx.destination); // Connect analyser to destination to hear audio
+        } catch (e) {
+          // If the source is already connected, it will throw an error.
+          if (e instanceof DOMException && e.name === 'InvalidStateError') {
+             // We can safely ignore this error if an analyser is already set up.
+             if (!analyserRef.current) {
+                const analyser = ctx.createAnalyser();
+                analyser.fftSize = 512;
+                analyserRef.current = analyser;
+                analyser.connect(ctx.destination);
+             }
+          } else {
+            console.error("Error setting up audio context:", e)
+            return; // Exit if there's a different error
+          }
+        }
 
-        const data = new Uint8Array(analyser.frequencyBinCount);
+        const data = new Uint8Array(analyserRef.current.frequencyBinCount);
 
         const loop = () => {
-          if (!containerRef.current || !analyserRef.current) {
-            if (isPlaying) {
-              rafRef.current = requestAnimationFrame(loop);
+          if (!containerRef.current || !analyserRef.current || !isPlaying) {
+            if (rafRef.current) {
+              cancelAnimationFrame(rafRef.current);
+              rafRef.current = 0;
             }
             return;
           };
 
           analyserRef.current.getByteFrequencyData(data);
-          const avg = data.reduce((a, b) => a + b, 0) / (data.length * 255);
+          const avg = data.reduce((a, b) => a + b, 0) / data.length / 255;
           const eased = Math.min(1, avg * 2);
           
           containerRef.current.style.setProperty("--pulse", String(eased));
@@ -44,40 +63,36 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
           
           rafRef.current = requestAnimationFrame(loop);
         };
-        loop();
-      }
-    }
-    setupAudioContext();
-    
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().then(() => {
-          audioContextRef.current = null;
-          analyserRef.current = null;
-        });
-      }
-    }
-  }, [isPlaying, audioRef]);
 
-  useEffect(() => {
-    if (!isPlaying) {
+        if (!rafRef.current) {
+            loop();
+        }
+      }
+    }
+
+    const cleanup = () => {
        if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
       }
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().then(() => {
-          audioContextRef.current = null;
-          analyserRef.current = null;
-        });
+        audioContextRef.current.close().catch(e => console.error("Error closing audio context", e));
+        audioContextRef.current = null;
+        analyserRef.current = null;
       }
-      if(containerRef.current) {
+       if(containerRef.current) {
         containerRef.current.style.setProperty("--pulse", "0");
       }
+    };
+
+    if (isPlaying) {
+      setupAudioContext();
+    } else {
+      cleanup();
     }
-  }, [isPlaying]);
+    
+    return cleanup;
+  }, [isPlaying, audioRef]);
   
   const total = size + ringWidth * 2;
 

@@ -147,7 +147,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarContent className="flex flex-col items-center p-4">
-              <div className="flex flex-col items-center py-4 border-b w-full">
+               <div className="flex flex-col items-center py-4 border-b w-full">
                   <Avatar className="w-20 h-20">
                     <AvatarImage src={profilePic} alt="Profile" />
                     <AvatarFallback>U</AvatarFallback>
