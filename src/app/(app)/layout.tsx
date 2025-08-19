@@ -176,7 +176,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Sidebar>
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
-             {pathname !== '/home' && (
+             {isSettingsPage && (
                 <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8">
                   <ArrowLeft />
                 </Button>
