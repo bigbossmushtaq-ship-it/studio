@@ -1,13 +1,30 @@
 
 "use client"
 
+import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
-import Image from "next/image";
+import { ExternalLink, ClipboardCopy } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AccountSettingsPage() {
+  const [username, setUsername] = React.useState("");
+  const { toast } = useToast();
+
+  React.useEffect(() => {
+    // Generate a random username-like string
+    setUsername(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+  }, []);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(username);
+    toast({
+      title: "Copied!",
+      description: "Username copied to clipboard.",
+    });
+  };
+
   return (
       <div className="space-y-8">
         <Card>
@@ -15,9 +32,12 @@ export default function AccountSettingsPage() {
             <CardTitle>Account Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label>Username</Label>
-              <p className="text-muted-foreground">313nvhd7km2j4e33zebherh4qx3u</p>
+             <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                    <Label>Username</Label>
+                    <p className="text-muted-foreground font-mono">{username}</p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={copyToClipboard}><ClipboardCopy className="h-5 w-5"/></Button>
             </div>
              <div className="flex items-center justify-between">
                 <div className="space-y-2">
