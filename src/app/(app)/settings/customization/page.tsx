@@ -19,7 +19,7 @@ export default function CustomizationSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="space-y-2">
             <Label htmlFor="theme">Theme</Label>
             <RadioGroup
               value={theme}
@@ -45,8 +45,8 @@ export default function CustomizationSettingsPage() {
             </RadioGroup>
           </div>
           {theme === 'theme-custom' && (
-             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t">
-                <div className="flex items-center gap-4">
+             <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center justify-between">
                   <Label htmlFor="primary-color">Primary</Label>
                   <Input 
                     id="primary-color"
@@ -56,7 +56,7 @@ export default function CustomizationSettingsPage() {
                     className="w-12 h-10 p-1"
                   />
                 </div>
-                 <div className="flex items-center gap-4">
+                 <div className="flex items-center justify-between">
                   <Label htmlFor="background-color">Background</Label>
                   <Input 
                     id="background-color"
@@ -66,7 +66,7 @@ export default function CustomizationSettingsPage() {
                     className="w-12 h-10 p-1"
                   />
                 </div>
-                 <div className="flex items-center gap-4">
+                 <div className="flex items-center justify-between">
                   <Label htmlFor="accent-color">Accent</Label>
                   <Input 
                     id="accent-color"

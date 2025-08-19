@@ -19,17 +19,19 @@ export default function PlaybackSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="space-y-2">
             <Label htmlFor="visualizer-toggle">Enable Spectrum Visualizer</Label>
-            <Switch
-              id="visualizer-toggle"
-              checked={spectrumVisualEffects}
-              onCheckedChange={setSpectrumVisualEffects}
-            />
+            <div className="flex items-center">
+              <Switch
+                id="visualizer-toggle"
+                checked={spectrumVisualEffects}
+                onCheckedChange={setSpectrumVisualEffects}
+              />
+            </div>
           </div>
-           <div className="flex items-center justify-between">
+           <div className="space-y-2">
             <Label htmlFor="audio-quality">Audio Quality</Label>
-            <Select defaultValue="normal">
+             <Select defaultValue="normal">
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select quality" />
                 </SelectTrigger>

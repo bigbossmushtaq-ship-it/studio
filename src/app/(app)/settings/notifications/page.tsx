@@ -15,9 +15,11 @@ export default function NotificationSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-           <div className="flex items-center justify-between">
+           <div className="space-y-2">
             <Label htmlFor="notifications-toggle">Enable Push Notifications</Label>
-            <Switch id="notifications-toggle" />
+            <div className="flex items-center">
+             <Switch id="notifications-toggle" />
+            </div>
           </div>
         </CardContent>
       </Card>
