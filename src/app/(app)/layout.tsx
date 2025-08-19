@@ -146,7 +146,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarContent className="flex flex-col p-4">
               {/* Profile section at the top and centered */}
               <div className="flex flex-col items-center py-4 border-b w-full">
-                  <Avatar className="w-24 h-24 mb-4">
+                  <Avatar className="w-20 h-20 mb-4">
                     <AvatarImage src={profilePic} alt="Profile" />
                     <AvatarFallback>U</AvatarFallback>
                   </Avatar>
