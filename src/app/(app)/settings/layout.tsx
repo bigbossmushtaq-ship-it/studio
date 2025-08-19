@@ -3,7 +3,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Palette, PlayCircle, Bell, Mail } from "lucide-react"
+import { Palette, PlayCircle, Bell, Mail, User } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -16,6 +16,11 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const pathname = usePathname()
 
   const sidebarNavItems = [
+     {
+      title: "Account",
+      href: "/settings/account",
+      icon: User,
+    },
     {
       title: "Customization",
       href: "/settings/customization",
