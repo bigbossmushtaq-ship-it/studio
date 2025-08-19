@@ -10,12 +10,12 @@ import { uploadBytesResumable } from "firebase/storage";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
-  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID"
+  "projectId": "tuneflow-meg7z",
+  "appId": "1:772294500650:web:c977452b7c0d3ad7c77e53",
+  "storageBucket": "tuneflow-meg7z.appspot.com",
+  "apiKey": "AIzaSyDzosPxByJmbb-7xVzaKEgGOF8OixcGNj0",
+  "authDomain": "tuneflow-meg7z.firebaseapp.com",
+  "messagingSenderId": "772294500650"
 };
 
 // Initialize Firebase
