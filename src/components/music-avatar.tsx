@@ -29,7 +29,9 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
 
         const loop = () => {
           if (!containerRef.current || !analyserRef.current) {
-            rafRef.current = requestAnimationFrame(loop);
+            if (isPlaying) {
+              rafRef.current = requestAnimationFrame(loop);
+            }
             return;
           };
 
@@ -51,16 +53,26 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
+       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().then(() => {
+          audioContextRef.current = null;
+          analyserRef.current = null;
+        });
+      }
     }
-  }, [isPlaying, audioRef, profilePic]);
+  }, [isPlaying, audioRef]);
 
   useEffect(() => {
-    if (!isPlaying && audioContextRef.current) {
-      audioContextRef.current.close().then(() => {
-        audioContextRef.current = null;
-        analyserRef.current = null;
-      });
-      cancelAnimationFrame(rafRef.current);
+    if (!isPlaying) {
+       if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().then(() => {
+          audioContextRef.current = null;
+          analyserRef.current = null;
+        });
+      }
       if(containerRef.current) {
         containerRef.current.style.setProperty("--pulse", "0");
       }
@@ -93,8 +105,7 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
             background:
               "conic-gradient(red, magenta, blue, cyan, lime, yellow, red)",
             filter: "hue-rotate(calc(var(--spin) * 60deg))",
-            WebkitMask:
-              `radial-gradient(transparent ${size/2}px, black ${size/2}px)`,
+            WebkitMask: `radial-gradient(transparent ${size/2}px, black ${size/2}px)`,
             mask: `radial-gradient(transparent ${size/2}px, black ${size/2}px)`
           }}
         />
