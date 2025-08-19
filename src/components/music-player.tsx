@@ -15,6 +15,7 @@ import {
   Laptop2,
   Volume2,
   Maximize2,
+  PlusCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -93,11 +94,11 @@ export function MusicPlayer() {
   }, [isPlaying])
 
   return (
-    <footer className="bg-card/80 backdrop-blur-lg border md:rounded-lg shadow-t-lg">
+    <footer className="bg-card/80 backdrop-blur-lg border md:rounded-lg shadow-t-lg p-4">
       <audio ref={audioRef} src="/assets/m83-midnight-city.mp3" loop crossOrigin="anonymous" />
-      <div className="grid grid-cols-[auto_1fr_auto] items-center px-4 h-20">
+      <div className="flex items-center">
         {/* Left Side: Album Art & Song Info */}
-        <div className="flex items-center gap-4 w-48 md:w-64">
+        <div className="flex items-center gap-4 flex-1">
             <div className="relative h-14 w-14 flex-shrink-0">
                <Image
                 src="https://placehold.co/128x128.png"
@@ -109,53 +110,32 @@ export function MusicPlayer() {
               />
               <SpectrumVisualizer isPlaying={isPlaying} />
             </div>
-             <div className="text-left overflow-hidden hidden md:block">
+             <div className="text-left overflow-hidden">
                 <p className="font-semibold truncate">Midnight City</p>
                 <p className="text-sm text-muted-foreground truncate">M83</p>
             </div>
         </div>
 
-        {/* Middle: Player Controls & Progress Bar */}
-        <div className="flex flex-col items-center justify-center gap-2">
-            <div className="flex items-center gap-2 md:gap-4">
-                 <Button variant="ghost" size="icon" className="hidden sm:inline-flex text-muted-foreground hover:text-foreground">
-                    <Shuffle className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                    <SkipBack className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-12 w-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-                    onClick={() => setIsPlaying(!isPlaying)}
-                >
-                    {isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 ml-1 fill-current" />}
-                </Button>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                    <SkipForward className="h-5 w-5" />
-                </Button>
-                 <Button variant="ghost" size="icon" className="hidden sm:inline-flex text-muted-foreground hover:text-foreground">
-                    <Repeat className="h-5 w-5" />
-                </Button>
-            </div>
-             <div className="hidden md:flex w-full max-w-md items-center gap-2">
-                <span className="text-xs text-muted-foreground">1:21</span>
-                <Slider defaultValue={[33]} max={100} step={1} className="w-full" />
-                <span className="text-xs text-muted-foreground">4:04</span>
-            </div>
+        {/* Right Side: Simplified Controls */}
+        <div className="flex items-center justify-end gap-2">
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Laptop2 className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <PlusCircle className="h-6 w-6" />
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => setIsPlaying(!isPlaying)}
+            >
+                {isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 ml-1 fill-current" />}
+            </Button>
         </div>
-        
-        {/* Right Side: Other Controls */}
-        <div className="flex items-center justify-end gap-2 w-48 md:w-64">
-          <Button variant="ghost" size="icon" onClick={() => setIsLiked(prev => !prev)}>
-            <Heart className={cn("h-5 w-5 text-muted-foreground", isLiked && "fill-primary text-primary")} />
-          </Button>
-           <div className="hidden md:flex items-center gap-2">
-                <Volume2 className="h-5 w-5 text-muted-foreground" />
-                <Slider defaultValue={[50]} max={100} step={1} className="w-24" onChange={(value) => { if(audioRef.current) audioRef.current.volume = value[0] / 100 }}/>
-           </div>
-        </div>
+      </div>
+      <div className="pt-2">
+        <Slider defaultValue={[33]} max={100} step={1} />
       </div>
     </footer>
   );
