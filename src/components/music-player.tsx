@@ -21,15 +21,17 @@ import { Slider } from "@/components/ui/slider";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useMusicPlayer } from "@/hooks/use-music-player";
+import { useTheme } from "@/hooks/use-theme";
 
 
 const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
   const [bars, setBars] = useState<number[]>([]);
+  const { spectrumVisualEffects } = useTheme();
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
-    if (isPlaying) {
+    if (isPlaying && spectrumVisualEffects) {
       intervalId = setInterval(() => {
         const newBars = Array.from({ length: 12 }, () => Math.random() * 0.9 + 0.1);
         setBars(newBars);
@@ -43,7 +45,9 @@ const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
         clearInterval(intervalId);
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying, spectrumVisualEffects]);
+  
+  if (!spectrumVisualEffects) return null;
 
   return (
     <div className={cn("absolute inset-0 flex items-center justify-center w-full h-full pointer-events-none", isPlaying ? "opacity-100" : "opacity-0")}>

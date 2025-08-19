@@ -2,10 +2,12 @@
 "use client"
 
 import { useMusicPlayer } from "@/hooks/use-music-player";
+import { useTheme } from "@/hooks/use-theme";
 import { useEffect, useRef } from "react";
 
 export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringWidth?: number }) {
   const { isPlaying, audioRef, profilePic } = useMusicPlayer();
+  const { spectrumVisualEffects } = useTheme();
   const rafRef = useRef(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -81,14 +83,14 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
       }
     };
 
-    if (isPlaying) {
+    if (isPlaying && spectrumVisualEffects) {
       setupAudioContext();
     } else {
       cleanup();
     }
     
     return cleanup;
-  }, [isPlaying, audioRef]);
+  }, [isPlaying, audioRef, spectrumVisualEffects]);
   
   const total = size + ringWidth * 2;
 
@@ -115,7 +117,8 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
               "conic-gradient(red, magenta, blue, cyan, lime, yellow, red)",
             filter: "hue-rotate(calc(var(--spin) * 60deg))",
             WebkitMask: `radial-gradient(transparent ${size/2}px, black ${size/2}px)`,
-            mask: `radial-gradient(transparent ${size/2}px, black ${size/2}px)`
+            mask: `radial-gradient(transparent ${size/2}px, black ${size/2}px)`,
+            display: spectrumVisualEffects ? 'block' : 'none',
           }}
         />
         <img

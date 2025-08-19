@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @tailwind base;
@@ -95,6 +96,16 @@ body {
     --sidebar-border: 300 0% 24%;
     --sidebar-ring: 262 58% 50%;
     --player-background: 300 0% 15%;
+  }
+
+  .dark.theme-violet {
+    --primary: 262 58% 60%;
+    --accent: 280 65% 60%;
+  }
+
+  .dark.theme-green {
+    --primary: 140 58% 50%;
+    --accent: 160 60% 45%;
   }
 }
  

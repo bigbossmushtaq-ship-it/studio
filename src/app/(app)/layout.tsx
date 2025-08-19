@@ -35,6 +35,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { MusicAvatar } from "@/components/music-avatar";
 import { useMusicPlayer } from "@/hooks/use-music-player";
+import { useTheme } from "@/hooks/use-theme";
 
 
 function SidebarNav() {
@@ -128,6 +129,7 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { profilePic, setProfilePic } = useMusicPlayer();
+  const { theme } = useTheme();
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -143,7 +145,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="grid h-screen w-full grid-rows-[1fr_auto] bg-background">
+      <div className={`grid h-screen w-full grid-rows-[1fr_auto] bg-background ${theme}`}>
         <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarContent className="flex flex-col items-center p-4">
@@ -173,7 +175,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
               <div className="mt-auto w-full">
                 <div className="flex flex-col gap-1 py-2 border-t">
-                  <Button variant="ghost" className="justify-start"><Settings className="mr-2"/> Settings</Button>
+                  <Button variant="ghost" className="justify-start" asChild>
+                    <Link href="/settings"><Settings className="mr-2"/> Settings</Link>
+                  </Button>
                   <Button variant="ghost" className="justify-start"><Bell className="mr-2"/> Notifications</Button>
                 </div>
 
