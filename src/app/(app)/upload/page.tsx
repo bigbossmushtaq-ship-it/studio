@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, Loader2, File, Music } from "lucide-react";
 import { suggestTheme } from '@/ai/flows/theme-suggestion';
+import { suggestGenre } from '@/ai/flows/genre-suggestion';
 import { useToast } from '@/hooks/use-toast';
 import { db, storage } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp, getDocs, query, orderBy } from "firebase/firestore";
@@ -50,7 +51,7 @@ export default function UploadPage() {
   
   // UI State
   const [isUploading, setIsUploading] = React.useState(false);
-  const [isSuggestingTheme, setIsSuggestingTheme] = React.useState(false);
+  const [isSuggesting, setIsSuggesting] = React.useState(false);
 
   // Display State
   const [songs, setSongs] = React.useState<Song[]>([]);
@@ -81,23 +82,28 @@ export default function UploadPage() {
     if (file) {
       setSongFile(file);
       setErrors(prev => ({...prev, songFile: false}));
-      setIsSuggestingTheme(true);
+      setIsSuggesting(true);
       try {
         const reader = new FileReader();
         reader.onload = async (e) => {
           const dataUri = e.target?.result as string;
           try {
-            const result = await suggestTheme({ songDataUri: dataUri });
-            setTheme(result.theme);
+            const [themeResult, genreResult] = await Promise.all([
+              suggestTheme({ songDataUri: dataUri }),
+              suggestGenre({ songDataUri: dataUri })
+            ]);
+            setTheme(themeResult.theme);
+            setGenre(genreResult.genre);
+            setErrors(p => ({...p, genre: false}));
           } catch (error) {
-            console.error("Error suggesting theme:", error);
+            console.error("Error suggesting theme or genre:", error);
             toast({
               variant: 'destructive',
-              title: "Theme suggestion failed",
-              description: "Could not analyze the song. Please enter a theme manually.",
+              title: "Suggestion failed",
+              description: "Could not analyze the song. Please enter theme and genre manually.",
             });
           } finally {
-            setIsSuggestingTheme(false);
+            setIsSuggesting(false);
           }
         };
         reader.readAsDataURL(file);
@@ -108,7 +114,7 @@ export default function UploadPage() {
           title: "File reading error",
           description: "There was a problem reading the selected file.",
         });
-        setIsSuggestingTheme(false);
+        setIsSuggesting(false);
       }
     }
   }, [toast]);
@@ -219,20 +225,28 @@ export default function UploadPage() {
               <Label htmlFor="album" className={cn(errors.album && "text-destructive")}>Album</Label>
               <Input id="album" placeholder="Enter album name" value={album} onChange={(e) => {setAlbum(e.target.value); setErrors(p => ({...p, album: false}))}} className={cn(errors.album && "border-destructive focus-visible:ring-destructive")}/>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="genre" className={cn(errors.genre && "text-destructive")}>Genre</Label>
-              <Input id="genre" placeholder="Enter genre" value={genre} onChange={(e) => {setGenre(e.target.value); setErrors(p => ({...p, genre: false}))}} className={cn(errors.genre && "border-destructive focus-visible:ring-destructive")}/>
+            <div className="relative space-y-2">
+              <Label htmlFor="genre" className={cn(errors.genre && "text-destructive")}>Genre (AI Suggested)</Label>
+               <Input 
+                id="genre" 
+                placeholder={isSuggesting ? "Analyzing song..." : "e.g. Pop, Rock"} 
+                value={genre}
+                onChange={(e) => {setGenre(e.target.value); setErrors(p => ({...p, genre: false}))}}
+                disabled={isSuggesting}
+                className={cn(errors.genre && "border-destructive focus-visible:ring-destructive")}
+              />
+               {isSuggesting && <Loader2 className="absolute right-3 top-8 h-5 w-5 animate-spin" />}
             </div>
              <div className="relative space-y-2">
               <Label htmlFor="theme">Theme (AI Suggested)</Label>
               <Input 
                 id="theme" 
-                placeholder={isSuggestingTheme ? "Analyzing song..." : "e.g. Energetic, Relaxing"} 
+                placeholder={isSuggesting ? "Analyzing song..." : "e.g. Energetic, Relaxing"} 
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
-                disabled={isSuggestingTheme}
+                disabled={isSuggesting}
               />
-               {isSuggestingTheme && <Loader2 className="absolute right-3 top-8 h-5 w-5 animate-spin" />}
+               {isSuggesting && <Loader2 className="absolute right-3 top-8 h-5 w-5 animate-spin" />}
             </div>
           </div>
           
@@ -287,7 +301,7 @@ export default function UploadPage() {
           <div className="flex justify-end">
             <Button 
               onClick={handleUpload} 
-              disabled={isUploading || isSuggestingTheme}
+              disabled={isUploading || isSuggesting}
             >
               {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</> : 'Upload Song'}
             </Button>
@@ -323,5 +337,3 @@ export default function UploadPage() {
     </div>
   );
 }
-
-    
