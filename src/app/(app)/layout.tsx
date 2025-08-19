@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   Library,
@@ -13,6 +13,7 @@ import {
   Settings,
   Bell,
   User,
+  ArrowLeft,
 } from "lucide-react";
 import {
   Sidebar,
@@ -135,6 +136,7 @@ const BottomNavBar = () => {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
   const pathname = usePathname();
+  const router = useRouter();
   const isActive = (path: string) => pathname.startsWith(path);
   const isSettingsPage = pathname.startsWith('/settings');
 
@@ -174,6 +176,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Sidebar>
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
+              <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8">
+                <ArrowLeft />
+              </Button>
               <SidebarTrigger className="p-0 rounded-full h-8 w-8">
                  <MusicAvatar size={32} ringWidth={2}/>
               </SidebarTrigger>
