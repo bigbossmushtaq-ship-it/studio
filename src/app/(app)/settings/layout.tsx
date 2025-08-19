@@ -1,16 +1,15 @@
 
+"use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Palette, PlayCircle, Bell, User, ArrowLeft } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { Palette, PlayCircle, Bell, User } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
-import React from "react"
+import { buttonVariants } from "@/components/ui/button"
 
 interface SettingsLayoutProps {
-  children: React.ReactNode,
-  searchParams: { [key: string]: string | string[] | undefined }
+  children: React.ReactNode
 }
 
 const sidebarNavItems = [
@@ -65,22 +64,7 @@ function SettingsNav() {
 }
 
 
-export default function SettingsLayout({ children, searchParams }: SettingsLayoutProps) {
-  // React.use(searchParams); // Correctly unwrap searchParams
-  const pathname = "/settings" // Manually set for now as we can't use usePathname on server
-
-  if (pathname === '/settings') {
-    return (
-      <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0 mt-6">
-        <aside className="-mx-4 lg:w-1/5">
-          <SettingsNav />
-        </aside>
-        <div className="flex-1 lg:max-w-4xl">{children}</div>
-      </div>
-    )
-  }
-
-
+export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
     <>
       <div className="space-y-0.5">
