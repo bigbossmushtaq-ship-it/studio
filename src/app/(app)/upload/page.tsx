@@ -140,7 +140,7 @@ export default function UploadPage() {
     return Object.keys(newErrors).length === 0;
   }
 
-  const uploadFile = (file: File, path: string): Promise<string> => {
+  const uploadFile = (file: File, path: string, progressCallback: (progress: number) => void): Promise<string> => {
     return new Promise((resolve, reject) => {
       const storageRef = ref(storage, path);
       const uploadTask = uploadBytesResumable(storageRef, file);
@@ -149,9 +149,7 @@ export default function UploadPage() {
         'state_changed',
         snapshot => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          if (path.startsWith('songs/')) {
-            setUploadProgress(progress);
-          }
+          progressCallback(progress);
         },
         error => {
           console.error(`Upload failed for ${path}:`, error);
@@ -179,16 +177,17 @@ export default function UploadPage() {
     setUploadProgress(0);
 
     try {
-      // 1. Upload song file and album art in parallel
       const songPath = `songs/${Date.now()}-${songFile!.name}`;
       const albumArtPath = `albumArt/${Date.now()}-${albumArtFile!.name}`;
 
       const [songUrl, albumArtUrl] = await Promise.all([
-        uploadFile(songFile!, songPath),
-        uploadFile(albumArtFile!, albumArtPath),
+        uploadFile(songFile!, songPath, (progress) => {
+          // Only use song progress for the main progress bar
+          setUploadProgress(progress);
+        }),
+        uploadFile(albumArtFile!, albumArtPath, () => {}), // No progress tracking for album art
       ]);
 
-      // 3. Save metadata to Firestore
       await addDoc(collection(db, "songs"), {
         title,
         artist,
@@ -205,7 +204,6 @@ export default function UploadPage() {
         description: `${title} by ${artist} has been added to your library.`,
       });
       
-      // 4. Reset form and refresh song list
       setTitle('');
       setArtist('');
       setAlbum('');
