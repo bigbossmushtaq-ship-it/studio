@@ -3,7 +3,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Palette, PlayCircle, Bell, Mail, User } from "lucide-react"
+import { Palette, PlayCircle, Bell, User } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -35,11 +35,6 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       title: "Notifications",
       href: "/settings/notifications",
       icon: Bell,
-    },
-    {
-      title: "Email",
-      href: "/settings/email",
-      icon: Mail,
     },
   ]
 

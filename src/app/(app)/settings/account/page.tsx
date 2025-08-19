@@ -36,34 +36,6 @@ export default function AccountSettingsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Plan</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-             <div className="flex items-center gap-4">
-                <div className="bg-muted p-3 rounded-md">
-                     <svg
-                        viewBox="0 0 100 100"
-                        className="h-10 w-10 text-foreground"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M25 40C25 31.7157 31.7157 25 40 25H60C68.2843 25 75 31.7157 75 40V60C75 68.2843 68.2843 75 60 75H40C31.7157 75 25 68.2843 25 60V40Z"
-                          stroke="currentColor"
-                          strokeWidth="10"
-                        />
-                        <circle cx="50" cy="50" r="10" fill="currentColor" />
-                      </svg>
-                </div>
-                <div>
-                    <p className="font-semibold">Free plan</p>
-                    <a href="#" className="text-sm text-primary underline">View your plan</a>
-                </div>
-             </div>
-          </CardContent>
-        </Card>
          <div>
             <p className="text-center text-sm text-muted-foreground">
                 To delete your data permanently, <a href="#" className="underline text-primary">close your account</a>.
