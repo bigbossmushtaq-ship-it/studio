@@ -185,7 +185,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                <SidebarHeader className="flex flex-col items-center justify-center p-4 gap-2">
                   <MusicAvatar size={64} ringWidth={4}/>
                   <input type="file" ref={fileInputRef} onChange={handleProfilePicChange} className="hidden" accept="image/*" />
-                  <Button variant="link" className="text-muted-foreground" onClick={handleUploadClick}>
+                  <Button variant="default" className="rounded-full" onClick={handleUploadClick}>
                     <Pencil className="mr-2 h-3 w-3"/>Change Profile
                   </Button>
                </SidebarHeader>
