@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -135,6 +136,7 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
+  const { username } = useApp();
   const pathname = usePathname();
   const router = useRouter();
   const isActive = (path: string) => pathname.startsWith(path);
@@ -151,13 +153,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
        <div className={`grid h-screen w-full grid-rows-[1fr_auto] bg-background ${theme}`} style={customStyle}>
         <div className="flex overflow-hidden">
           <Sidebar>
-            <SidebarContent className="flex flex-col items-center p-4">
+            <SidebarContent className="flex flex-col p-2">
                <div className="w-full mt-4">
                 <SidebarNav />
               </div>
 
-              <div className="mt-auto w-full">
-                <div className="flex flex-col gap-1 py-2 border-t">
+              <div className="mt-auto w-full space-y-2">
+                 <SidebarSeparator />
+                 <div className="flex flex-col gap-1 py-2">
                   <Link href="/settings" className={cn(buttonVariants({ variant: "ghost" }), isActive('/settings') && "bg-muted", "justify-start")}>
                     <Settings className="mr-2"/> Settings
                   </Link>
@@ -166,10 +169,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                      <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
                   </div>
                 </div>
-
-                <Button variant="destructive" className="w-full justify-center mt-2" asChild>
-                  <Link href="/"><LogOut className="mr-2" />Logout</Link>
-                </Button>
+                 <SidebarSeparator />
+                 <div className="flex items-center justify-between p-2">
+                    <Avatar>
+                      <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <Button variant="destructive" size="sm" asChild>
+                      <Link href="/"><LogOut className="mr-2"/>Logout</Link>
+                    </Button>
+                 </div>
               </div>
 
             </SidebarContent>
