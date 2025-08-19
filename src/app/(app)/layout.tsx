@@ -178,10 +178,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="p-0 rounded-full h-8 w-8">
                  <MusicAvatar size={32} ringWidth={2}/>
               </SidebarTrigger>
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input placeholder="Search songs, artists, or podcasts..." className="pl-10 w-full max-w-sm" />
-              </div>
+              {!isSettingsPage && (
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input placeholder="Search songs, artists, or podcasts..." className="pl-10 w-full max-w-sm" />
+                </div>
+              )}
             </header>
             <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && "pb-40 md:pb-32")}>
               {children}
