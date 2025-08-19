@@ -259,7 +259,10 @@ export default function UploadPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button onClick={handleUpload} disabled={isUploading || isSuggestingTheme}>
+            <Button 
+              onClick={handleUpload} 
+              disabled={isUploading || isSuggestingTheme || !title || !artist || !album || !genre || !songFile || !albumArtFile}
+            >
               {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</> : 'Upload Song'}
             </Button>
           </div>
@@ -294,5 +297,3 @@ export default function UploadPage() {
     </div>
   );
 }
-
-    
