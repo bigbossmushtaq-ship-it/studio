@@ -14,6 +14,7 @@ import {
   Bell,
   User,
   ArrowLeft,
+  Pencil,
 } from "lucide-react";
 import {
   Sidebar,
@@ -153,8 +154,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarContent className="flex flex-col p-2">
-               <SidebarHeader className="flex items-center justify-center p-4">
+               <SidebarHeader className="flex flex-col items-center justify-center p-4 gap-2">
                   <MusicAvatar size={64} ringWidth={4}/>
+                  <Button variant="link" className="text-muted-foreground" asChild>
+                    <Link href="/settings/account"><Pencil className="mr-2 h-3 w-3"/>Change Profile</Link>
+                  </Button>
                </SidebarHeader>
                <div className="w-full">
                 <SidebarNav />
