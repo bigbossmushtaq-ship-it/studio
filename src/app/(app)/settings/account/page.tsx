@@ -42,28 +42,6 @@ export default function AccountSettingsPage() {
       <div className="space-y-8">
         <Card>
           <CardHeader>
-            <CardTitle>Profile Picture</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4">
-            <Avatar className="h-32 w-32">
-              <AvatarImage src={profilePic} alt={username} />
-              <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
-            </Avatar>
-             <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleProfilePicChange} 
-              className="hidden"
-              accept="image/*"
-            />
-            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-              <Pencil className="mr-2 h-4 w-4"/>
-              Change your profile pic
-            </Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
             <CardTitle>Account Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
