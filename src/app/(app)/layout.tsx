@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -12,6 +13,7 @@ import {
   Upload,
   Settings,
   Bell,
+  User,
 } from "lucide-react";
 import {
   Sidebar,
@@ -125,7 +127,7 @@ const BottomNavBar = () => {
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { profilePic, setProfilePic, isPlaying } = useMusicPlayer();
+  const { profilePic, setProfilePic } = useMusicPlayer();
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -146,7 +148,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Sidebar>
             <SidebarContent className="flex flex-col p-4">
               <div className="flex flex-col items-center py-4 border-b w-full">
-                  <MusicAvatar isPlaying={isPlaying} size="lg" src={profilePic} />
+                  <Avatar className="w-20 h-20">
+                    <AvatarImage src={profilePic} alt="Profile" />
+                    <AvatarFallback>U</AvatarFallback>
+                  </Avatar>
                   <div className="mt-4">
                     <Button asChild size="sm" className="rounded-full text-xs h-8">
                       <label className="cursor-pointer">
@@ -182,14 +187,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
               <SidebarTrigger className="md:hidden">
-                 <MusicAvatar isPlaying={isPlaying} src={profilePic} />
+                 <MusicAvatar size={32} ringWidth={2}/>
               </SidebarTrigger>
               <div className="flex-1">
                 {/* Header content like search bar can go here */}
               </div>
               <div className="hidden md:flex">
                  <SidebarTrigger>
-                    <MusicAvatar isPlaying={isPlaying} src={profilePic} />
+                    <MusicAvatar size={32} ringWidth={2} />
                 </SidebarTrigger>
               </div>
             </header>

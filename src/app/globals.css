@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-@import './animations.css';
 
 @tailwind base;
 @tailwind components;
@@ -112,4 +111,8 @@ body {
   .bg-player {
     background-color: hsl(var(--player-background));
   }
+}
+
+#avatar-visualizer-container {
+    transition: box-shadow 0.2s ease-out;
 }

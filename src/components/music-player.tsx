@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useMusicPlayer } from "@/hooks/use-music-player";
 
@@ -67,11 +67,30 @@ const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
 
 
 export function MusicPlayer() {
-  const { isPlaying, setIsPlaying } = useMusicPlayer();
+  const { isPlaying, setIsPlaying, setAudioRef } = useMusicPlayer();
   const [isLiked, setIsLiked] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+      if (audioRef.current) {
+          setAudioRef(audioRef);
+          audioRef.current.volume = 0.5;
+      }
+  }, [setAudioRef]);
+  
+  useEffect(() => {
+    if(audioRef.current) {
+      if(isPlaying) {
+        audioRef.current.play().catch(e => console.error("Play error:", e));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying])
 
   return (
     <footer className="bg-card/80 backdrop-blur-lg border md:rounded-lg shadow-t-lg">
+      <audio ref={audioRef} src="/assets/m83-midnight-city.mp3" loop />
       <div className="grid grid-cols-[auto_1fr_auto] items-center px-4 h-20">
         {/* Left Side: Album Art & Song Info */}
         <div className="flex items-center gap-4 w-48 md:w-64">
@@ -130,10 +149,11 @@ export function MusicPlayer() {
           </Button>
            <div className="hidden md:flex items-center gap-2">
                 <Volume2 className="h-5 w-5 text-muted-foreground" />
-                <Slider defaultValue={[50]} max={100} step={1} className="w-24" />
+                <Slider defaultValue={[50]} max={100} step={1} className="w-24" onChange={(value) => { if(audioRef.current) audioRef.current.volume = value[0] / 100 }}/>
            </div>
         </div>
       </div>
     </footer>
   );
 }
+

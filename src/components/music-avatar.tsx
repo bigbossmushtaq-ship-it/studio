@@ -1,34 +1,112 @@
 
 "use client"
 
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useMusicPlayer } from "@/hooks/use-music-player";
+import { useEffect, useRef, useState } from "react";
 
-type MusicAvatarProps = {
-    isPlaying: boolean;
-    src: string;
-    size?: 'sm' | 'lg';
-}
+export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringWidth?: number }) {
+  const { isPlaying, audioRef, profilePic } = useMusicPlayer();
+  const rafRef = useRef(0);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-export function MusicAvatar({ isPlaying, src, size = 'sm' }: MusicAvatarProps) {
-    const sizeClasses = size === 'sm' ? "h-8 w-8" : "h-20 w-20";
-    const padding = size === 'sm' ? "p-0.5" : "p-1";
+  useEffect(() => {
+    if (isPlaying && audioRef?.current && !audioContext) {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const source = ctx.createMediaElementSource(audioRef.current);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
 
-    return (
-        <div className={cn(
-            "rgb-border-bg", 
-            !isPlaying && "rgb-border-bg-paused",
-            padding
-        )}>
-            <div className={cn(
-                "rgb-border-content",
-                padding
-            )}>
-                 <Avatar className={sizeClasses}>
-                    <AvatarImage src={src} alt="User" />
-                    <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-            </div>
-        </div>
-    )
+      source.connect(analyser);
+      source.connect(ctx.destination);
+
+      const data = new Uint8Array(analyser.frequencyBinCount);
+
+      const loop = () => {
+        if (!containerRef.current) {
+          rafRef.current = requestAnimationFrame(loop);
+          return;
+        };
+
+        analyser.getByteFrequencyData(data);
+        const avg = data.reduce((a, b) => a + b, 0) / (data.length * 255);
+        const eased = Math.min(1, avg * 2);
+        
+        containerRef.current.style.setProperty("--pulse", String(eased));
+        containerRef.current.style.setProperty("--spin", String(performance.now() / 1000));
+        
+        rafRef.current = requestAnimationFrame(loop);
+      };
+      loop();
+      setAudioContext(ctx);
+    }
+    
+    return () => {
+      if(audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
+      }
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    }
+  }, [isPlaying, audioRef, audioContext]);
+
+  useEffect(() => {
+    if (!isPlaying && audioContext) {
+      audioContext.close().then(() => setAudioContext(null));
+      cancelAnimationFrame(rafRef.current);
+      if(containerRef.current) {
+        containerRef.current.style.setProperty("--pulse", "0");
+      }
+    }
+  }, [isPlaying, audioContext]);
+  
+  const total = size + ringWidth * 2;
+  const maskRadius = size / 2;
+
+  return (
+      <div
+        ref={containerRef}
+        id="avatar-visualizer-container"
+        style={{
+          width: total,
+          height: total,
+          borderRadius: "50%",
+          position: "relative",
+          "--pulse": 0,
+          "--spin": 0,
+          boxShadow:
+            "0 0 calc(6px + 10px * var(--pulse)) rgba(255,255,255,0.35)",
+        } as React.CSSProperties}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            padding: ringWidth,
+            background:
+              "conic-gradient(red, magenta, blue, cyan, lime, yellow, red)",
+            filter: "hue-rotate(calc(var(--spin) * 60deg))",
+            WebkitMask:
+              `radial-gradient(circle at center, transparent ${maskRadius-ringWidth}px, black ${maskRadius}px)`,
+            mask: `radial-gradient(circle at center, transparent ${maskRadius-ringWidth}px, black ${maskRadius}px)`
+          }}
+        />
+        <img
+          src={profilePic}
+          alt="profile"
+          style={{
+            position: "absolute",
+            top: ringWidth,
+            left: ringWidth,
+            width: size,
+            height: size,
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+          data-ai-hint="profile picture"
+        />
+      </div>
+  );
 }
