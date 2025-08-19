@@ -21,8 +21,16 @@ export default function LoginPage() {
   const { setEmail, setUsername } = useApp();
   const [emailInput, setEmailInput] = React.useState('');
 
+  React.useEffect(() => {
+    const rememberedUser = localStorage.getItem('tuneflow_user');
+    if (rememberedUser) {
+      setEmailInput(rememberedUser);
+    }
+  }, []);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.setItem('tuneflow_user', emailInput);
     // In a real app, you'd check if it's an email or username
     // For this prototype, we'll assume it's an email if it contains '@'
     if (emailInput.includes('@')) {
