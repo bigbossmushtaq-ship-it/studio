@@ -13,6 +13,7 @@ import { db, storage } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp, getDocs, query, orderBy } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 type Song = {
   id: string;
@@ -25,6 +26,15 @@ type Song = {
   songUrl: string;
 };
 
+type FormErrors = {
+  title?: boolean;
+  artist?: boolean;
+  album?: boolean;
+  genre?: boolean;
+  songFile?: boolean;
+  albumArtFile?: boolean;
+}
+
 export default function UploadPage() {
   const { toast } = useToast();
 
@@ -36,6 +46,7 @@ export default function UploadPage() {
   const [theme, setTheme] = React.useState('');
   const [songFile, setSongFile] = React.useState<File | null>(null);
   const [albumArtFile, setAlbumArtFile] = React.useState<File | null>(null);
+  const [errors, setErrors] = React.useState<FormErrors>({});
   
   // UI State
   const [isUploading, setIsUploading] = React.useState(false);
@@ -69,6 +80,7 @@ export default function UploadPage() {
     const file = event.target.files?.[0];
     if (file) {
       setSongFile(file);
+      setErrors(prev => ({...prev, songFile: false}));
       setIsSuggestingTheme(true);
       try {
         const reader = new FileReader();
@@ -105,15 +117,28 @@ export default function UploadPage() {
     const file = event.target.files?.[0];
     if(file) {
       setAlbumArtFile(file);
+      setErrors(prev => ({...prev, albumArtFile: false}));
     }
   }
 
+  const validateForm = () => {
+    const newErrors: FormErrors = {};
+    if (!title) newErrors.title = true;
+    if (!artist) newErrors.artist = true;
+    if (!album) newErrors.album = true;
+    if (!genre) newErrors.genre = true;
+    if (!songFile) newErrors.songFile = true;
+    if (!albumArtFile) newErrors.albumArtFile = true;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
   const handleUpload = async () => {
-    if (!songFile || !albumArtFile || !title || !artist || !album || !genre || !theme) {
+    if (!validateForm()) {
       toast({
         variant: 'destructive',
         title: "Missing Information",
-        description: "Please fill out all fields and select both files.",
+        description: "Please fill out all highlighted fields.",
       });
       return;
     }
@@ -121,13 +146,13 @@ export default function UploadPage() {
     setIsUploading(true);
     try {
       // 1. Upload song file
-      const songRef = ref(storage, `songs/${Date.now()}-${songFile.name}`);
-      await uploadBytes(songRef, songFile);
+      const songRef = ref(storage, `songs/${Date.now()}-${songFile!.name}`);
+      await uploadBytes(songRef, songFile!);
       const songUrl = await getDownloadURL(songRef);
 
       // 2. Upload album art
-      const albumArtRef = ref(storage, `albumArt/${Date.now()}-${albumArtFile.name}`);
-      await uploadBytes(albumArtRef, albumArtFile);
+      const albumArtRef = ref(storage, `albumArt/${Date.now()}-${albumArtFile!.name}`);
+      await uploadBytes(albumArtRef, albumArtFile!);
       const albumArtUrl = await getDownloadURL(albumArtRef);
 
       // 3. Save metadata to Firestore
@@ -136,7 +161,7 @@ export default function UploadPage() {
         artist,
         album,
         genre,
-        theme,
+        theme: theme || 'Not specified',
         songUrl,
         albumArtUrl,
         uploadedAt: serverTimestamp(),
@@ -155,6 +180,7 @@ export default function UploadPage() {
       setTheme('');
       setSongFile(null);
       setAlbumArtFile(null);
+      setErrors({});
       fetchSongs();
 
     } catch (error) {
@@ -182,23 +208,23 @@ export default function UploadPage() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input id="title" placeholder="Enter song title" value={title} onChange={(e) => setTitle(e.target.value)} />
+              <Label htmlFor="title" className={cn(errors.title && "text-destructive")}>Title</Label>
+              <Input id="title" placeholder="Enter song title" value={title} onChange={(e) => {setTitle(e.target.value); setErrors(p => ({...p, title: false}))}} className={cn(errors.title && "border-destructive focus-visible:ring-destructive")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="artist">Artist</Label>
-              <Input id="artist" placeholder="Enter artist name" value={artist} onChange={(e) => setArtist(e.target.value)} />
+              <Label htmlFor="artist" className={cn(errors.artist && "text-destructive")}>Artist</Label>
+              <Input id="artist" placeholder="Enter artist name" value={artist} onChange={(e) => {setArtist(e.target.value); setErrors(p => ({...p, artist: false}))}} className={cn(errors.artist && "border-destructive focus-visible:ring-destructive")} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="album">Album</Label>
-              <Input id="album" placeholder="Enter album name" value={album} onChange={(e) => setAlbum(e.target.value)} />
+              <Label htmlFor="album" className={cn(errors.album && "text-destructive")}>Album</Label>
+              <Input id="album" placeholder="Enter album name" value={album} onChange={(e) => {setAlbum(e.target.value); setErrors(p => ({...p, album: false}))}} className={cn(errors.album && "border-destructive focus-visible:ring-destructive")}/>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="genre">Genre</Label>
-              <Input id="genre" placeholder="Enter genre" value={genre} onChange={(e) => setGenre(e.target.value)} />
+              <Label htmlFor="genre" className={cn(errors.genre && "text-destructive")}>Genre</Label>
+              <Input id="genre" placeholder="Enter genre" value={genre} onChange={(e) => {setGenre(e.target.value); setErrors(p => ({...p, genre: false}))}} className={cn(errors.genre && "border-destructive focus-visible:ring-destructive")}/>
             </div>
              <div className="relative space-y-2">
-              <Label htmlFor="theme">Theme</Label>
+              <Label htmlFor="theme">Theme (AI Suggested)</Label>
               <Input 
                 id="theme" 
                 placeholder={isSuggestingTheme ? "Analyzing song..." : "e.g. Energetic, Relaxing"} 
@@ -212,10 +238,10 @@ export default function UploadPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label>Album Art</Label>
+              <Label className={cn(errors.albumArtFile && "text-destructive")}>Album Art</Label>
               <label
                 htmlFor="album-art-upload"
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", errors.albumArtFile && "border-destructive text-destructive")}
               >
                 {albumArtFile ? (
                    <div className="flex flex-col items-center justify-center text-center">
@@ -224,8 +250,8 @@ export default function UploadPage() {
                    </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center">
-                    <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
+                    <UploadCloud className="w-8 h-8 mb-2" />
+                    <p className="text-sm">
                       <span className="font-semibold">Click to upload</span> or drag & drop
                     </p>
                   </div>
@@ -235,10 +261,10 @@ export default function UploadPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Song File</Label>
+              <Label className={cn(errors.songFile && "text-destructive")}>Song File</Label>
                <label
                   htmlFor="song-file-upload"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
+                  className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", errors.songFile && "border-destructive text-destructive")}
                 >
                   {songFile ? (
                      <div className="flex flex-col items-center justify-center text-center">
@@ -247,8 +273,8 @@ export default function UploadPage() {
                      </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center">
-                      <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
+                      <UploadCloud className="w-8 h-8 mb-2 " />
+                      <p className="text-sm">
                         <span className="font-semibold">Click to upload</span> or drag & drop
                       </p>
                     </div>
@@ -261,7 +287,7 @@ export default function UploadPage() {
           <div className="flex justify-end">
             <Button 
               onClick={handleUpload} 
-              disabled={isUploading || isSuggestingTheme || !title || !artist || !album || !genre || !songFile || !albumArtFile}
+              disabled={isUploading || isSuggestingTheme}
             >
               {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</> : 'Upload Song'}
             </Button>
@@ -297,3 +323,5 @@ export default function UploadPage() {
     </div>
   );
 }
+
+    
