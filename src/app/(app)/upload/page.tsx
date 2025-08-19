@@ -10,9 +10,7 @@ import { UploadCloud, Loader2, File, Music } from "lucide-react";
 import { suggestTheme } from '@/ai/flows/theme-suggestion';
 import { suggestGenre } from '@/ai/flows/genre-suggestion';
 import { useToast } from '@/hooks/use-toast';
-import { db, storage } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp, getDocs, query, orderBy } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { supabase } from "@/lib/supabase";
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -23,8 +21,8 @@ type Song = {
   album: string;
   genre: string;
   theme: string;
-  albumArtUrl: string;
-  songUrl: string;
+  album_art_url: string;
+  song_url: string;
 };
 
 type FormErrors = {
@@ -51,7 +49,6 @@ export default function UploadPage() {
   
   // UI State
   const [isUploading, setIsUploading] = React.useState(false);
-  const [uploadProgress, setUploadProgress] = React.useState(0);
   const [isSuggesting, setIsSuggesting] = React.useState(false);
 
   // Display State
@@ -59,10 +56,13 @@ export default function UploadPage() {
 
   const fetchSongs = React.useCallback(async () => {
     try {
-      const q = query(collection(db, "songs"), orderBy("uploadedAt", "desc"));
-      const snapshot = await getDocs(q);
-      const songList = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<Song, 'id'>) }));
-      setSongs(songList);
+      const { data, error } = await supabase
+        .from('songs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSongs(data as Song[]);
     } catch (error) {
       console.error("Error fetching songs:", error);
       toast({
@@ -151,78 +151,59 @@ export default function UploadPage() {
     }
 
     setIsUploading(true);
-    setUploadProgress(0);
 
-    const songPath = `songs/${Date.now()}-${songFile.name}`;
-    const albumArtPath = `albumArt/${Date.now()}-${albumArtFile.name}`;
-
-    const songStorageRef = ref(storage, songPath);
-    const albumArtStorageRef = ref(storage, albumArtPath);
-    
-    // Upload album art (no progress tracking needed for this small file)
     try {
-      await uploadBytesResumable(albumArtStorageRef, albumArtFile);
-      const albumArtUrl = await getDownloadURL(albumArtStorageRef);
+      const songPath = `public/${Date.now()}-${songFile.name}`;
+      const albumArtPath = `public/${Date.now()}-${albumArtFile.name}`;
+
+      // Upload song file
+      const { error: songError } = await supabase.storage.from('songs').upload(songPath, songFile);
+      if (songError) throw songError;
+      const { data: { publicUrl: songUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
+
+      // Upload album art
+      const { error: albumArtError } = await supabase.storage.from('album-art').upload(albumArtPath, albumArtFile);
+      if (albumArtError) throw albumArtError;
+      const { data: { publicUrl: albumArtUrl } } = supabase.storage.from('album-art').getPublicUrl(albumArtPath);
+
+      // Save metadata to Supabase table
+      const { error: insertError } = await supabase
+        .from('songs')
+        .insert({
+          title,
+          artist,
+          album,
+          genre,
+          theme: theme || 'Not specified',
+          song_url: songUrl,
+          album_art_url: albumArtUrl,
+        });
       
-      // Upload song file with progress tracking
-      const songUploadTask = uploadBytesResumable(songStorageRef, songFile);
+      if (insertError) throw insertError;
+      
+      toast({
+        title: "Upload Successful!",
+        description: `${title} by ${artist} has been added to your library.`,
+      });
 
-      songUploadTask.on('state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
-        },
-        (error) => {
-          console.error("Song upload failed:", error);
-           toast({
-            variant: 'destructive',
-            title: "Upload Failed",
-            description: "There was an error uploading your song. Please try again.",
-          });
-          setIsUploading(false);
-        },
-        async () => {
-          // On successful song upload
-          const songUrl = await getDownloadURL(songUploadTask.snapshot.ref);
-
-          // Save metadata to Firestore
-          await addDoc(collection(db, "songs"), {
-            title,
-            artist,
-            album,
-            genre,
-            theme: theme || 'Not specified',
-            songUrl,
-            albumArtUrl,
-            uploadedAt: serverTimestamp(),
-          });
-
-          toast({
-            title: "Upload Successful!",
-            description: `${title} by ${artist} has been added to your library.`,
-          });
-          
-          // Reset form
-          setTitle('');
-          setArtist('');
-          setAlbum('');
-          setGenre('');
-          setTheme('');
-          setSongFile(null);
-          setAlbumArtFile(null);
-          setErrors({});
-          fetchSongs();
-          setIsUploading(false);
-          setUploadProgress(0);
-        }
-      );
-
-    } catch (error) {
-       toast({
+      // Reset form
+      setTitle('');
+      setArtist('');
+      setAlbum('');
+      setGenre('');
+      setTheme('');
+      setSongFile(null);
+      setAlbumArtFile(null);
+      setErrors({});
+      fetchSongs();
+    } catch (error: any) {
+      console.error("Upload failed:", error);
+      toast({
         variant: 'destructive',
         title: "Upload Failed",
-        description: "There was an error uploading your album art. Please try again.",
+        description: error.message || "There was an error uploading your song. Please try again.",
       });
+    } finally {
       setIsUploading(false);
     }
   };
@@ -332,7 +313,7 @@ export default function UploadPage() {
               {isUploading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                  Uploading... {Math.round(uploadProgress)}%
+                  Uploading...
                 </>
               ) : 'Upload Song'}
             </Button>
@@ -347,7 +328,7 @@ export default function UploadPage() {
             {songs.map((song) => (
               <Card key={song.id} className="p-4 flex flex-col">
                 <Image
-                  src={song.albumArtUrl}
+                  src={song.album_art_url}
                   alt={song.title}
                   width={200}
                   height={200}
@@ -357,7 +338,7 @@ export default function UploadPage() {
                   <h3 className="font-semibold truncate">{song.title}</h3>
                   <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
                 </div>
-                <audio controls src={song.songUrl} className="mt-4 w-full" />
+                <audio controls src={song.song_url} className="mt-4 w-full" />
               </Card>
             ))}
           </div>
