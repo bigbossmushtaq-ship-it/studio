@@ -157,7 +157,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
               <div className="mt-auto w-full">
                 <div className="flex flex-col gap-1 py-2 border-t">
-                  <Link href="/settings" className={cn(buttonVariants({ variant: "ghost" }), isActive('/settings') && "bg-muted", "justify-start")}>
+                  <Link href="/settings/account" className={cn(buttonVariants({ variant: "ghost" }), isActive('/settings') && "bg-muted", "justify-start")}>
                     <Settings className="mr-2"/> Settings
                   </Link>
                    <div className="relative">
