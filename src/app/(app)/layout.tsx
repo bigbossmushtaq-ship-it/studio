@@ -144,22 +144,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarContent className="flex flex-col p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Logo className="h-8 w-8 text-primary" />
-                <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-                  TuneFlow
-                </span>
-              </div>
-              
-              <SidebarNav />
-
-              <div className="mt-auto">
-                <div className="flex flex-col items-center py-4 border-t border-b">
+              {/* Profile section at the top and centered */}
+              <div className="flex flex-col items-center py-4 border-b w-full">
                   <Avatar className="w-24 h-24 mb-4">
                     <AvatarImage src={profilePic} alt="Profile" />
                     <AvatarFallback>U</AvatarFallback>
                   </Avatar>
-                  <Button asChild size="sm">
+                  <Button asChild size="sm" className="rounded-full text-xs h-8">
                     <label className="cursor-pointer">
                       Change Picture
                       <Input
@@ -171,8 +162,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </label>
                   </Button>
                 </div>
-                
-                <div className="flex flex-col gap-1 py-2">
+              
+              <div className="w-full mt-4">
+                <SidebarNav />
+              </div>
+
+              <div className="mt-auto w-full">
+                <div className="flex flex-col gap-1 py-2 border-t">
                   <Button variant="ghost" className="justify-start"><Settings className="mr-2"/> Settings</Button>
                   <Button variant="ghost" className="justify-start"><Bell className="mr-2"/> Notifications</Button>
                 </div>
