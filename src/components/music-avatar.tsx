@@ -1,12 +1,12 @@
 
 "use client"
 
-import { useMusicPlayer } from "@/hooks/use-music-player";
+import { useApp } from "@/hooks/use-app";
 import { useTheme } from "@/hooks/use-theme";
 import { useEffect, useRef } from "react";
 
 export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringWidth?: number }) {
-  const { isPlaying, audioRef, profilePic } = useMusicPlayer();
+  const { isPlaying, audioRef, profilePic } = useApp();
   const { spectrumVisualEffects } = useTheme();
   const rafRef = useRef(0);
   const audioContextRef = useRef<AudioContext | null>(null);

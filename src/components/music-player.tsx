@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { useMusicPlayer } from "@/hooks/use-music-player";
+import { useApp } from "@/hooks/use-app";
 import { useTheme } from "@/hooks/use-theme";
 
 
@@ -71,7 +71,7 @@ const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
 
 
 export function MusicPlayer() {
-  const { isPlaying, setIsPlaying, setAudioRef } = useMusicPlayer();
+  const { isPlaying, setIsPlaying, setAudioRef } = useApp();
   const [isLiked, setIsLiked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 

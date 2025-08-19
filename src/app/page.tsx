@@ -1,7 +1,14 @@
+
 'use client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons/logo';
@@ -22,19 +29,29 @@ export default function LoginPage() {
             <Logo className="h-12 w-12" />
           </div>
           <CardTitle className="text-2xl text-center">Login to TuneFlow</CardTitle>
-          <CardDescription className="text-center">Enter your email below to login to your account</CardDescription>
+          <CardDescription className="text-center">
+            Enter your email or username below to login
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Label htmlFor="email">Email or Username</Label>
+                <Input
+                  id="email"
+                  type="text"
+                  placeholder="m@example.com or your_username"
+                  required
+                />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <Link href="#" className="ml-auto inline-block text-sm underline">
+                  <Link
+                    href="#"
+                    className="ml-auto inline-block text-sm underline"
+                  >
                     Forgot your password?
                   </Link>
                 </div>

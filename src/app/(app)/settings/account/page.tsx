@@ -2,20 +2,16 @@
 "use client"
 
 import * as React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ClipboardCopy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useApp } from "@/hooks/use-app";
 
 export default function AccountSettingsPage() {
-  const [username, setUsername] = React.useState("");
+  const { username } = useApp();
   const { toast } = useToast();
-
-  React.useEffect(() => {
-    // Generate a random username-like string
-    setUsername(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
-  }, []);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(username);

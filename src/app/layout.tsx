@@ -4,7 +4,7 @@ import { PT_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
-import { MusicPlayerProvider } from "@/hooks/use-music-player";
+import { AppProvider } from "@/hooks/use-app";
 import { ThemeProvider } from "@/hooks/use-theme";
 
 const ptSans = PT_Sans({
@@ -32,9 +32,9 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider>
-          <MusicPlayerProvider>
+          <AppProvider>
             {children}
-          </MusicPlayerProvider>
+          </AppProvider>
         </ThemeProvider>
         <Toaster />
       </body>

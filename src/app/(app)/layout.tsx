@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from "react";
@@ -34,7 +33,7 @@ import { MusicPlayer } from "@/components/music-player";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { MusicAvatar } from "@/components/music-avatar";
-import { useMusicPlayer } from "@/hooks/use-music-player";
+import { useApp } from "@/hooks/use-app";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 
