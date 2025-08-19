@@ -7,59 +7,65 @@ import { useEffect, useRef, useState } from "react";
 export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringWidth?: number }) {
   const { isPlaying, audioRef, profilePic } = useMusicPlayer();
   const rafRef = useRef(0);
-  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isPlaying && audioRef?.current && !audioContext) {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const source = ctx.createMediaElementSource(audioRef.current);
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 1024;
+    const setupAudioContext = () => {
+      if (isPlaying && audioRef?.current && !audioContextRef.current) {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = ctx;
 
-      source.connect(analyser);
-      source.connect(ctx.destination);
+        const source = ctx.createMediaElementSource(audioRef.current);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 1024;
+        analyserRef.current = analyser;
 
-      const data = new Uint8Array(analyser.frequencyBinCount);
+        source.connect(analyser);
+        source.connect(ctx.destination);
 
-      const loop = () => {
-        if (!containerRef.current) {
+        const data = new Uint8Array(analyser.frequencyBinCount);
+
+        const loop = () => {
+          if (!containerRef.current || !analyserRef.current) {
+            rafRef.current = requestAnimationFrame(loop);
+            return;
+          };
+
+          analyserRef.current.getByteFrequencyData(data);
+          const avg = data.reduce((a, b) => a + b, 0) / (data.length * 255);
+          const eased = Math.min(1, avg * 2);
+          
+          containerRef.current.style.setProperty("--pulse", String(eased));
+          containerRef.current.style.setProperty("--spin", String(performance.now() / 1000));
+          
           rafRef.current = requestAnimationFrame(loop);
-          return;
         };
-
-        analyser.getByteFrequencyData(data);
-        const avg = data.reduce((a, b) => a + b, 0) / (data.length * 255);
-        const eased = Math.min(1, avg * 2);
-        
-        containerRef.current.style.setProperty("--pulse", String(eased));
-        containerRef.current.style.setProperty("--spin", String(performance.now() / 1000));
-        
-        rafRef.current = requestAnimationFrame(loop);
-      };
-      loop();
-      setAudioContext(ctx);
+        loop();
+      }
     }
+    setupAudioContext();
     
     return () => {
-      if(audioContext && audioContext.state !== 'closed') {
-        audioContext.close();
-      }
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
     }
-  }, [isPlaying, audioRef, audioContext]);
+  }, [isPlaying, audioRef]);
 
   useEffect(() => {
-    if (!isPlaying && audioContext) {
-      audioContext.close().then(() => setAudioContext(null));
+    if (!isPlaying && audioContextRef.current) {
+      audioContextRef.current.close().then(() => {
+        audioContextRef.current = null;
+        analyserRef.current = null;
+      });
       cancelAnimationFrame(rafRef.current);
       if(containerRef.current) {
         containerRef.current.style.setProperty("--pulse", "0");
       }
     }
-  }, [isPlaying, audioContext]);
+  }, [isPlaying]);
   
   const total = size + ringWidth * 2;
   const maskRadius = size / 2;

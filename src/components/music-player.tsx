@@ -90,7 +90,7 @@ export function MusicPlayer() {
 
   return (
     <footer className="bg-card/80 backdrop-blur-lg border md:rounded-lg shadow-t-lg">
-      <audio ref={audioRef} src="/assets/m83-midnight-city.mp3" loop />
+      <audio ref={audioRef} src="/assets/m83-midnight-city.mp3" loop crossOrigin="anonymous" />
       <div className="grid grid-cols-[auto_1fr_auto] items-center px-4 h-20">
         {/* Left Side: Album Art & Song Info */}
         <div className="flex items-center gap-4 w-48 md:w-64">
@@ -156,4 +156,3 @@ export function MusicPlayer() {
     </footer>
   );
 }
-
