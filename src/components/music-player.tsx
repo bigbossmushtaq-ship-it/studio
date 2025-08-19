@@ -94,7 +94,7 @@ export function MusicPlayer() {
   }, [isPlaying])
 
   return (
-    <footer className="bg-card/80 backdrop-blur-lg border md:rounded-full shadow-t-lg px-4 py-2">
+    <footer className="bg-card/80 backdrop-blur-lg border md:rounded-lg shadow-t-lg px-4 py-2">
       <audio ref={audioRef} src="/assets/m83-midnight-city.mp3" loop crossOrigin="anonymous" />
       <div className="flex items-center">
         {/* Left Side: Album Art & Song Info */}
