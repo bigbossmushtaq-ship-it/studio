@@ -1,10 +1,11 @@
 
+
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
 interface SettingsLayoutProps {
   children: React.ReactNode
@@ -40,7 +41,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         <aside className="-mx-4 lg:w-1/5">
           <nav
             className={cn(
-              "flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1"
+              "flex flex-col space-y-1"
             )}
           >
             {sidebarNavItems.map((item) => (

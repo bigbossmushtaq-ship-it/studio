@@ -103,6 +103,11 @@ function SidebarNav() {
 const BottomNavBar = () => {
   const pathname = usePathname();
   const isActive = (path: string) => pathname === path;
+  
+  if (pathname.startsWith('/settings')) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-20 md:hidden">
       <div className="flex justify-around h-16 items-center">
@@ -132,6 +137,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
   const pathname = usePathname();
   const isActive = (path: string) => pathname.startsWith(path);
+  const isSettingsPage = pathname.startsWith('/settings');
 
   const customStyle = theme === 'theme-custom' ? {
     '--primary': customColors.primary,
@@ -177,17 +183,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Input placeholder="Search songs, artists, or podcasts..." className="pl-10 w-full max-w-sm" />
               </div>
             </header>
-            <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-40 md:pb-32">
+            <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && "pb-40 md:pb-32")}>
               {children}
             </main>
           </SidebarInset>
         </div>
-        <div className="fixed bottom-0 w-full z-20 md:pl-[3rem] group-data-[state=expanded]:md:pl-[16rem] transition-all duration-200 ease-linear">
-            <div className="md:px-2">
-              <MusicPlayer />
-            </div>
-            <BottomNavBar />
-        </div>
+        {!isSettingsPage && (
+          <div className="fixed bottom-0 w-full z-20 md:pl-[3rem] group-data-[state=expanded]:md:pl-[16rem] transition-all duration-200 ease-linear">
+              <div className="md:px-2">
+                <MusicPlayer />
+              </div>
+              <BottomNavBar />
+          </div>
+        )}
       </div>
     </SidebarProvider>
   );
