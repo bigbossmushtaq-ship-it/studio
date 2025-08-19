@@ -140,31 +140,8 @@ export default function UploadPage() {
     return Object.keys(newErrors).length === 0;
   }
 
-  const uploadFile = (file: File, path: string, progressCallback: (progress: number) => void): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on(
-        'state_changed',
-        snapshot => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          progressCallback(progress);
-        },
-        error => {
-          console.error(`Upload failed for ${path}:`, error);
-          reject(error);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve(downloadURL);
-        }
-      );
-    });
-  };
-
   const handleUpload = async () => {
-    if (!validateForm()) {
+    if (!validateForm() || !songFile || !albumArtFile) {
       toast({
         variant: 'destructive',
         title: "Missing Information",
@@ -176,53 +153,77 @@ export default function UploadPage() {
     setIsUploading(true);
     setUploadProgress(0);
 
+    const songPath = `songs/${Date.now()}-${songFile.name}`;
+    const albumArtPath = `albumArt/${Date.now()}-${albumArtFile.name}`;
+
+    const songStorageRef = ref(storage, songPath);
+    const albumArtStorageRef = ref(storage, albumArtPath);
+    
+    // Upload album art (no progress tracking needed for this small file)
     try {
-      const songPath = `songs/${Date.now()}-${songFile!.name}`;
-      const albumArtPath = `albumArt/${Date.now()}-${albumArtFile!.name}`;
-
-      const [songUrl, albumArtUrl] = await Promise.all([
-        uploadFile(songFile!, songPath, (progress) => {
-          // Only use song progress for the main progress bar
-          setUploadProgress(progress);
-        }),
-        uploadFile(albumArtFile!, albumArtPath, () => {}), // No progress tracking for album art
-      ]);
-
-      await addDoc(collection(db, "songs"), {
-        title,
-        artist,
-        album,
-        genre,
-        theme: theme || 'Not specified',
-        songUrl,
-        albumArtUrl,
-        uploadedAt: serverTimestamp(),
-      });
-
-      toast({
-        title: "Upload Successful!",
-        description: `${title} by ${artist} has been added to your library.`,
-      });
+      await uploadBytesResumable(albumArtStorageRef, albumArtFile);
+      const albumArtUrl = await getDownloadURL(albumArtStorageRef);
       
-      setTitle('');
-      setArtist('');
-      setAlbum('');
-      setGenre('');
-      setTheme('');
-      setSongFile(null);
-      setAlbumArtFile(null);
-      setErrors({});
-      fetchSongs();
+      // Upload song file with progress tracking
+      const songUploadTask = uploadBytesResumable(songStorageRef, songFile);
+
+      songUploadTask.on('state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress);
+        },
+        (error) => {
+          console.error("Song upload failed:", error);
+           toast({
+            variant: 'destructive',
+            title: "Upload Failed",
+            description: "There was an error uploading your song. Please try again.",
+          });
+          setIsUploading(false);
+        },
+        async () => {
+          // On successful song upload
+          const songUrl = await getDownloadURL(songUploadTask.snapshot.ref);
+
+          // Save metadata to Firestore
+          await addDoc(collection(db, "songs"), {
+            title,
+            artist,
+            album,
+            genre,
+            theme: theme || 'Not specified',
+            songUrl,
+            albumArtUrl,
+            uploadedAt: serverTimestamp(),
+          });
+
+          toast({
+            title: "Upload Successful!",
+            description: `${title} by ${artist} has been added to your library.`,
+          });
+          
+          // Reset form
+          setTitle('');
+          setArtist('');
+          setAlbum('');
+          setGenre('');
+          setTheme('');
+          setSongFile(null);
+          setAlbumArtFile(null);
+          setErrors({});
+          fetchSongs();
+          setIsUploading(false);
+          setUploadProgress(0);
+        }
+      );
 
     } catch (error) {
-      toast({
+       toast({
         variant: 'destructive',
         title: "Upload Failed",
-        description: "There was an error uploading your song. Please try again.",
+        description: "There was an error uploading your album art. Please try again.",
       });
-    } finally {
       setIsUploading(false);
-      setUploadProgress(0);
     }
   };
 
@@ -326,7 +327,7 @@ export default function UploadPage() {
           <div className="flex justify-end">
             <Button 
               onClick={handleUpload} 
-              disabled={isUploading || isSuggesting}
+              disabled={isUploading || isSuggesting || !title || !artist || !album || !genre || !songFile || !albumArtFile}
             >
               {isUploading ? (
                 <>
@@ -366,5 +367,4 @@ export default function UploadPage() {
       </div>
     </div>
   );
-
-    
+}
