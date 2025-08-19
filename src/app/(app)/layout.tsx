@@ -199,10 +199,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <Link href="/settings" className={cn(buttonVariants({ variant: "ghost" }), isActive('/settings') && "bg-muted", "justify-start")}>
                     <Settings className="mr-2"/> Settings
                   </Link>
-                   <div className="relative">
-                    <Button variant="ghost" className="justify-start w-full"><Bell className="mr-2"/> Notifications</Button>
-                     <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                  </div>
                 </div>
                  <SidebarSeparator />
                  <div className="flex items-center justify-between p-2">
