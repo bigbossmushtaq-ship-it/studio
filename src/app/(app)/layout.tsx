@@ -86,6 +86,18 @@ function SidebarNav() {
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
+         <SidebarMenuItem>
+          <SidebarMenuButton
+            asChild
+            isActive={isActive("/profile")}
+            tooltip={isMobile ? undefined : "Profile"}
+          >
+            <Link href="/profile">
+              <User />
+              Profile
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarMenu>
     </>
   );
@@ -144,26 +156,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </span>
                 </div>
               </div>
-              <div className="flex justify-center items-center py-4 group-data-[collapsible=icon]:hidden">
-                 <Button variant="ghost" size="icon" asChild className="h-16 w-16">
-                    <Link href="/profile">
-                       <Avatar className="h-16 w-16">
-                        <AvatarImage src={profilePic} alt="User" />
-                        <AvatarFallback>U</AvatarFallback>
-                      </Avatar>
-                    </Link>
-                  </Button>
-              </div>
-               <div className="hidden group-data-[collapsible=icon]:flex justify-center items-center py-4">
-                 <Button variant="ghost" size="icon" asChild>
-                    <Link href="/profile">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={profilePic} alt="User" />
-                        <AvatarFallback>U</AvatarFallback>
-                      </Avatar>
-                    </Link>
-                  </Button>
-              </div>
             </SidebarHeader>
             <SidebarContent>
               <SidebarNav />
@@ -183,10 +175,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Sidebar>
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
-              <SidebarTrigger className="md:hidden" />
+              <SidebarTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profilePic} alt="User" />
+                    <AvatarFallback>U</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </SidebarTrigger>
               <div className="flex-1">
                 {/* Header content like search bar can go here */}
               </div>
+              <Button variant="ghost" size="icon" asChild className="hidden md:flex">
+                <Link href="/profile">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profilePic} alt="User" />
+                    <AvatarFallback>U</AvatarFallback>
+                  </Avatar>
+                </Link>
+              </Button>
             </header>
             <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-40 md:pb-32">
               {childrenWithProps}
