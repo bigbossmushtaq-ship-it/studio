@@ -68,7 +68,6 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
   }, [isPlaying]);
   
   const total = size + ringWidth * 2;
-  const maskRadius = size / 2;
 
   return (
       <div
@@ -95,8 +94,8 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
               "conic-gradient(red, magenta, blue, cyan, lime, yellow, red)",
             filter: "hue-rotate(calc(var(--spin) * 60deg))",
             WebkitMask:
-              `radial-gradient(circle at center, transparent ${maskRadius-ringWidth}px, black ${maskRadius}px)`,
-            mask: `radial-gradient(circle at center, transparent ${maskRadius-ringWidth}px, black ${maskRadius}px)`
+              `radial-gradient(transparent ${size/2}px, black ${size/2}px)`,
+            mask: `radial-gradient(transparent ${size/2}px, black ${size/2}px)`
           }}
         />
         <img
