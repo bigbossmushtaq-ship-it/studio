@@ -39,6 +39,10 @@ export default function UploadPage() {
               <Label htmlFor="genre">Genre</Label>
               <Input id="genre" placeholder="Enter genre" />
             </div>
+             <div className="space-y-2">
+              <Label htmlFor="theme">Theme</Label>
+              <Input id="theme" placeholder="e.g. Energetic, Relaxing" />
+            </div>
           </div>
           
           <div className="space-y-2">
