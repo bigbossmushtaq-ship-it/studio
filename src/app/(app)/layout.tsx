@@ -39,7 +39,7 @@ import { useTheme } from "@/hooks/use-theme";
 
 function SidebarNav() {
   const pathname = usePathname();
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
   const { isMobile } = useSidebar();
 
   return (
@@ -127,20 +127,9 @@ const BottomNavBar = () => {
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { profilePic, setProfilePic } = useMusicPlayer();
   const { theme, customColors } = useTheme();
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setProfilePic(result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const pathname = usePathname();
+  const isActive = (path: string) => pathname.startsWith(path);
 
   const customStyle = theme === 'theme-custom' ? {
     '--primary': customColors.primary,
@@ -160,8 +149,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
               <div className="mt-auto w-full">
                 <div className="flex flex-col gap-1 py-2 border-t">
-                  <Button variant="ghost" className="justify-start" asChild>
-                    <Link href="/settings"><Settings className="mr-2"/> Settings</Link>
+                  <Button variant="ghost" className="justify-start" asChild isActive={isActive("/settings")}>
+                    <Link href="/settings/customization"><Settings className="mr-2"/> Settings</Link>
                   </Button>
                    <div className="relative">
                     <Button variant="ghost" className="justify-start w-full"><Bell className="mr-2"/> Notifications</Button>
