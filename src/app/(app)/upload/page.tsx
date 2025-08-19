@@ -12,7 +12,7 @@ import { suggestGenre } from '@/ai/flows/genre-suggestion';
 import { useToast } from '@/hooks/use-toast';
 import { db, storage } from "@/lib/firebase";
 import { addDoc, collection, serverTimestamp, getDocs, query, orderBy } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -51,6 +51,7 @@ export default function UploadPage() {
   
   // UI State
   const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadProgress, setUploadProgress] = React.useState(0);
   const [isSuggesting, setIsSuggesting] = React.useState(false);
 
   // Display State
@@ -139,6 +140,31 @@ export default function UploadPage() {
     return Object.keys(newErrors).length === 0;
   }
 
+  const uploadFile = (file: File, path: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const storageRef = ref(storage, path);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        'state_changed',
+        snapshot => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          if (path.startsWith('songs/')) {
+            setUploadProgress(progress);
+          }
+        },
+        error => {
+          console.error(`Upload failed for ${path}:`, error);
+          reject(error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(downloadURL);
+        }
+      );
+    });
+  };
+
   const handleUpload = async () => {
     if (!validateForm()) {
       toast({
@@ -150,16 +176,17 @@ export default function UploadPage() {
     }
 
     setIsUploading(true);
-    try {
-      // 1. Upload song file
-      const songRef = ref(storage, `songs/${Date.now()}-${songFile!.name}`);
-      await uploadBytes(songRef, songFile!);
-      const songUrl = await getDownloadURL(songRef);
+    setUploadProgress(0);
 
-      // 2. Upload album art
-      const albumArtRef = ref(storage, `albumArt/${Date.now()}-${albumArtFile!.name}`);
-      await uploadBytes(albumArtRef, albumArtFile!);
-      const albumArtUrl = await getDownloadURL(albumArtRef);
+    try {
+      // 1. Upload song file and album art in parallel
+      const songPath = `songs/${Date.now()}-${songFile!.name}`;
+      const albumArtPath = `albumArt/${Date.now()}-${albumArtFile!.name}`;
+
+      const [songUrl, albumArtUrl] = await Promise.all([
+        uploadFile(songFile!, songPath),
+        uploadFile(albumArtFile!, albumArtPath),
+      ]);
 
       // 3. Save metadata to Firestore
       await addDoc(collection(db, "songs"), {
@@ -190,7 +217,6 @@ export default function UploadPage() {
       fetchSongs();
 
     } catch (error) {
-      console.error("Upload failed:", error);
       toast({
         variant: 'destructive',
         title: "Upload Failed",
@@ -198,6 +224,7 @@ export default function UploadPage() {
       });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -303,7 +330,12 @@ export default function UploadPage() {
               onClick={handleUpload} 
               disabled={isUploading || isSuggesting}
             >
-              {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading...</> : 'Upload Song'}
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                  Uploading... {Math.round(uploadProgress)}%
+                </>
+              ) : 'Upload Song'}
             </Button>
           </div>
         </CardContent>
@@ -336,4 +368,5 @@ export default function UploadPage() {
       </div>
     </div>
   );
-}
+
+    
