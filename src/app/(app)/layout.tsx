@@ -176,21 +176,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Sidebar>
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
-              <SidebarTrigger asChild variant="ghost" size="icon" className="md:hidden rounded-full">
+              <SidebarTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={profilePic} alt="User" />
                     <AvatarFallback>U</AvatarFallback>
                   </Avatar>
+                </Button>
               </SidebarTrigger>
               <div className="flex-1">
                 {/* Header content like search bar can go here */}
               </div>
               <div className="hidden md:flex">
-                 <SidebarTrigger asChild variant="ghost" size="icon" className="rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={profilePic} alt="User" />
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
+                 <SidebarTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={profilePic} alt="User" />
+                        <AvatarFallback>U</AvatarFallback>
+                      </Avatar>
+                    </Button>
                 </SidebarTrigger>
               </div>
             </header>
