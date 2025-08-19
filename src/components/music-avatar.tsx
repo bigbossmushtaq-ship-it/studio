@@ -107,8 +107,6 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
           position: "relative",
           "--pulse": 0,
           "--spin": 0,
-          boxShadow:
-            "0 0 calc(6px + 10px * var(--pulse)) rgba(255,255,255,0.4)",
         } as React.CSSProperties}
       >
         <div
