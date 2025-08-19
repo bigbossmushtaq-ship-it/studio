@@ -1,10 +1,56 @@
+
+'use client';
+
+import * as React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { UploadCloud } from "lucide-react";
+import { UploadCloud, Loader2 } from "lucide-react";
+import { suggestTheme } from '@/ai/flows/theme-suggestion';
+import { useToast } from '@/hooks/use-toast';
 
 export default function UploadPage() {
+  const [theme, setTheme] = React.useState('');
+  const [isSuggestingTheme, setIsSuggestingTheme] = React.useState(false);
+  const { toast } = useToast();
+
+  const handleFileChange = React.useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setIsSuggestingTheme(true);
+      try {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const dataUri = e.target?.result as string;
+          try {
+            const result = await suggestTheme({ songDataUri: dataUri });
+            setTheme(result.theme);
+          } catch (error) {
+            console.error("Error suggesting theme:", error);
+            toast({
+              variant: 'destructive',
+              title: "Theme suggestion failed",
+              description: "Could not analyze the song. Please enter a theme manually.",
+            });
+          } finally {
+            setIsSuggestingTheme(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Error reading file:", error);
+        toast({
+          variant: 'destructive',
+          title: "File reading error",
+          description: "There was a problem reading the selected file.",
+        });
+        setIsSuggestingTheme(false);
+      }
+    }
+  }, [toast]);
+
+
   return (
     <div className="space-y-8">
       <div>
@@ -39,9 +85,16 @@ export default function UploadPage() {
               <Label htmlFor="genre">Genre</Label>
               <Input id="genre" placeholder="Enter genre" />
             </div>
-             <div className="space-y-2">
+             <div className="relative space-y-2">
               <Label htmlFor="theme">Theme</Label>
-              <Input id="theme" placeholder="e.g. Energetic, Relaxing" />
+              <Input 
+                id="theme" 
+                placeholder={isSuggestingTheme ? "Analyzing song..." : "e.g. Energetic, Relaxing"} 
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                disabled={isSuggestingTheme}
+              />
+               {isSuggestingTheme && <Loader2 className="absolute right-3 top-8 h-5 w-5 animate-spin" />}
             </div>
           </div>
           
@@ -59,7 +112,7 @@ export default function UploadPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 800x800px)</p>
                 </div>
-                <Input id="album-art-upload" type="file" className="hidden" />
+                <Input id="album-art-upload" type="file" className="hidden" accept="image/*" />
               </label>
             </div>
           </div>
@@ -78,7 +131,13 @@ export default function UploadPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">MP3 or WAV (MAX. 10MB)</p>
                 </div>
-                <Input id="song-file-upload" type="file" className="hidden" />
+                <Input 
+                  id="song-file-upload" 
+                  type="file" 
+                  className="hidden" 
+                  accept="audio/mpeg, audio/wav"
+                  onChange={handleFileChange}
+                />
               </label>
             </div>
           </div>
