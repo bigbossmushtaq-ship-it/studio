@@ -41,13 +41,6 @@ export default function NotificationSettingsPage() {
                 </div>
                 <Switch id="playlist-emails" />
             </div>
-             <div className="flex items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                    <Label htmlFor="promo-emails">Promotional Emails</Label>
-                    <p className="text-sm text-muted-foreground">Receive offers and promotions.</p>
-                </div>
-                <Switch id="promo-emails" />
-            </div>
           </div>
         </CardContent>
       </Card>
