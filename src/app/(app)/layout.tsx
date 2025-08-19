@@ -128,10 +128,6 @@ const BottomNavBar = () => {
           <Library className="h-6 w-6" />
           <span className="text-xs">Your Library</span>
         </Link>
-        <Link href="#" className={`flex flex-col items-center gap-1 text-muted-foreground`}>
-          <SpotifyLogo className="h-6 w-6" />
-          <span className="text-xs">Premium</span>
-        </Link>
          <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
           <Plus className="h-6 w-6" />
           <span className="text-xs">Create</span>
