@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -28,13 +29,14 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { MusicPlayer } from "@/components/music-player";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { MusicAvatar } from "@/components/music-avatar";
 import { useMusicPlayer } from "@/hooks/use-music-player";
 import { useTheme } from "@/hooks/use-theme";
+import { cn } from "@/lib/utils";
 
 
 function SidebarNav() {
@@ -149,9 +151,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
               <div className="mt-auto w-full">
                 <div className="flex flex-col gap-1 py-2 border-t">
-                  <Button variant="ghost" className="justify-start" asChild isActive={isActive("/settings")}>
-                    <Link href="/settings/customization"><Settings className="mr-2"/> Settings</Link>
-                  </Button>
+                  <Link href="/settings/customization" className={cn(buttonVariants({ variant: "ghost" }), isActive('/settings') && "bg-muted", "justify-start")}>
+                    <Settings className="mr-2"/> Settings
+                  </Link>
                    <div className="relative">
                     <Button variant="ghost" className="justify-start w-full"><Bell className="mr-2"/> Notifications</Button>
                      <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
