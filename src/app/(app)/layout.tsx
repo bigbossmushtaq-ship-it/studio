@@ -128,7 +128,7 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { profilePic, setProfilePic } = useMusicPlayer();
-  const { theme } = useTheme();
+  const { theme, customColors } = useTheme();
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -142,33 +142,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const customStyle = theme === 'theme-custom' ? {
+    '--primary': customColors.primary,
+    '--background': customColors.background,
+    '--accent': customColors.accent,
+  } as React.CSSProperties : {};
+
   return (
     <SidebarProvider defaultOpen>
-      <div className={`grid h-screen w-full grid-rows-[1fr_auto] bg-background ${theme}`}>
+       <div className={`grid h-screen w-full grid-rows-[1fr_auto] bg-background ${theme}`} style={customStyle}>
         <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarContent className="flex flex-col items-center p-4">
-               <div className="flex flex-col items-center py-4 border-b w-full">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage src={profilePic} alt="Profile" />
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
-                  <div className="mt-4">
-                    <Button asChild size="sm" className="rounded-full text-xs h-8">
-                      <label className="cursor-pointer">
-                        Change Picture
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleImageChange}
-                        />
-                      </label>
-                    </Button>
-                  </div>
-                </div>
-              
-              <div className="w-full mt-4">
+               <div className="w-full mt-4">
                 <SidebarNav />
               </div>
 
@@ -177,7 +163,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <Button variant="ghost" className="justify-start" asChild>
                     <Link href="/settings"><Settings className="mr-2"/> Settings</Link>
                   </Button>
-                  <Button variant="ghost" className="justify-start"><Bell className="mr-2"/> Notifications</Button>
+                   <div className="relative">
+                    <Button variant="ghost" className="justify-start w-full"><Bell className="mr-2"/> Notifications</Button>
+                     <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                  </div>
                 </div>
 
                 <Button variant="destructive" className="w-full justify-center mt-2" asChild>
@@ -192,8 +181,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="p-0 rounded-full h-8 w-8">
                  <MusicAvatar size={32} ringWidth={2}/>
               </SidebarTrigger>
-              <div className="flex-1">
-                {/* Header content like search bar can go here */}
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input placeholder="Search songs, artists, or podcasts..." className="pl-10 w-full max-w-sm" />
               </div>
             </header>
             <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-40 md:pb-32">
