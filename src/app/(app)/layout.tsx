@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from "react";
@@ -11,7 +10,9 @@ import {
   LogOut,
   Search,
   Upload,
-  User
+  User,
+  Settings,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,11 +26,13 @@ import {
   SidebarTrigger,
   useSidebar,
   SidebarFooter,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/icons/logo";
 import { MusicPlayer } from "@/components/music-player";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 
 function SidebarNav() {
   const pathname = usePathname();
@@ -87,18 +90,6 @@ function SidebarNav() {
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            isActive={isActive("/profile")}
-            tooltip={isMobile ? undefined : "Profile"}
-          >
-            <Link href="/profile">
-              <User />
-              Profile
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
       </SidebarMenu>
     </>
   );
@@ -135,48 +126,67 @@ const BottomNavBar = () => {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [profilePic, setProfilePic] = React.useState("https://placehold.co/200x200.png");
 
-  const childrenWithProps = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
-      // @ts-ignore
-      return React.cloneElement(child, { setProfilePic });
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setProfilePic(result);
+      };
+      reader.readAsDataURL(file);
     }
-    return child;
-  });
+  };
 
   return (
     <SidebarProvider defaultOpen>
       <div className="grid h-screen w-full grid-rows-[1fr_auto] bg-background">
         <div className="flex overflow-hidden">
           <Sidebar>
-            <SidebarHeader className="p-4">
-               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Logo className="h-8 w-8 text-primary" />
-                  <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-                    TuneFlow
-                  </span>
-                </div>
+            <SidebarContent className="flex flex-col p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Logo className="h-8 w-8 text-primary" />
+                <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
+                  TuneFlow
+                </span>
               </div>
-            </SidebarHeader>
-            <SidebarContent>
+              
               <SidebarNav />
+
+              <div className="mt-auto">
+                <div className="flex flex-col items-center py-4 border-t border-b">
+                  <Avatar className="w-24 h-24 mb-4">
+                    <AvatarImage src={profilePic} alt="Profile" />
+                    <AvatarFallback>U</AvatarFallback>
+                  </Avatar>
+                  <Button asChild size="sm">
+                    <label className="cursor-pointer">
+                      Change Picture
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  </Button>
+                </div>
+                
+                <div className="flex flex-col gap-1 py-2">
+                  <Button variant="ghost" className="justify-start"><Settings className="mr-2"/> Settings</Button>
+                  <Button variant="ghost" className="justify-start"><Bell className="mr-2"/> Notifications</Button>
+                </div>
+
+                <Button variant="destructive" className="w-full justify-center mt-2" asChild>
+                  <Link href="/"><LogOut className="mr-2" />Logout</Link>
+                </Button>
+              </div>
+
             </SidebarContent>
-             <SidebarFooter>
-                <div className="group-data-[collapsible=icon]:hidden">
-                    <Button variant="destructive" className="w-full justify-center" asChild>
-                      <Link href="/"><LogOut className="mr-2 h-4 w-4" />Logout</Link>
-                    </Button>
-                </div>
-                <div className="hidden group-data-[collapsible=icon]:block">
-                     <Button variant="destructive" size="icon" asChild>
-                      <Link href="/"><LogOut /></Link>
-                    </Button>
-                </div>
-            </SidebarFooter>
           </Sidebar>
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
-              <SidebarTrigger asChild className="md:hidden">
+              <SidebarTrigger className="md:hidden">
                  <Avatar className="h-8 w-8">
                   <AvatarImage src={profilePic} alt="User" />
                   <AvatarFallback>U</AvatarFallback>
@@ -186,7 +196,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 {/* Header content like search bar can go here */}
               </div>
               <div className="hidden md:flex">
-                 <SidebarTrigger asChild>
+                 <SidebarTrigger>
                     <Avatar className="h-8 w-8 cursor-pointer">
                       <AvatarImage src={profilePic} alt="User" />
                       <AvatarFallback>U</AvatarFallback>
@@ -195,7 +205,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </header>
             <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-6 pb-40 md:pb-32">
-              {childrenWithProps}
+              {children}
             </main>
           </SidebarInset>
         </div>
