@@ -19,7 +19,7 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
 
         const source = ctx.createMediaElementSource(audioRef.current);
         const analyser = ctx.createAnalyser();
-        analyser.fftSize = 1024;
+        analyser.fftSize = 512;
         analyserRef.current = analyser;
 
         source.connect(analyser);
@@ -52,7 +52,7 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
         cancelAnimationFrame(rafRef.current);
       }
     }
-  }, [isPlaying, audioRef]);
+  }, [isPlaying, audioRef, profilePic]);
 
   useEffect(() => {
     if (!isPlaying && audioContextRef.current) {
@@ -82,7 +82,7 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
           "--pulse": 0,
           "--spin": 0,
           boxShadow:
-            "0 0 calc(6px + 10px * var(--pulse)) rgba(255,255,255,0.35)",
+            "0 0 calc(6px + 10px * var(--pulse)) rgba(255,255,255,0.4)",
         } as React.CSSProperties}
       >
         <div
