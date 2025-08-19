@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 interface SettingsLayoutProps {
   children: React.ReactNode
