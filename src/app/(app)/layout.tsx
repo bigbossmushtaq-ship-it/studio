@@ -234,13 +234,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarInset>
         </div>
         {!isSettingsPage && (
-           <div className="fixed bottom-0 w-full z-40 md:pl-[3rem] group-data-[state=expanded]:md:pl-[16rem] transition-all duration-200 ease-linear">
+           <div className="fixed bottom-0 w-full z-40 md:bottom-2 md:left-auto md:right-2 md:w-auto md:pl-[3rem] group-data-[state=expanded]:md:pl-[16rem] transition-all duration-200 ease-linear">
               <div className="md:px-2">
                   <MusicPlayer />
               </div>
-              <BottomNavBar />
             </div>
         )}
+         {!isSettingsPage && <BottomNavBar />}
       </div>
     </SidebarProvider>
   );

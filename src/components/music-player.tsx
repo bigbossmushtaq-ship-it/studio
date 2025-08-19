@@ -94,31 +94,31 @@ export function MusicPlayer() {
   }, [isPlaying])
 
   return (
-    <footer className="bg-card/80 backdrop-blur-lg border md:rounded-lg shadow-t-lg p-4">
+    <footer className="bg-card/80 backdrop-blur-lg border md:rounded-full shadow-t-lg px-4 py-2">
       <audio ref={audioRef} src="/assets/m83-midnight-city.mp3" loop crossOrigin="anonymous" />
       <div className="flex items-center">
         {/* Left Side: Album Art & Song Info */}
-        <div className="flex items-center gap-4 flex-1">
-            <div className="relative h-14 w-14 flex-shrink-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="relative h-12 w-12 flex-shrink-0">
                <Image
                 src="https://placehold.co/128x128.png"
-                width={56}
-                height={56}
+                width={48}
+                height={48}
                 alt="Album Art"
                 className="rounded-md aspect-square object-cover"
                 data-ai-hint="album cover"
               />
               <SpectrumVisualizer isPlaying={isPlaying} />
             </div>
-             <div className="text-left overflow-hidden">
-                <p className="font-semibold truncate">Midnight City</p>
-                <p className="text-sm text-muted-foreground truncate">M83</p>
+             <div className="text-left overflow-hidden hidden sm:block">
+                <p className="font-semibold truncate text-sm">Midnight City</p>
+                <p className="text-xs text-muted-foreground truncate">M83</p>
             </div>
         </div>
 
         {/* Right Side: Simplified Controls */}
-        <div className="flex items-center justify-end gap-2">
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+        <div className="flex items-center justify-end gap-1">
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hidden sm:inline-flex">
                 <Laptop2 className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
@@ -127,15 +127,12 @@ export function MusicPlayer() {
             <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-10 w-10"
                 onClick={() => setIsPlaying(!isPlaying)}
             >
                 {isPlaying ? <Pause className="h-6 w-6 fill-current" /> : <Play className="h-6 w-6 ml-1 fill-current" />}
             </Button>
         </div>
-      </div>
-      <div className="pt-2">
-        <Slider defaultValue={[33]} max={100} step={1} />
       </div>
     </footer>
   );
