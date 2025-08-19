@@ -3,6 +3,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Palette, PlayCircle, Bell } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -18,14 +19,17 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
     {
       title: "Customization",
       href: "/settings/customization",
+      icon: Palette,
     },
     {
       title: "Playback",
       href: "/settings/playback",
+      icon: PlayCircle,
     },
     {
       title: "Notifications",
       href: "/settings/notifications",
+      icon: Bell,
     },
   ]
 
@@ -56,6 +60,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
                   "justify-start"
                 )}
               >
+                <item.icon className="mr-2 h-4 w-4" />
                 {item.title}
               </Link>
             ))}
