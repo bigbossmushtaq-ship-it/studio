@@ -1,0 +1,50 @@
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rgb-border-bg {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+}
+
+.rgb-border-bg::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    #ff0000,
+    #ff7f00,
+    #ffff00,
+    #00ff00,
+    #0000ff,
+    #4b0082,
+    #8b00ff,
+    #ff0000
+  );
+  animation: rotate 4s linear infinite;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.rgb-border-bg-paused::before {
+    animation-play-state: paused;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.rgb-border-content {
+  position: relative;
+  z-index: 2;
+  background-color: hsl(var(--card));
+  border-radius: 9999px;
+}

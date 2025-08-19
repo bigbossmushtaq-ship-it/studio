@@ -10,7 +10,6 @@ import {
   LogOut,
   Search,
   Upload,
-  User,
   Settings,
   Bell,
 } from "lucide-react";
@@ -29,10 +28,12 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/icons/logo";
 import { MusicPlayer } from "@/components/music-player";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { MusicAvatar } from "@/components/music-avatar";
+import { useMusicPlayer } from "@/hooks/use-music-player";
+
 
 function SidebarNav() {
   const pathname = usePathname();
@@ -124,7 +125,7 @@ const BottomNavBar = () => {
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const [profilePic, setProfilePic] = React.useState("https://placehold.co/200x200.png");
+  const { profilePic, setProfilePic, isPlaying } = useMusicPlayer();
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -144,23 +145,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarContent className="flex flex-col p-4">
-              {/* Profile section at the top and centered */}
               <div className="flex flex-col items-center py-4 border-b w-full">
-                  <Avatar className="w-20 h-20 mb-4">
-                    <AvatarImage src={profilePic} alt="Profile" />
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
-                  <Button asChild size="sm" className="rounded-full text-xs h-8">
-                    <label className="cursor-pointer">
-                      Change Picture
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageChange}
-                      />
-                    </label>
-                  </Button>
+                  <MusicAvatar isPlaying={isPlaying} size="lg" src={profilePic} />
+                  <div className="mt-4">
+                    <Button asChild size="sm" className="rounded-full text-xs h-8">
+                      <label className="cursor-pointer">
+                        Change Picture
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageChange}
+                        />
+                      </label>
+                    </Button>
+                  </div>
                 </div>
               
               <div className="w-full mt-4">
@@ -183,20 +182,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
               <SidebarTrigger className="md:hidden">
-                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={profilePic} alt="User" />
-                  <AvatarFallback>U</AvatarFallback>
-                </Avatar>
+                 <MusicAvatar isPlaying={isPlaying} src={profilePic} />
               </SidebarTrigger>
               <div className="flex-1">
                 {/* Header content like search bar can go here */}
               </div>
               <div className="hidden md:flex">
                  <SidebarTrigger>
-                    <Avatar className="h-8 w-8 cursor-pointer">
-                      <AvatarImage src={profilePic} alt="User" />
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
+                    <MusicAvatar isPlaying={isPlaying} src={profilePic} />
                 </SidebarTrigger>
               </div>
             </header>

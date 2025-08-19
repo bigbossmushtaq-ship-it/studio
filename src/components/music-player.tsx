@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -19,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useMusicPlayer } from "@/hooks/use-music-player";
 
 
 const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
@@ -65,7 +67,7 @@ const SpectrumVisualizer = ({ isPlaying }: { isPlaying: boolean }) => {
 
 
 export function MusicPlayer() {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { isPlaying, setIsPlaying } = useMusicPlayer();
   const [isLiked, setIsLiked] = useState(false);
 
   return (
