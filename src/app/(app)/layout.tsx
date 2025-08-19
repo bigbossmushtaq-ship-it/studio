@@ -16,6 +16,7 @@ import {
   User,
   ArrowLeft,
   Pencil,
+  Plus,
 } from "lucide-react";
 import {
   Sidebar,
@@ -40,6 +41,7 @@ import { useApp } from "@/hooks/use-app";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { SpotifyLogo } from "@/components/icons/spotify-logo";
 
 
 function SidebarNav() {
@@ -112,23 +114,27 @@ const BottomNavBar = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-20 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t z-30 md:hidden">
       <div className="flex justify-around h-16 items-center">
         <Link href="/home" className={`flex flex-col items-center gap-1 ${isActive('/home') ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Home />
+          <Home className="h-6 w-6" />
           <span className="text-xs">Home</span>
         </Link>
          <Link href="/search" className={`flex flex-col items-center gap-1 ${isActive('/search') ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Search />
+          <Search className="h-6 w-6" />
           <span className="text-xs">Search</span>
         </Link>
-         <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Upload />
-          <span className="text-xs">Upload</span>
-        </Link>
         <Link href="/library" className={`flex flex-col items-center gap-1 ${isActive('/library') ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Library />
-          <span className="text-xs">Library</span>
+          <Library className="h-6 w-6" />
+          <span className="text-xs">Your Library</span>
+        </Link>
+        <Link href="#" className={`flex flex-col items-center gap-1 text-muted-foreground`}>
+          <SpotifyLogo className="h-6 w-6" />
+          <span className="text-xs">Premium</span>
+        </Link>
+         <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Plus className="h-6 w-6" />
+          <span className="text-xs">Create</span>
         </Link>
       </div>
     </div>
@@ -234,11 +240,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarInset>
         </div>
         {!isSettingsPage && (
-           <div className="fixed bottom-0 w-full z-40 md:bottom-2 md:left-auto md:right-2 md:w-auto md:pl-[3rem] group-data-[state=expanded]:md:pl-[16rem] transition-all duration-200 ease-linear">
-              <div className="md:px-2">
-                  <MusicPlayer />
-              </div>
-            </div>
+           <div className="fixed bottom-[63px] md:bottom-2 left-0 right-0 md:left-auto md:right-2 w-full md:w-[calc(100%-4rem)] group-data-[state=expanded]:md:w-[calc(100%-17rem)] z-40 transition-all duration-200 ease-linear">
+             <div className="p-2 md:p-0">
+               <MusicPlayer />
+             </div>
+           </div>
         )}
          {!isSettingsPage && <BottomNavBar />}
       </div>
