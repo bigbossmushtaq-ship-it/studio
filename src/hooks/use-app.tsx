@@ -13,6 +13,8 @@ interface AppContextType {
   // User State
   username: string;
   setUsername: (username: string) => void;
+  email: string;
+  setEmail: (email: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -25,6 +27,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   // User State
   const [username, setUsername] = useState("your_username");
+  const [email, setEmail] = useState("novamusic0987@gmail.com");
 
 
   const setAudioRef = (ref: React.RefObject<HTMLAudioElement>) => {
@@ -40,6 +43,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setAudioRef,
     username,
     setUsername,
+    email,
+    setEmail
   };
 
   return (

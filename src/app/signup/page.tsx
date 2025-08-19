@@ -14,12 +14,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons/logo';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
+import { useApp } from '@/hooks/use-app';
 
 export default function SignupPage() {
   const router = useRouter();
+  const { setEmail } = useApp();
+  const [emailInput, setEmailInput] = React.useState('');
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
+    setEmail(emailInput);
     router.push('/choose-username');
   };
 
@@ -57,6 +62,8 @@ export default function SignupPage() {
                   type="email"
                   placeholder="m@example.com"
                   required
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">

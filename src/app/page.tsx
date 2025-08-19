@@ -13,11 +13,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons/logo';
 import { useRouter } from 'next/navigation';
+import * as React from 'react';
+import { useApp } from '@/hooks/use-app';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setEmail, setUsername } = useApp();
+  const [emailInput, setEmailInput] = React.useState('');
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    // In a real app, you'd check if it's an email or username
+    // For this prototype, we'll assume it's an email if it contains '@'
+    if (emailInput.includes('@')) {
+      setEmail(emailInput);
+    } else {
+      setUsername(emailInput);
+      // You might want to fetch the associated email or handle this differently
+      setEmail('user@example.com'); // Placeholder for non-email login
+    }
     router.push('/home');
   };
 
@@ -43,6 +57,8 @@ export default function LoginPage() {
                   type="text"
                   placeholder="m@example.com or your_username"
                   required
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
