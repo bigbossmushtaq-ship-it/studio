@@ -5,15 +5,13 @@ import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ClipboardCopy, Pencil } from "lucide-react";
+import { ExternalLink, ClipboardCopy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/hooks/use-app";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function AccountSettingsPage() {
-  const { username, email, profilePic, setProfilePic } = useApp();
+  const { username, email } = useApp();
   const { toast } = useToast();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(username);
@@ -22,43 +20,9 @@ export default function AccountSettingsPage() {
       description: "Username copied to clipboard.",
     });
   };
-  
-  const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePic(reader.result as string);
-        toast({
-            title: "Success!",
-            description: "Profile picture updated.",
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
 
   return (
       <div className="space-y-8">
-        <Card>
-           <CardHeader>
-            <CardTitle>Profile Picture</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4">
-            <Avatar className="h-32 w-32">
-              <AvatarImage src={profilePic} alt="Profile Picture" />
-              <AvatarFallback>{username?.[0]?.toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <input type="file" ref={fileInputRef} onChange={handleProfilePicChange} className="hidden" accept="image/*" />
-            <Button onClick={handleUploadClick}>
-              <Pencil className="mr-2 h-4 w-4" /> Change your profile pic
-            </Button>
-          </CardContent>
-        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Account Details</CardTitle>
