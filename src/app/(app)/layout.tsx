@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from "react";
@@ -136,7 +135,7 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
-  const { username } = useApp();
+  const { username, profilePic } = useApp();
   const pathname = usePathname();
   const router = useRouter();
   const isActive = (path: string) => pathname.startsWith(path);
@@ -154,7 +153,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="flex overflow-hidden">
           <Sidebar>
             <SidebarContent className="flex flex-col p-2">
-               <div className="w-full mt-4">
+               <SidebarHeader className="flex items-center justify-center p-4">
+                  <MusicAvatar size={64} ringWidth={4}/>
+               </SidebarHeader>
+               <div className="w-full">
                 <SidebarNav />
               </div>
 
@@ -171,9 +173,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
                  <SidebarSeparator />
                  <div className="flex items-center justify-between p-2">
-                    <Avatar>
-                      <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                     <p className="font-semibold truncate">{username}</p>
                     <Button variant="destructive" size="sm" asChild>
                       <Link href="/"><LogOut className="mr-2"/>Logout</Link>
                     </Button>

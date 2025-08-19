@@ -2,16 +2,18 @@
 "use client"
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ClipboardCopy } from "lucide-react";
+import { ExternalLink, ClipboardCopy, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/hooks/use-app";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function AccountSettingsPage() {
-  const { username, email } = useApp();
+  const { username, email, profilePic, setProfilePic } = useApp();
   const { toast } = useToast();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(username);
@@ -20,9 +22,46 @@ export default function AccountSettingsPage() {
       description: "Username copied to clipboard.",
     });
   };
+  
+  const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result as string);
+        toast({
+            title: "Success!",
+            description: "Profile picture updated.",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
       <div className="space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile Picture</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center gap-6">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={profilePic} alt={username} />
+              <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
+             <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleProfilePicChange} 
+              className="hidden"
+              accept="image/*"
+            />
+            <Button onClick={() => fileInputRef.current?.click()}>
+              <Pencil className="mr-2 h-4 w-4"/>
+              Upload
+            </Button>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Account Details</CardTitle>
