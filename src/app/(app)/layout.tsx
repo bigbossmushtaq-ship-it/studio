@@ -177,7 +177,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarInset className="flex flex-col">
             <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
               <SidebarTrigger asChild className="md:hidden">
-                <Avatar className="h-8 w-8">
+                 <Avatar className="h-8 w-8">
                   <AvatarImage src={profilePic} alt="User" />
                   <AvatarFallback>U</AvatarFallback>
                 </Avatar>
