@@ -14,8 +14,6 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
   useEffect(() => {
     const setupAudioContext = () => {
       if (isPlaying && audioRef?.current && !audioContextRef.current) {
-        // A new AudioContext can only be created after a user gesture.
-        // We assume the gesture to start playing music has already happened.
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         audioContextRef.current = ctx;
 
@@ -26,11 +24,9 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
           analyserRef.current = analyser;
 
           source.connect(analyser);
-          analyser.connect(ctx.destination); // Connect analyser to destination to hear audio
+          analyser.connect(ctx.destination);
         } catch (e) {
-          // If the source is already connected, it will throw an error.
           if (e instanceof DOMException && e.name === 'InvalidStateError') {
-             // We can safely ignore this error if an analyser is already set up.
              if (!analyserRef.current) {
                 const analyser = ctx.createAnalyser();
                 analyser.fftSize = 512;
@@ -39,7 +35,7 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
              }
           } else {
             console.error("Error setting up audio context:", e)
-            return; // Exit if there's a different error
+            return; 
           }
         }
 
