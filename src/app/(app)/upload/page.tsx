@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -173,7 +172,7 @@ export default function UploadPage() {
 
     try {
       // 1. Upload Album Art
-      const albumArtPath = `album-art/${user.id}/${uuidv4()}`;
+      const albumArtPath = `public/${uuidv4()}`;
       const { error: albumArtError } = await supabase.storage
         .from('album-art')
         .upload(albumArtPath, albumArtFile);
@@ -182,7 +181,7 @@ export default function UploadPage() {
       if (!albumArtUrl) throw new Error('Could not get public URL for album art.');
 
       // 2. Upload Song File
-      const songPath = `songs/${user.id}/${uuidv4()}`;
+      const songPath = `public/${uuidv4()}`;
       const { error: songError } = await supabase.storage
         .from('songs')
         .upload(songPath, songFile);
@@ -364,3 +363,4 @@ export default function UploadPage() {
   );
 }
 
+    
