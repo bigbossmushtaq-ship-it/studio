@@ -69,10 +69,12 @@ export default function UploadPage() {
         .eq('uploaded_by', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
       setSongs(data as Song[]);
     } catch (error: any) {
-      console.error("Error fetching songs:", error);
+      console.error("Error fetching songs:", error.message);
       toast({
         variant: 'destructive',
         title: "Failed to load songs",
@@ -362,5 +364,3 @@ export default function UploadPage() {
     </div>
   );
 }
-
-    
