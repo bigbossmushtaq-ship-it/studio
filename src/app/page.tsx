@@ -13,56 +13,54 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons/logo';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
+import { useApp } from '@/hooks/use-app';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 export default function AuthPage() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
   const [isLogin, setIsLogin] = React.useState(true);
+  const { login, signup, loading, error, session } = useApp();
   const { toast } = useToast();
   const router = useRouter();
 
+  React.useEffect(() => {
+    if (session) {
+      router.replace('/home');
+    }
+  }, [session, router]);
+  
+  React.useEffect(() => {
+    if (error) {
+       toast({
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: error,
+      });
+    }
+  }, [error, toast]);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      if (isLogin) {
-        // LOGIN
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+    let result;
+    if (isLogin) {
+      result = await login(email, password);
+      if(result.success) {
         toast({
           title: 'Login successful!',
           description: 'Welcome back.',
         });
-        router.push('/home');
-      } else {
-        // SIGNUP
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
+      }
+    } else {
+      result = await signup(email, password);
+       if(result.success) {
         toast({
           title: 'Signup successful!',
           description: 'Please check your email to confirm your account.',
         });
       }
-    } catch (err: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication Error',
-        description: err.message,
-      });
-    } finally {
-      setLoading(false);
     }
   };
 

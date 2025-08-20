@@ -138,22 +138,15 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
-  const { username, setProfilePic, logout, session } = useApp();
+  const { username, setProfilePic, logout, session, loading } = useApp();
   const pathname = usePathname();
   const router = useRouter();
-  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
 
   React.useEffect(() => {
-    // Wait for session to be determined
-    if (session === undefined) return;
-    
-    if (!session) {
+    if (!loading && !session) {
       router.replace('/');
-    } else {
-      setIsCheckingAuth(false);
     }
-  }, [session, router]);
-  
+  }, [session, loading, router]);
   
   const isActive = (path: string) => pathname.startsWith(path);
   const isSettingsPage = pathname.startsWith('/settings');
@@ -190,7 +183,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     '--accent': customColors.accent,
   } as React.CSSProperties : {};
   
-  if (isCheckingAuth) {
+  if (loading || !session) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

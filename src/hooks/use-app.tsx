@@ -16,6 +16,10 @@ interface AppContextType {
   session: Session | null;
   user: User | null;
   username: string;
+  loading: boolean;
+  error: string | null;
+  login: (email: string, pass: string) => Promise<{success: boolean}>;
+  signup: (email: string, pass: string) => Promise<{success: boolean}>;
   logout: () => Promise<void>;
 }
 
@@ -31,8 +35,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState("Guest");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const getSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+            setUsername(session.user.email?.split('@')[0] || 'User');
+        }
+        setLoading(false);
+    };
+
+    getSession();
+
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -41,23 +59,37 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUsername('Guest');
       }
+      setLoading(false);
     });
-
-    // Fetch initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-           setUsername(session.user.email?.split('@')[0] || 'User');
-        } else {
-           setUsername('Guest');
-        }
-    })
 
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
+  
+  const login = async (email: string, pass: string) => {
+      setLoading(true);
+      setError(null);
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return { success: false };
+      }
+      return { success: true };
+  }
+  
+  const signup = async (email: string, pass: string) => {
+      setLoading(true);
+      setError(null);
+      const { error } = await supabase.auth.signUp({ email, password: pass });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return { success: false };
+      }
+      return { success: true };
+  }
   
   const setProfilePic = (url: string) => {
     setProfilePicState(url);
@@ -66,8 +98,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const logout = async () => {
     await supabase.auth.signOut();
-    setSession(null);
-    setUser(null);
   }
 
   const setAudioRef = (ref: React.RefObject<HTMLAudioElement>) => {
@@ -84,6 +114,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     session,
     user,
     username,
+    loading,
+    error,
+    login,
+    signup,
     logout,
   };
 

@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, Loader2, CheckCircle2 } from "lucide-react";
-import { suggestTheme } from '@/ai/flows/theme-suggestion';
-import { suggestGenre } from '@/ai/flows/genre-suggestion';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from "@/lib/supabase";
 import Image from 'next/image';
@@ -53,16 +51,17 @@ export default function UploadPage() {
 
   // UI State
   const [isSaving, setIsSaving] = React.useState(false);
-  const [isSuggesting, setIsSuggesting] = React.useState(false);
 
   // Display State
   const [songs, setSongs] = React.useState<Song[]>([]);
 
   const fetchSongs = React.useCallback(async () => {
+    if (!user) return;
     try {
       const { data, error } = await supabase
         .from('songs')
         .select('*')
+        .eq('uploaded_by', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -72,53 +71,22 @@ export default function UploadPage() {
       toast({
         variant: 'destructive',
         title: "Failed to load songs",
-        description: "Could not retrieve the song library. Please try again later.",
+        description: "Could not retrieve your song library. Please try again later.",
       });
     }
-  }, [toast]);
+  }, [user, toast]);
 
   React.useEffect(() => {
     fetchSongs();
   }, [fetchSongs]);
 
 
-  const handleSongFileChange = React.useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSongFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     setSongFile(file);
     setErrors(p => ({...p, songFile: false}));
-    setIsSuggesting(true);
-
-    try {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const dataUri = e.target?.result as string;
-        try {
-          const [themeResult, genreResult] = await Promise.all([
-            suggestTheme({ songDataUri: dataUri }),
-            suggestGenre({ songDataUri: dataUri })
-          ]);
-          setTheme(themeResult.theme);
-          setGenre(genreResult.genre);
-          setErrors(p => ({...p, genre: false}));
-        } catch (aiError) {
-           console.error("Error suggesting theme or genre:", aiError);
-           toast({
-             variant: 'destructive',
-             title: "AI Suggestion failed",
-             description: "Could not analyze the song. Please enter theme and genre manually.",
-           });
-        } finally {
-          setIsSuggesting(false);
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch (readError) {
-      console.error("Error reading file:", readError);
-      setIsSuggesting(false);
-    }
-  }, [toast]);
+  };
   
   const handleAlbumArtChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -144,7 +112,7 @@ export default function UploadPage() {
       toast({
         variant: 'destructive',
         title: "Missing Information",
-        description: "Please fill out all required fields, select files, and ensure you are logged in.",
+        description: "Please fill out all required fields and select both files.",
       });
       return;
     }
@@ -153,7 +121,7 @@ export default function UploadPage() {
 
     try {
       // 1. Upload Album Art
-      const albumArtPath = `public/${user.id}-${Date.now()}-${albumArtFile.name}`;
+      const albumArtPath = `album-art/${user.id}-${Date.now()}-${albumArtFile.name}`;
       const { error: albumArtError } = await supabase.storage
         .from('album-art')
         .upload(albumArtPath, albumArtFile);
@@ -162,7 +130,7 @@ export default function UploadPage() {
       if (!albumArtUrl) throw new Error('Could not get public URL for album art.');
 
       // 2. Upload Song File
-      const songPath = `public/${user.id}-${Date.now()}-${songFile.name}`;
+      const songPath = `songs/${user.id}-${Date.now()}-${songFile.name}`;
       const { error: songError } = await supabase.storage
         .from('songs')
         .upload(songPath, songFile);
@@ -201,7 +169,8 @@ export default function UploadPage() {
       setSongFile(null);
       setAlbumArtFile(null);
       setErrors({});
-      fetchSongs();
+      // Refetch songs to update the list
+      fetchSongs(); 
     } catch (error: any) {
       console.error("Save failed:", error);
       toast({
@@ -237,28 +206,24 @@ export default function UploadPage() {
               <Label htmlFor="album" className={cn(errors.album && "text-destructive")}>Album</Label>
               <Input id="album" placeholder="Enter album name" value={album} onChange={(e) => {setAlbum(e.target.value); setErrors(p => ({...p, album: false}))}} className={cn(errors.album && "border-destructive focus-visible:ring-destructive")}/>
             </div>
-            <div className="relative space-y-2">
-              <Label htmlFor="genre" className={cn(errors.genre && "text-destructive")}>Genre (AI Suggested)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="genre" className={cn(errors.genre && "text-destructive")}>Genre</Label>
                <Input 
                 id="genre" 
-                placeholder={isSuggesting ? "Analyzing song..." : "e.g. Pop, Rock"} 
+                placeholder="e.g. Pop, Rock" 
                 value={genre}
                 onChange={(e) => {setGenre(e.target.value); setErrors(p => ({...p, genre: false}))}}
-                disabled={isSuggesting}
                 className={cn(errors.genre && "border-destructive focus-visible:ring-destructive")}
               />
-               {isSuggesting && <Loader2 className="absolute right-3 top-8 h-5 w-5 animate-spin" />}
             </div>
-             <div className="relative space-y-2">
-              <Label htmlFor="theme">Theme (AI Suggested)</Label>
+             <div className="space-y-2">
+              <Label htmlFor="theme">Theme</Label>
               <Input 
                 id="theme" 
-                placeholder={isSuggesting ? "Analyzing song..." : "e.g. Energetic, Relaxing"} 
+                placeholder="e.g. Energetic, Relaxing" 
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
-                disabled={isSuggesting}
               />
-               {isSuggesting && <Loader2 className="absolute right-3 top-8 h-5 w-5 animate-spin" />}
             </div>
           </div>
           
@@ -295,7 +260,7 @@ export default function UploadPage() {
           <div className="flex justify-end">
             <Button 
               onClick={handleSaveSong} 
-              disabled={isSaving || isSuggesting}
+              disabled={isSaving}
             >
               {isSaving ? (
                 <>
@@ -311,7 +276,7 @@ export default function UploadPage() {
       <div>
         <h2 className="text-2xl font-bold tracking-tight mb-4">Uploaded Songs</h2>
         {songs.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {songs.map((song) => (
               <Card key={song.id} className="p-4 flex flex-col">
                 <Image
