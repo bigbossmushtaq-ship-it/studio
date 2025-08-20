@@ -140,7 +140,7 @@ export default function UploadPage() {
   }
 
   const handleSaveSong = async () => {
-    if (!validateForm()) {
+    if (!validateForm() || !songFile || !albumArtFile) {
       toast({
         variant: 'destructive',
         title: "Missing Information",
@@ -153,22 +153,29 @@ export default function UploadPage() {
 
     try {
       // 1. Upload Album Art
-      const albumArtPath = `public/${username}-${Date.now()}-${albumArtFile!.name}`;
-      const { error: albumArtError } = await supabase.storage.from('album-art').upload(albumArtPath, albumArtFile!, {
-        cacheControl: '3600',
-        upsert: false,
-      });
+      const albumArtPath = `public/${username}-${Date.now()}-${albumArtFile.name}`;
+      const { error: albumArtError } = await supabase.storage
+        .from('album-art')
+        .upload(albumArtPath, albumArtFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
       if (albumArtError) throw new Error(`Album Art Upload Failed: ${albumArtError.message}`);
       const { data: { publicUrl: albumArtUrl } } = supabase.storage.from('album-art').getPublicUrl(albumArtPath);
+      if (!albumArtUrl) throw new Error('Could not get public URL for album art.');
 
       // 2. Upload Song File
-      const songPath = `public/${username}-${Date.now()}-${songFile!.name}`;
-      const { error: songError } = await supabase.storage.from('songs').upload(songPath, songFile!, {
-        cacheControl: '3600',
-        upsert: false,
-      });
+      const songPath = `public/${username}-${Date.now()}-${songFile.name}`;
+      const { error: songError } = await supabase.storage
+        .from('songs')
+        .upload(songPath, songFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
       if (songError) throw new Error(`Song Upload Failed: ${songError.message}`);
       const { data: { publicUrl: songUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
+       if (!songUrl) throw new Error('Could not get public URL for song.');
+
 
       // 3. Save metadata to database
       const { error: insertError } = await supabase
