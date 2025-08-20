@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, Loader2, File, Music } from "lucide-react";
+import { UploadCloud, Loader2, File, Music, CheckCircle2, AlertCircle } from "lucide-react";
 import { suggestTheme } from '@/ai/flows/theme-suggestion';
 import { suggestGenre } from '@/ai/flows/genre-suggestion';
 import { useToast } from '@/hooks/use-toast';
@@ -30,9 +30,9 @@ type FormErrors = {
   artist?: boolean;
   album?: boolean;
   genre?: boolean;
-  songFile?: boolean;
-  albumArtFile?: boolean;
 }
+
+type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 
 export default function UploadPage() {
   const { toast } = useToast();
@@ -43,13 +43,19 @@ export default function UploadPage() {
   const [album, setAlbum] = React.useState('');
   const [genre, setGenre] = React.useState('');
   const [theme, setTheme] = React.useState('');
-  const [songFile, setSongFile] = React.useState<File | null>(null);
-  const [albumArtFile, setAlbumArtFile] = React.useState<File | null>(null);
   const [errors, setErrors] = React.useState<FormErrors>({});
   
+  // File and URL State
+  const [songFile, setSongFile] = React.useState<File | null>(null);
+  const [albumArtFile, setAlbumArtFile] = React.useState<File | null>(null);
+  const [songUrl, setSongUrl] = React.useState<string | null>(null);
+  const [albumArtUrl, setAlbumArtUrl] = React.useState<string | null>(null);
+
   // UI State
-  const [isUploading, setIsUploading] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
   const [isSuggesting, setIsSuggesting] = React.useState(false);
+  const [songUploadStatus, setSongUploadStatus] = React.useState<UploadStatus>('idle');
+  const [albumArtUploadStatus, setAlbumArtUploadStatus] = React.useState<UploadStatus>('idle');
 
   // Display State
   const [songs, setSongs] = React.useState<Song[]>([]);
@@ -80,51 +86,83 @@ export default function UploadPage() {
 
   const handleSongFileChange = React.useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setSongFile(file);
-      setErrors(prev => ({...prev, songFile: false}));
-      setIsSuggesting(true);
-      try {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const dataUri = e.target?.result as string;
-          try {
-            const [themeResult, genreResult] = await Promise.all([
-              suggestTheme({ songDataUri: dataUri }),
-              suggestGenre({ songDataUri: dataUri })
-            ]);
-            setTheme(themeResult.theme);
-            setGenre(genreResult.genre);
-            setErrors(p => ({...p, genre: false}));
-          } catch (error) {
-            console.error("Error suggesting theme or genre:", error);
-            toast({
-              variant: 'destructive',
-              title: "Suggestion failed",
-              description: "Could not analyze the song. Please enter theme and genre manually.",
-            });
-          } finally {
-            setIsSuggesting(false);
-          }
-        };
-        reader.readAsDataURL(file);
-      } catch (error) {
-        console.error("Error reading file:", error);
-        toast({
-          variant: 'destructive',
-          title: "File reading error",
-          description: "There was a problem reading the selected file.",
-        });
-        setIsSuggesting(false);
-      }
+    if (!file) return;
+
+    setSongFile(file);
+    setSongUploadStatus('uploading');
+    setIsSuggesting(true);
+
+    // AI Suggestions
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUri = e.target?.result as string;
+        try {
+          const [themeResult, genreResult] = await Promise.all([
+            suggestTheme({ songDataUri: dataUri }),
+            suggestGenre({ songDataUri: dataUri })
+          ]);
+          setTheme(themeResult.theme);
+          setGenre(genreResult.genre);
+          setErrors(p => ({...p, genre: false}));
+        } catch (aiError) {
+           console.error("Error suggesting theme or genre:", aiError);
+           toast({
+             variant: 'destructive',
+             title: "AI Suggestion failed",
+             description: "Could not analyze the song. Please enter theme and genre manually.",
+           });
+        } finally {
+          setIsSuggesting(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (readError) {
+      console.error("Error reading file:", readError);
+      setIsSuggesting(false);
+    }
+    
+    // File Upload
+    try {
+      const songPath = `public/${Date.now()}-${file.name}`;
+      const { error: songError } = await supabase.storage.from('songs').upload(songPath, file);
+      if (songError) throw songError;
+      const { data: { publicUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
+      setSongUrl(publicUrl);
+      setSongUploadStatus('success');
+    } catch (uploadError: any) {
+      setSongUploadStatus('error');
+      console.error("Song upload failed:", uploadError);
+      toast({
+        variant: 'destructive',
+        title: "Song Upload Failed",
+        description: uploadError.message || "Could not upload the song file.",
+      });
     }
   }, [toast]);
   
-  const handleAlbumArtChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAlbumArtChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if(file) {
-      setAlbumArtFile(file);
-      setErrors(prev => ({...prev, albumArtFile: false}));
+    if(!file) return;
+
+    setAlbumArtFile(file);
+    setAlbumArtUploadStatus('uploading');
+
+    try {
+      const albumArtPath = `public/${Date.now()}-${file.name}`;
+      const { error: albumArtError } = await supabase.storage.from('album-art').upload(albumArtPath, file);
+      if (albumArtError) throw albumArtError;
+      const { data: { publicUrl } } = supabase.storage.from('album-art').getPublicUrl(albumArtPath);
+      setAlbumArtUrl(publicUrl);
+      setAlbumArtUploadStatus('success');
+    } catch (uploadError: any) {
+      setAlbumArtUploadStatus('error');
+      console.error("Album art upload failed:", uploadError);
+      toast({
+        variant: 'destructive',
+        title: "Album Art Upload Failed",
+        description: uploadError.message || "Could not upload the album art.",
+      });
     }
   }
 
@@ -134,38 +172,23 @@ export default function UploadPage() {
     if (!artist) newErrors.artist = true;
     if (!album) newErrors.album = true;
     if (!genre) newErrors.genre = true;
-    if (!songFile) newErrors.songFile = true;
-    if (!albumArtFile) newErrors.albumArtFile = true;
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
 
-  const handleUpload = async () => {
-    if (!validateForm() || !songFile || !albumArtFile) {
+  const handleSaveSong = async () => {
+    if (!validateForm() || !songUrl || !albumArtUrl) {
       toast({
         variant: 'destructive',
         title: "Missing Information",
-        description: "Please fill out all highlighted fields.",
+        description: "Please fill out all fields and ensure files are uploaded.",
       });
       return;
     }
 
-    setIsUploading(true);
+    setIsSaving(true);
 
     try {
-      // 1. Upload Album Art
-      const albumArtPath = `public/${Date.now()}-${albumArtFile.name}`;
-      const { error: albumArtError } = await supabase.storage.from('album-art').upload(albumArtPath, albumArtFile);
-      if (albumArtError) throw albumArtError;
-      const { data: { publicUrl: albumArtUrl } } = supabase.storage.from('album-art').getPublicUrl(albumArtPath);
-
-      // 2. Upload Song File
-      const songPath = `public/${Date.now()}-${songFile.name}`;
-      const { error: songError } = await supabase.storage.from('songs').upload(songPath, songFile);
-      if (songError) throw songError;
-      const { data: { publicUrl: songUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
-
-      // 3. Save metadata to Supabase table
       const { error: insertError } = await supabase
         .from('songs')
         .insert({
@@ -181,7 +204,7 @@ export default function UploadPage() {
       if (insertError) throw insertError;
       
       toast({
-        title: "Upload Successful!",
+        title: "Save Successful!",
         description: `${title} by ${artist} has been added to your library.`,
       });
 
@@ -193,20 +216,37 @@ export default function UploadPage() {
       setTheme('');
       setSongFile(null);
       setAlbumArtFile(null);
+      setSongUrl(null);
+      setAlbumArtUrl(null);
+      setSongUploadStatus('idle');
+      setAlbumArtUploadStatus('idle');
       setErrors({});
       fetchSongs();
     } catch (error: any) {
-      console.error("Upload failed:", error);
+      console.error("Save failed:", error);
       toast({
         variant: 'destructive',
-        title: "Upload Failed",
-        description: error.message || "There was an error uploading your song. Please try again.",
+        title: "Save Failed",
+        description: error.message || "There was an error saving your song. Please try again.",
       });
     } finally {
-      setIsUploading(false);
+      setIsSaving(false);
     }
   };
 
+  const renderUploadStatus = (status: UploadStatus, fileName: string | null, type: 'song' | 'art') => {
+      const iconClass = "w-8 h-8 mb-2";
+      if (status === 'uploading') {
+        return <div className="flex flex-col items-center justify-center"><Loader2 className={`${iconClass} animate-spin`} /><p className="text-sm">Uploading...</p></div>;
+      }
+      if (status === 'success' && fileName) {
+        return <div className="flex flex-col items-center justify-center text-center"><CheckCircle2 className={`${iconClass} text-green-500`} /><p className="font-semibold text-foreground truncate max-w-full px-4">{fileName}</p></div>
+      }
+      if (status === 'error') {
+          return <div className="flex flex-col items-center justify-center text-center"><AlertCircle className={`${iconClass} text-destructive`} /><p className="text-sm text-destructive">Upload failed</p></div>
+      }
+      return <div className="flex flex-col items-center justify-center"><UploadCloud className={iconClass} /><p className="text-sm"><span className="font-semibold">Click to upload</span> or drag & drop</p></div>
+  }
 
   return (
     <div className="space-y-8">
@@ -258,63 +298,39 @@ export default function UploadPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className={cn(errors.albumArtFile && "text-destructive")}>Album Art</Label>
+              <Label className={cn(albumArtUploadStatus === 'error' && "text-destructive")}>Album Art</Label>
               <label
                 htmlFor="album-art-upload"
-                className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", errors.albumArtFile && "border-destructive text-destructive")}
+                className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", albumArtUploadStatus === 'error' && "border-destructive text-destructive", albumArtUploadStatus === 'uploading' && "cursor-not-allowed", albumArtUploadStatus === 'success' && "border-green-500")}
               >
-                {albumArtFile ? (
-                   <div className="flex flex-col items-center justify-center text-center">
-                     <File className="w-8 h-8 mb-2 text-primary" />
-                     <p className="font-semibold text-foreground truncate max-w-full px-4">{albumArtFile.name}</p>
-                   </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center">
-                    <UploadCloud className="w-8 h-8 mb-2" />
-                    <p className="text-sm">
-                      <span className="font-semibold">Click to upload</span> or drag & drop
-                    </p>
-                  </div>
-                )}
-                <Input id="album-art-upload" type="file" className="hidden" accept="image/*" onChange={handleAlbumArtChange} />
+                {renderUploadStatus(albumArtUploadStatus, albumArtFile?.name || null, 'art')}
+                <Input id="album-art-upload" type="file" className="hidden" accept="image/*" onChange={handleAlbumArtChange} disabled={albumArtUploadStatus === 'uploading'} />
               </label>
             </div>
 
             <div className="space-y-2">
-              <Label className={cn(errors.songFile && "text-destructive")}>Song File</Label>
+              <Label className={cn(songUploadStatus === 'error' && "text-destructive")}>Song File</Label>
                <label
                   htmlFor="song-file-upload"
-                  className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", errors.songFile && "border-destructive text-destructive")}
+                  className={cn("flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted", songUploadStatus === 'error' && "border-destructive text-destructive", songUploadStatus === 'uploading' && "cursor-not-allowed", songUploadStatus === 'success' && "border-green-500")}
                 >
-                  {songFile ? (
-                     <div className="flex flex-col items-center justify-center text-center">
-                       <Music className="w-8 h-8 mb-2 text-primary" />
-                       <p className="font-semibold text-foreground truncate max-w-full px-4">{songFile.name}</p>
-                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center">
-                      <UploadCloud className="w-8 h-8 mb-2 " />
-                      <p className="text-sm">
-                        <span className="font-semibold">Click to upload</span> or drag & drop
-                      </p>
-                    </div>
-                  )}
-                  <Input id="song-file-upload" type="file" className="hidden" accept="audio/mpeg, audio/wav" onChange={handleSongFileChange} />
+                  {renderUploadStatus(songUploadStatus, songFile?.name || null, 'song')}
+                  <Input id="song-file-upload" type="file" className="hidden" accept="audio/mpeg, audio/wav" onChange={handleSongFileChange} disabled={songUploadStatus === 'uploading'} />
                 </label>
             </div>
           </div>
 
           <div className="flex justify-end">
             <Button 
-              onClick={handleUpload} 
-              disabled={isUploading || isSuggesting || !title || !artist || !album || !genre || !songFile || !albumArtFile}
+              onClick={handleSaveSong} 
+              disabled={isSaving || isSuggesting || !title || !artist || !album || !genre || !songUrl || !albumArtUrl}
             >
-              {isUploading ? (
+              {isSaving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                  Uploading...
+                  Saving...
                 </>
-              ) : 'Upload Song'}
+              ) : 'Save Song to Library'}
             </Button>
           </div>
         </CardContent>
@@ -348,3 +364,5 @@ export default function UploadPage() {
     </div>
   );
 }
+
+    
