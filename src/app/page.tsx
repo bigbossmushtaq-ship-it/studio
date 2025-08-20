@@ -58,7 +58,7 @@ export default function AuthPage() {
        if(result.success) {
         toast({
           title: 'Signup successful!',
-          description: 'Please check your email for a verification link to complete your registration.',
+          description: 'Welcome aboard.',
         });
       }
     }
