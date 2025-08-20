@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, Loader2, File, Music, CheckCircle2, AlertCircle } from "lucide-react";
+import { UploadCloud, Loader2, CheckCircle2 } from "lucide-react";
 import { suggestTheme } from '@/ai/flows/theme-suggestion';
 import { suggestGenre } from '@/ai/flows/genre-suggestion';
 import { useToast } from '@/hooks/use-toast';
@@ -154,13 +154,19 @@ export default function UploadPage() {
     try {
       // 1. Upload Album Art
       const albumArtPath = `public/${username}-${Date.now()}-${albumArtFile!.name}`;
-      const { error: albumArtError } = await supabase.storage.from('album-art').upload(albumArtPath, albumArtFile!);
+      const { error: albumArtError } = await supabase.storage.from('album-art').upload(albumArtPath, albumArtFile!, {
+        cacheControl: '3600',
+        upsert: false,
+      });
       if (albumArtError) throw new Error(`Album Art Upload Failed: ${albumArtError.message}`);
       const { data: { publicUrl: albumArtUrl } } = supabase.storage.from('album-art').getPublicUrl(albumArtPath);
 
       // 2. Upload Song File
       const songPath = `public/${username}-${Date.now()}-${songFile!.name}`;
-      const { error: songError } = await supabase.storage.from('songs').upload(songPath, songFile!);
+      const { error: songError } = await supabase.storage.from('songs').upload(songPath, songFile!, {
+        cacheControl: '3600',
+        upsert: false,
+      });
       if (songError) throw new Error(`Song Upload Failed: ${songError.message}`);
       const { data: { publicUrl: songUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
 
@@ -329,5 +335,3 @@ export default function UploadPage() {
     </div>
   );
 }
-
-    
