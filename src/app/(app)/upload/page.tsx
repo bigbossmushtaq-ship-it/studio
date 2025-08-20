@@ -153,20 +153,19 @@ export default function UploadPage() {
     setIsUploading(true);
 
     try {
-      const songPath = `public/${Date.now()}-${songFile.name}`;
+      // 1. Upload Album Art
       const albumArtPath = `public/${Date.now()}-${albumArtFile.name}`;
-
-      // Upload song file
-      const { error: songError } = await supabase.storage.from('songs').upload(songPath, songFile);
-      if (songError) throw songError;
-      const { data: { publicUrl: songUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
-
-      // Upload album art
       const { error: albumArtError } = await supabase.storage.from('album-art').upload(albumArtPath, albumArtFile);
       if (albumArtError) throw albumArtError;
       const { data: { publicUrl: albumArtUrl } } = supabase.storage.from('album-art').getPublicUrl(albumArtPath);
 
-      // Save metadata to Supabase table
+      // 2. Upload Song File
+      const songPath = `public/${Date.now()}-${songFile.name}`;
+      const { error: songError } = await supabase.storage.from('songs').upload(songPath, songFile);
+      if (songError) throw songError;
+      const { data: { publicUrl: songUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
+
+      // 3. Save metadata to Supabase table
       const { error: insertError } = await supabase
         .from('songs')
         .insert({
