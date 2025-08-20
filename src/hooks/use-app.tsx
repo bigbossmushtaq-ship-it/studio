@@ -82,7 +82,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (email: string, pass: string) => {
       setLoading(true);
       setError(null);
-      const { error } = await supabase.auth.signUp({ email, password: pass });
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password: pass,
+        options: {
+          emailRedirectTo: `${window.location.origin}/home`,
+          data: {
+            channel: 'email'
+          }
+        }
+      });
       if (error) {
         setError(error.message);
         setLoading(false);
