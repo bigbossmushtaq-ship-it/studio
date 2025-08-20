@@ -82,7 +82,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (email: string, pass: string) => {
       setLoading(true);
       setError(null);
-      const { error } = await supabase.auth.signUp({ 
+      const { data, error } = await supabase.auth.signUp({ 
         email, 
         password: pass
       });
@@ -90,6 +90,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setError(error.message);
         setLoading(false);
         return { success: false };
+      }
+      // Manually refresh the session to ensure the user is logged in
+      if (data.session) {
+         await supabase.auth.refreshSession();
       }
       return { success: true };
   }
