@@ -156,10 +156,7 @@ export default function UploadPage() {
       const albumArtPath = `public/${username}-${Date.now()}-${albumArtFile.name}`;
       const { error: albumArtError } = await supabase.storage
         .from('album-art')
-        .upload(albumArtPath, albumArtFile, {
-          cacheControl: '3600',
-          upsert: false,
-        });
+        .upload(albumArtPath, albumArtFile);
       if (albumArtError) throw new Error(`Album Art Upload Failed: ${albumArtError.message}`);
       const { data: { publicUrl: albumArtUrl } } = supabase.storage.from('album-art').getPublicUrl(albumArtPath);
       if (!albumArtUrl) throw new Error('Could not get public URL for album art.');
@@ -168,10 +165,7 @@ export default function UploadPage() {
       const songPath = `public/${username}-${Date.now()}-${songFile.name}`;
       const { error: songError } = await supabase.storage
         .from('songs')
-        .upload(songPath, songFile, {
-          cacheControl: '3600',
-          upsert: false,
-        });
+        .upload(songPath, songFile);
       if (songError) throw new Error(`Song Upload Failed: ${songError.message}`);
       const { data: { publicUrl: songUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
        if (!songUrl) throw new Error('Could not get public URL for song.');
