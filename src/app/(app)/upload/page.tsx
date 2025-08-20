@@ -71,12 +71,12 @@ export default function UploadPage() {
 
       if (error) throw error;
       setSongs(data as Song[]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching songs:", error);
       toast({
         variant: 'destructive',
         title: "Failed to load songs",
-        description: "Could not retrieve your song library. Please try again later.",
+        description: error.message || "Could not retrieve your song library. Please try again later.",
       });
     }
   }, [user, toast]);
