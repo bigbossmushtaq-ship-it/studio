@@ -1,6 +1,7 @@
 
 'use client';
-import Link from 'next/link';
+
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -12,35 +13,57 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons/logo';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import * as React from 'react';
-import { useApp } from '@/hooks/use-app';
 
-export default function LoginPage() {
+export default function AuthPage() {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [isLogin, setIsLogin] = React.useState(true);
+  const { toast } = useToast();
   const router = useRouter();
-  const { setEmail, setUsername, username } = useApp();
-  const [emailInput, setEmailInput] = React.useState('');
 
-  React.useEffect(() => {
-    // If user is already logged in, redirect to home
-    if (username && username !== 'your_username') {
-      router.replace('/home');
-    }
-  }, [username, router]);
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd check if it's an email or username
-    // For this prototype, we'll assume it's an email if it contains '@'
-    if (emailInput.includes('@')) {
-      setEmail(emailInput);
-      setUsername(emailInput.split('@')[0]);
-    } else {
-      setUsername(emailInput);
-      // You might want to fetch the associated email or handle this differently
-      setEmail(`${emailInput}@example.com`); // Placeholder for non-email login
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        // LOGIN
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+        toast({
+          title: 'Login successful!',
+          description: 'Welcome back.',
+        });
+        router.push('/home');
+      } else {
+        // SIGNUP
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        toast({
+          title: 'Signup successful!',
+          description: 'Please check your email to confirm your account.',
+        });
+      }
+    } catch (err: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: err.message,
+      });
+    } finally {
+      setLoading(false);
     }
-    router.push('/home');
   };
 
   return (
@@ -50,50 +73,53 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Logo className="h-12 w-12" />
           </div>
-          <CardTitle className="text-2xl text-center">Login to TuneFlow</CardTitle>
+          <CardTitle className="text-2xl text-center">
+            {isLogin ? 'Login to TuneFlow' : 'Create an Account'}
+          </CardTitle>
           <CardDescription className="text-center">
-            Enter your email or username below to login
+            Enter your credentials to continue
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleAuth}>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email or Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  type="text"
-                  placeholder="m@example.com or your_username"
+                  type="email"
+                  placeholder="m@example.com"
                   required
-                  value={emailInput}
-                  onChange={(e) => setEmailInput(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
                 />
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="#"
-                    className="ml-auto inline-block text-sm underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-                <Input id="password" type="password" required />
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
               </div>
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                Login
-              </Button>
-              <Button variant="outline" className="w-full">
-                Login with Google
+              <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
+                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : isLogin ? 'Login' : 'Sign Up'}
               </Button>
             </div>
           </form>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="underline">
-              Sign up
-            </Link>
+            {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="underline"
+              disabled={loading}
+            >
+              {isLogin ? 'Sign up' : 'Login'}
+            </button>
           </div>
         </CardContent>
       </Card>

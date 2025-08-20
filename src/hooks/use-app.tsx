@@ -1,6 +1,8 @@
 
 "use client"
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { Session, User } from '@supabase/supabase-js';
 
 interface AppContextType {
   // Music Player State
@@ -11,11 +13,10 @@ interface AppContextType {
   audioRef: React.RefObject<HTMLAudioElement> | null;
   setAudioRef: (ref: React.RefObject<HTMLAudioElement>) => void;
   // User State
+  session: Session | null;
+  user: User | null;
   username: string;
-  setUsername: (username: string) => void;
-  email: string;
-  setEmail: (email: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -27,42 +28,46 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [audioRef, setAudioRefState] = useState<React.RefObject<HTMLAudioElement> | null>(null);
 
   // User State
-  const [username, setUsernameState] = useState("your_username");
-  const [email, setEmailState] = useState("novamusic0987@gmail.com");
-  
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState("Guest");
+
   useEffect(() => {
-    const savedUsername = localStorage.getItem('tuneflow_username');
-    const savedEmail = localStorage.getItem('tuneflow_email');
-    const savedProfilePic = localStorage.getItem('tuneflow_profile_pic');
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUsername(session.user.email?.split('@')[0] || 'User');
+      } else {
+        setUsername('Guest');
+      }
+    });
 
-    if (savedUsername) setUsernameState(savedUsername);
-    if (savedEmail) setEmailState(savedEmail);
-    if (savedProfilePic) setProfilePicState(savedProfilePic);
+    // Fetch initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+           setUsername(session.user.email?.split('@')[0] || 'User');
+        } else {
+           setUsername('Guest');
+        }
+    })
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
-
-  const setUsername = (newUsername: string) => {
-    setUsernameState(newUsername);
-    localStorage.setItem('tuneflow_username', newUsername);
-  };
-
-  const setEmail = (newEmail: string) => {
-    setEmailState(newEmail);
-    localStorage.setItem('tuneflow_email', newEmail);
-  };
   
   const setProfilePic = (url: string) => {
     setProfilePicState(url);
-    localStorage.setItem('tuneflow_profile_pic', url);
+    // You might want to save this to user metadata in Supabase
   };
   
-  const logout = () => {
-    setUsernameState('your_username');
-    setEmailState('novamusic0987@gmail.com');
-    setProfilePicState('https://placehold.co/200x200.png');
-    localStorage.removeItem('tuneflow_username');
-    localStorage.removeItem('tuneflow_email');
-    localStorage.removeItem('tuneflow_profile_pic');
-    // No need to redirect here, the button will handle it
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
   }
 
   const setAudioRef = (ref: React.RefObject<HTMLAudioElement>) => {
@@ -76,10 +81,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setProfilePic,
     audioRef,
     setAudioRef,
+    session,
+    user,
     username,
-    setUsername,
-    email,
-    setEmail,
     logout,
   };
 

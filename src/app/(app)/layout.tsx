@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from "react";
@@ -17,6 +16,7 @@ import {
   ArrowLeft,
   Pencil,
   Plus,
+  Loader2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,8 +41,6 @@ import { useApp } from "@/hooks/use-app";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { SpotifyLogo } from "@/components/icons/spotify-logo";
-
 
 function SidebarNav() {
   const pathname = usePathname();
@@ -140,9 +138,23 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
-  const { username, setProfilePic, logout } = useApp();
+  const { username, setProfilePic, logout, session } = useApp();
   const pathname = usePathname();
   const router = useRouter();
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
+
+  React.useEffect(() => {
+    // Wait for session to be determined
+    if (session === undefined) return;
+    
+    if (!session) {
+      router.replace('/');
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [session, router]);
+  
+  
   const isActive = (path: string) => pathname.startsWith(path);
   const isSettingsPage = pathname.startsWith('/settings');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -167,8 +179,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     fileInputRef.current?.click();
   };
   
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push('/');
   }
 
@@ -177,6 +189,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     '--background': customColors.background,
     '--accent': customColors.accent,
   } as React.CSSProperties : {};
+  
+  if (isCheckingAuth) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider defaultOpen>

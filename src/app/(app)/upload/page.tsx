@@ -37,7 +37,7 @@ type FormErrors = {
 
 export default function UploadPage() {
   const { toast } = useToast();
-  const { username } = useApp();
+  const { user } = useApp();
 
   // Form State
   const [title, setTitle] = React.useState('');
@@ -140,11 +140,11 @@ export default function UploadPage() {
   }
 
   const handleSaveSong = async () => {
-    if (!validateForm() || !songFile || !albumArtFile) {
+    if (!validateForm() || !songFile || !albumArtFile || !user) {
       toast({
         variant: 'destructive',
         title: "Missing Information",
-        description: "Please fill out all required fields and select files.",
+        description: "Please fill out all required fields, select files, and ensure you are logged in.",
       });
       return;
     }
@@ -153,7 +153,7 @@ export default function UploadPage() {
 
     try {
       // 1. Upload Album Art
-      const albumArtPath = `public/${username}-${Date.now()}-${albumArtFile.name}`;
+      const albumArtPath = `public/${user.id}-${Date.now()}-${albumArtFile.name}`;
       const { error: albumArtError } = await supabase.storage
         .from('album-art')
         .upload(albumArtPath, albumArtFile);
@@ -162,7 +162,7 @@ export default function UploadPage() {
       if (!albumArtUrl) throw new Error('Could not get public URL for album art.');
 
       // 2. Upload Song File
-      const songPath = `public/${username}-${Date.now()}-${songFile.name}`;
+      const songPath = `public/${user.id}-${Date.now()}-${songFile.name}`;
       const { error: songError } = await supabase.storage
         .from('songs')
         .upload(songPath, songFile);
@@ -182,7 +182,7 @@ export default function UploadPage() {
           theme: theme || 'Not specified',
           song_url: songUrl,
           album_art_url: albumArtUrl,
-          uploaded_by: username
+          uploaded_by: user.id
         });
       
       if (insertError) throw new Error(`Database Save Failed: ${insertError.message}`);

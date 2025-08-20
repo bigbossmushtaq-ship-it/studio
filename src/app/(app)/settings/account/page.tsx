@@ -10,10 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useApp } from "@/hooks/use-app";
 
 export default function AccountSettingsPage() {
-  const { username, email } = useApp();
+  const { username, user } = useApp();
   const { toast } = useToast();
 
   const copyToClipboard = () => {
+    if (!username) return;
     navigator.clipboard.writeText(username);
     toast({
       title: "Copied!",
@@ -38,7 +39,7 @@ export default function AccountSettingsPage() {
              <div className="flex items-center justify-between">
                 <div className="space-y-2">
                     <Label>Email</Label>
-                    <p className="text-muted-foreground">{email}</p>
+                    <p className="text-muted-foreground">{user?.email}</p>
                 </div>
                 <Button variant="ghost" size="icon"><ExternalLink className="h-5 w-5"/></Button>
             </div>
