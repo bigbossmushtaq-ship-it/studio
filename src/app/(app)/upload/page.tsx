@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -6,12 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, Loader2, CheckCircle2 } from "lucide-react";
+import { UploadCloud, Loader2, CheckCircle2, Wand2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from "@/lib/supabase";
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/hooks/use-app';
+import { suggestGenre } from '@/ai/flows/genre-suggestion';
+import { suggestTheme } from '@/ai/flows/theme-suggestion';
+import { v4 as uuidv4 } from 'uuid';
 
 type Song = {
   id: string;
@@ -51,6 +55,8 @@ export default function UploadPage() {
 
   // UI State
   const [isSaving, setIsSaving] = React.useState(false);
+  const [isSuggestingGenre, setIsSuggestingGenre] = React.useState(false);
+  const [isSuggestingTheme, setIsSuggestingTheme] = React.useState(false);
 
   // Display State
   const [songs, setSongs] = React.useState<Song[]>([]);
@@ -106,6 +112,52 @@ export default function UploadPage() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
+  
+  const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleSuggestGenre = async () => {
+    if (!songFile) {
+      toast({ variant: 'destructive', title: 'Please select a song file first.' });
+      return;
+    }
+    setIsSuggestingGenre(true);
+    try {
+      const songDataUri = await fileToDataUri(songFile);
+      const result = await suggestGenre({ songDataUri });
+      setGenre(result.genre);
+    } catch (error) {
+      console.error('Genre suggestion failed:', error);
+      toast({ variant: 'destructive', title: 'Could not suggest a genre.' });
+    } finally {
+      setIsSuggestingGenre(false);
+    }
+  };
+
+  const handleSuggestTheme = async () => {
+    if (!songFile) {
+      toast({ variant: 'destructive', title: 'Please select a song file first.' });
+      return;
+    }
+    setIsSuggestingTheme(true);
+    try {
+      const songDataUri = await fileToDataUri(songFile);
+      const result = await suggestTheme({ songDataUri });
+      setTheme(result.theme);
+    } catch (error) {
+      console.error('Theme suggestion failed:', error);
+      toast({ variant: 'destructive', title: 'Could not suggest a theme.' });
+    } finally {
+      setIsSuggestingTheme(false);
+    }
+  };
+
 
   const handleSaveSong = async () => {
     if (!validateForm() || !songFile || !albumArtFile || !user) {
@@ -121,7 +173,7 @@ export default function UploadPage() {
 
     try {
       // 1. Upload Album Art
-      const albumArtPath = `album-art/${user.id}-${Date.now()}-${albumArtFile.name}`;
+      const albumArtPath = `album-art/${user.id}/${uuidv4()}`;
       const { error: albumArtError } = await supabase.storage
         .from('album-art')
         .upload(albumArtPath, albumArtFile);
@@ -130,7 +182,7 @@ export default function UploadPage() {
       if (!albumArtUrl) throw new Error('Could not get public URL for album art.');
 
       // 2. Upload Song File
-      const songPath = `songs/${user.id}-${Date.now()}-${songFile.name}`;
+      const songPath = `songs/${user.id}/${uuidv4()}`;
       const { error: songError } = await supabase.storage
         .from('songs')
         .upload(songPath, songFile);
@@ -189,7 +241,7 @@ export default function UploadPage() {
         <CardHeader>
           <CardTitle>Upload Song</CardTitle>
           <CardDescription>
-            Add your own music to TuneFlow. It will appear below after upload.
+            Add your own music to TuneFlow. It will appear below after upload. Use the magic wand to get AI-powered suggestions for genre and theme based on the audio.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -208,22 +260,32 @@ export default function UploadPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="genre" className={cn(errors.genre && "text-destructive")}>Genre</Label>
-               <Input 
-                id="genre" 
-                placeholder="e.g. Pop, Rock" 
-                value={genre}
-                onChange={(e) => {setGenre(e.target.value); setErrors(p => ({...p, genre: false}))}}
-                className={cn(errors.genre && "border-destructive focus-visible:ring-destructive")}
-              />
+               <div className="flex gap-2">
+                  <Input 
+                    id="genre" 
+                    placeholder="e.g. Pop, Rock" 
+                    value={genre}
+                    onChange={(e) => {setGenre(e.target.value); setErrors(p => ({...p, genre: false}))}}
+                    className={cn(errors.genre && "border-destructive focus-visible:ring-destructive")}
+                  />
+                  <Button variant="outline" size="icon" onClick={handleSuggestGenre} disabled={isSuggestingGenre || !songFile}>
+                    {isSuggestingGenre ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                  </Button>
+               </div>
             </div>
              <div className="space-y-2">
               <Label htmlFor="theme">Theme</Label>
-              <Input 
-                id="theme" 
-                placeholder="e.g. Energetic, Relaxing" 
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-              />
+               <div className="flex gap-2">
+                <Input 
+                  id="theme" 
+                  placeholder="e.g. Energetic, Relaxing" 
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value)}
+                />
+                <Button variant="outline" size="icon" onClick={handleSuggestTheme} disabled={isSuggestingTheme || !songFile}>
+                   {isSuggestingTheme ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
           </div>
           
@@ -301,3 +363,4 @@ export default function UploadPage() {
     </div>
   );
 }
+
