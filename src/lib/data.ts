@@ -8,6 +8,8 @@ export type Song = {
   genre: string;
   theme: string;
   fileUrl: string;
+  album_art_url?: string;
+  song_url?: string;
 };
 
 export type Playlist = {
