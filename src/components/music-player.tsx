@@ -68,7 +68,7 @@ export function MusicPlayer() {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying]);
+  }, [isPlaying, currentSong]); // Added currentSong dependency
 
   const handleProgressChange = (value: number[]) => {
     const newProgress = value[0];
