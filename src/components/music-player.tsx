@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Image from "next/image";
@@ -22,6 +21,16 @@ export function MusicPlayer() {
   const [volume, setVolume] = useState(0.5);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [songSource, setSongSource] = useState("");
+  const [songSourceType, setSongSourceType] = useState("");
+
+  const getFileType = (url: string) => {
+    if (!url) return "";
+    if (url.endsWith(".mp3")) return "audio/mpeg";
+    if (url.endsWith(".wav")) return "audio/wav";
+    // Add other types if needed
+    return "audio/mpeg"; // Fallback
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -52,7 +61,9 @@ export function MusicPlayer() {
 
   useEffect(() => {
     if (currentSong && audioRef.current) {
-      audioRef.current.src = currentSong.song_url || currentSong.fileUrl;
+      const url = currentSong.song_url || currentSong.fileUrl;
+      setSongSource(url);
+      setSongSourceType(getFileType(url));
       setProgress(0);
       if (isPlaying) {
         audioRef.current.load();
@@ -92,7 +103,10 @@ export function MusicPlayer() {
 
   return (
     <footer className="bg-card/95 backdrop-blur-lg rounded-md shadow-lg overflow-hidden">
-      <audio ref={audioRef} crossOrigin="anonymous" />
+      <audio ref={audioRef} crossOrigin="anonymous">
+        {songSource && <source src={songSource} type={songSourceType} />}
+        Your browser does not support the audio element.
+      </audio>
       <div className="flex items-center gap-4 p-2 relative">
         {/* Left Side: Album Art & Song Info */}
         <div className="flex items-center gap-3 min-w-0">
