@@ -133,8 +133,7 @@ const BottomNavBar = () => {
   )
 }
 
-
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
   const { username, setProfilePic, logout, session, loading, currentSong } = useApp();
   const pathname = usePathname();
@@ -191,73 +190,80 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider defaultOpen>
-       <div className={`grid h-screen w-full grid-rows-[1fr_auto] bg-background ${theme}`} style={customStyle}>
-        <div className="flex overflow-hidden">
-          <Sidebar>
-            <SidebarContent className="flex flex-col p-2">
-               <SidebarHeader className="flex flex-col items-center justify-center p-4 gap-2">
-                  <MusicAvatar size={64} ringWidth={4}/>
-                  <input type="file" ref={fileInputRef} onChange={handleProfilePicChange} className="hidden" accept="image/*" />
-                  <Button variant="default" className="rounded-full" onClick={handleUploadClick}>
-                    <Pencil className="mr-2 h-3 w-3"/>Change Profile
+     <div className={`grid h-screen w-full grid-rows-[1fr_auto] bg-background ${theme}`} style={customStyle}>
+      <div className="flex overflow-hidden">
+        <Sidebar>
+          <SidebarContent className="flex flex-col p-2">
+             <SidebarHeader className="flex flex-col items-center justify-center p-4 gap-2">
+                <MusicAvatar size={64} ringWidth={4}/>
+                <input type="file" ref={fileInputRef} onChange={handleProfilePicChange} className="hidden" accept="image/*" />
+                <Button variant="default" className="rounded-full" onClick={handleUploadClick}>
+                  <Pencil className="mr-2 h-3 w-3"/>Change Profile
+                </Button>
+             </SidebarHeader>
+             <div className="w-full">
+              {pathname !== '/home' && (
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => router.back()}
+                      tooltip={isMobile ? undefined : "Go Back"}
+                    >
+                      <ArrowLeft />
+                      Back
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              )}
+              <SidebarNav />
+            </div>
+
+            <div className="mt-auto w-full space-y-2">
+               <SidebarSeparator />
+               <div className="flex flex-col gap-1 py-2">
+                <Link href="/settings" className={cn(buttonVariants({ variant: "ghost" }), isActive('/settings') && "bg-muted", "justify-start")}>
+                  <Settings className="mr-2"/> Settings
+                </Link>
+              </div>
+               <SidebarSeparator />
+               <div className="flex items-center justify-between p-2">
+                   <p className="font-semibold truncate">{username}</p>
+                  <Button variant="destructive" size="sm" onClick={handleLogout}>
+                    <LogOut className="mr-2"/>Logout
                   </Button>
-               </SidebarHeader>
-               <div className="w-full">
-                {pathname !== '/home' && (
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton
-                        onClick={() => router.back()}
-                        tooltip={isMobile ? undefined : "Go Back"}
-                      >
-                        <ArrowLeft />
-                        Back
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                )}
-                <SidebarNav />
-              </div>
+               </div>
+            </div>
 
-              <div className="mt-auto w-full space-y-2">
-                 <SidebarSeparator />
-                 <div className="flex flex-col gap-1 py-2">
-                  <Link href="/settings" className={cn(buttonVariants({ variant: "ghost" }), isActive('/settings') && "bg-muted", "justify-start")}>
-                    <Settings className="mr-2"/> Settings
-                  </Link>
-                </div>
-                 <SidebarSeparator />
-                 <div className="flex items-center justify-between p-2">
-                     <p className="font-semibold truncate">{username}</p>
-                    <Button variant="destructive" size="sm" onClick={handleLogout}>
-                      <LogOut className="mr-2"/>Logout
-                    </Button>
-                 </div>
-              </div>
-
-            </SidebarContent>
-          </Sidebar>
-          <SidebarInset className="flex flex-col">
-            <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
-              <SidebarTrigger className="p-0 rounded-full h-8 w-8">
-                 <MusicAvatar size={32} ringWidth={2}/>
-              </SidebarTrigger>
-            </header>
-            <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && (currentSong ? "pb-40 md:pb-32" : "pb-24 md:pb-8"))}>
-              {children}
-            </main>
-          </SidebarInset>
-        </div>
-        {!isSettingsPage && (
-           <div className="fixed bottom-[63px] md:bottom-2 left-0 right-0 md:left-auto md:right-2 w-full md:w-[calc(100%-4rem)] group-data-[state=expanded]:md:w-[calc(100%-17rem)] z-40 transition-all duration-200 ease-linear">
-             <div className="p-2 md:p-0">
-               <MusicPlayer />
-             </div>
-           </div>
-        )}
-         {!isSettingsPage && <BottomNavBar />}
+          </SidebarContent>
+        </Sidebar>
+        <SidebarInset className="flex flex-col">
+          <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6 sticky top-0 z-10">
+            <SidebarTrigger className="p-0 rounded-full h-8 w-8">
+               <MusicAvatar size={32} ringWidth={2}/>
+            </SidebarTrigger>
+          </header>
+          <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && (currentSong ? "pb-40 md:pb-32" : "pb-24 md:pb-8"))}>
+            {children}
+          </main>
+        </SidebarInset>
       </div>
+      {!isSettingsPage && (
+         <div className="fixed bottom-[63px] md:bottom-2 left-0 right-0 md:left-auto md:right-2 w-full md:w-[calc(100%-4rem)] group-data-[state=expanded]:md:w-[calc(100%-17rem)] z-40 transition-all duration-200 ease-linear">
+           <div className="p-2 md:p-0">
+             <MusicPlayer />
+           </div>
+         </div>
+      )}
+       {!isSettingsPage && <BottomNavBar />}
+    </div>
+  );
+}
+
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider defaultOpen>
+      <AppLayoutContent>{children}</AppLayoutContent>
     </SidebarProvider>
   );
 }
