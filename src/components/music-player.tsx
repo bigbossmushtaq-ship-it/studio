@@ -48,25 +48,24 @@ export function MusicPlayer() {
   }, [setAudioRef, setIsPlaying]);
 
   useEffect(() => {
-    if (currentSong && audioRef.current) {
-       const url = currentSong.song_url || currentSong.fileUrl;
-       if (audioRef.current.src !== url) {
-          audioRef.current.src = url || '';
-          setProgress(0);
-          audioRef.current.load();
-       }
-    }
-  }, [currentSong]);
-  
-  useEffect(() => {
-    if(audioRef.current) {
-      if(isPlaying) {
+    if (!audioRef.current) return;
+
+    if (isPlaying && currentSong) {
+      const url = currentSong.song_url;
+      // If the source is different, change it and play
+      if (audioRef.current.src !== url) {
+        audioRef.current.src = url || '';
+        audioRef.current.load();
         audioRef.current.play().catch(e => console.error("Play error:", e));
       } else {
-        audioRef.current.pause();
+        // If the source is the same, just play
+        audioRef.current.play().catch(e => console.error("Play error:", e));
       }
+    } else {
+      // If not playing, pause it
+      audioRef.current.pause();
     }
-  }, [isPlaying, currentSong]); // Re-run when currentSong changes too
+  }, [isPlaying, currentSong]);
 
   const handleProgressChange = (value: number[]) => {
     const newProgress = value[0];
@@ -91,7 +90,7 @@ export function MusicPlayer() {
           {/* Left Side: Album Art & Song Info */}
           <div className="flex items-center gap-3 min-w-0">
               <AlbumArt
-                src={currentSong.album_art_url || currentSong.albumArt || ''}
+                src={currentSong.album_art_url || ''}
                 width={48}
                 height={48}
                 alt="Album Art"
