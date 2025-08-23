@@ -34,14 +34,13 @@ export default function HomePage() {
   const [loading, setLoading] = React.useState(true);
 
   const fetchSongs = React.useCallback(async () => {
-    if (!user) return;
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('songs')
         .select('*')
-        .eq('uploaded_by', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(20);
 
       if (error) {
         throw error;
@@ -60,7 +59,7 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [toast]);
 
   React.useEffect(() => {
     fetchSongs();
