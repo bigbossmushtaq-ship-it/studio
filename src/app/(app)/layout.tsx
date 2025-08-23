@@ -202,19 +202,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 </Button>
              </SidebarHeader>
              <div className="w-full">
-              {pathname !== '/home' && (
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      onClick={() => router.back()}
-                      tooltip={isMobile ? undefined : "Go Back"}
-                    >
-                      <ArrowLeft />
-                      Back
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              )}
               <SidebarNav />
             </div>
 

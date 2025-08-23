@@ -3,10 +3,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Palette, PlayCircle, Bell, User } from "lucide-react"
+import { Palette, PlayCircle, Bell, User, ArrowLeft } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 interface SettingsLayoutProps {
   children: React.ReactNode
@@ -67,6 +67,14 @@ function SettingsNav() {
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
     <>
+      <div className="mb-6">
+        <Button asChild variant="ghost" className="pl-0">
+          <Link href="/home">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Home
+          </Link>
+        </Button>
+      </div>
       <div className="space-y-0.5">
         <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
         <p className="text-muted-foreground">
