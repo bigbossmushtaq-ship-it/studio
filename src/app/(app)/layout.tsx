@@ -44,12 +44,24 @@ import { useToast } from "@/hooks/use-toast";
 
 function SidebarNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
   const { isMobile } = useSidebar();
 
   return (
     <>
       <SidebarMenu>
+        {pathname !== '/home' && (
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={() => router.back()}
+              tooltip={isMobile ? undefined : "Go Back"}
+            >
+              <ArrowLeft />
+              Back
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        )}
         <SidebarMenuItem>
           <SidebarMenuButton
             asChild
