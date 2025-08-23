@@ -138,7 +138,7 @@ const BottomNavBar = () => {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
-  const { username, setProfilePic, logout, session, loading } = useApp();
+  const { username, setProfilePic, logout, session, loading, currentSong } = useApp();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -243,7 +243,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
               )}
             </header>
-            <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && "pb-40 md:pb-32")}>
+            <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && (currentSong ? "pb-40 md:pb-32" : "pb-24 md:pb-8"))}>
               {children}
             </main>
           </SidebarInset>

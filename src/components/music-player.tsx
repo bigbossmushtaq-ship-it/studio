@@ -21,16 +21,6 @@ export function MusicPlayer() {
   const [volume, setVolume] = useState(0.5);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [songSource, setSongSource] = useState("");
-  const [songSourceType, setSongSourceType] = useState("");
-
-  const getFileType = (url: string) => {
-    if (!url) return "";
-    if (url.endsWith(".mp3")) return "audio/mpeg";
-    if (url.endsWith(".wav")) return "audio/wav";
-    // Add other types if needed
-    return "audio/mpeg"; // Fallback
-  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -61,19 +51,18 @@ export function MusicPlayer() {
 
   useEffect(() => {
     if (currentSong && audioRef.current) {
-      const url = currentSong.song_url || currentSong.fileUrl;
-      if (url !== songSource) {
-        setSongSource(url);
-        setSongSourceType(getFileType(url));
-        setProgress(0);
-        if (isPlaying) {
-          audioRef.current.load();
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(e => console.error("Play error:", e));
-          }
-        }
-      }
+       const url = currentSong.song_url || currentSong.fileUrl;
+       if (audioRef.current.src !== url) {
+          audioRef.current.src = url;
+          setProgress(0);
+       }
+       if (isPlaying) {
+         audioRef.current.load();
+         const playPromise = audioRef.current.play();
+         if (playPromise !== undefined) {
+           playPromise.catch(e => console.error("Play error:", e));
+         }
+       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSong, isPlaying]);
@@ -106,66 +95,61 @@ export function MusicPlayer() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  if (!currentSong) {
-    return null; // Don't render player if no song is selected
-  }
-
   return (
-    <footer className="bg-card/95 backdrop-blur-lg rounded-md shadow-lg overflow-hidden">
-      <audio ref={audioRef} crossOrigin="anonymous">
-        {songSource && <source src={songSource} type={songSourceType} />}
-        Your browser does not support the audio element.
-      </audio>
-      <div className="flex items-center gap-4 p-2 relative">
-        {/* Left Side: Album Art & Song Info */}
-        <div className="flex items-center gap-3 min-w-0">
-            <AlbumArt
-              src={currentSong.albumArt || currentSong.album_art_url}
-              width={48}
-              height={48}
-              alt="Album Art"
-              className="rounded-md aspect-square object-cover"
-            />
-             <div className="text-left overflow-hidden">
-                <p className="font-semibold truncate text-sm">{currentSong.title}</p>
-                <p className="text-xs text-muted-foreground truncate">{currentSong.artist}</p>
+    <footer className={cn("bg-card/95 backdrop-blur-lg rounded-md shadow-lg overflow-hidden transition-all duration-300", currentSong ? "h-auto p-2 opacity-100" : "h-0 p-0 opacity-0")}>
+       <audio ref={audioRef} crossOrigin="anonymous" />
+       {currentSong && (
+        <div className="flex items-center gap-4 relative">
+          {/* Left Side: Album Art & Song Info */}
+          <div className="flex items-center gap-3 min-w-0">
+              <AlbumArt
+                src={currentSong.albumArt || currentSong.album_art_url}
+                width={48}
+                height={48}
+                alt="Album Art"
+                className="rounded-md aspect-square object-cover"
+              />
+               <div className="text-left overflow-hidden">
+                  <p className="font-semibold truncate text-sm">{currentSong.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{currentSong.artist}</p>
+              </div>
+          </div>
+
+          {/* Center: Player Controls & Progress */}
+          <div className="flex-1 flex flex-col items-center gap-1 mx-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground hover:text-foreground h-10 w-10"
+                onClick={() => setIsPlaying(!isPlaying)}
+              >
+                {isPlaying ? <Pause className="h-7 w-7 fill-current" /> : <Play className="h-7 w-7 fill-current" />}
+              </Button>
             </div>
-        </div>
-
-        {/* Center: Player Controls & Progress */}
-        <div className="flex-1 flex flex-col items-center gap-1 mx-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-foreground hover:text-foreground h-10 w-10"
-              onClick={() => setIsPlaying(!isPlaying)}
-            >
-              {isPlaying ? <Pause className="h-7 w-7 fill-current" /> : <Play className="h-7 w-7 fill-current" />}
-            </Button>
+            <div className="w-full flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">{formatTime(audioRef.current?.currentTime || 0)}</span>
+              <Slider 
+                  value={[progress]} 
+                  onValueChange={handleProgressChange} 
+                  className="w-full h-1"
+              />
+              <span className="text-xs text-muted-foreground">{formatTime(duration)}</span>
+            </div>
           </div>
-          <div className="w-full flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">{formatTime(audioRef.current?.currentTime || 0)}</span>
-            <Slider 
-                value={[progress]} 
-                onValueChange={handleProgressChange} 
-                className="w-full h-1"
-            />
-            <span className="text-xs text-muted-foreground">{formatTime(duration)}</span>
+
+
+          {/* Right Side: Other Controls */}
+           <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                      <Laptop2 className="h-5 w-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                      <PlusCircle className="h-5 w-5" />
+                  </Button>
           </div>
         </div>
-
-
-        {/* Right Side: Other Controls */}
-         <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                    <Laptop2 className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-                    <PlusCircle className="h-5 w-5" />
-                </Button>
-        </div>
-      </div>
+      )}
     </footer>
   );
 }
