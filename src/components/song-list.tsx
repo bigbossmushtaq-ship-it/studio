@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Clock, Dot } from "lucide-react";
 import { Song } from "@/lib/data";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import AlbumArt from "./album-art";
 
 function SongItemRow({ song, index }: { song: Song; index: number }) {
   return (
@@ -9,13 +10,12 @@ function SongItemRow({ song, index }: { song: Song; index: number }) {
       <TableCell className="w-12 text-center">{index + 1}</TableCell>
       <TableCell>
         <div className="flex items-center gap-4">
-          <Image
+          <AlbumArt
             src={song.albumArt}
             width={40}
             height={40}
             alt={song.title}
             className="rounded"
-            data-ai-hint="album cover"
           />
           <div className="truncate">
             <p className="font-medium truncate">{song.title}</p>

@@ -15,6 +15,7 @@ import { useApp } from '@/hooks/use-app';
 import { suggestGenre } from '@/ai/flows/genre-suggestion';
 import { suggestTheme } from '@/ai/flows/theme-suggestion';
 import { v4 as uuidv4 } from 'uuid';
+import AlbumArt from '@/components/album-art';
 
 type Song = {
   id: string;
@@ -342,7 +343,7 @@ export default function UploadPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {songs.map((song) => (
               <Card key={song.id} className="p-4 flex flex-col">
-                <Image
+                <AlbumArt
                   src={song.album_art_url}
                   alt={song.title}
                   width={200}

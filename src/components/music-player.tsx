@@ -14,6 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/hooks/use-app";
+import AlbumArt from "./album-art";
 
 export function MusicPlayer() {
   const { isPlaying, setIsPlaying, setAudioRef } = useApp();
@@ -69,13 +70,12 @@ export function MusicPlayer() {
       <div className="flex items-center gap-4 p-2 relative">
         {/* Left Side: Album Art & Song Info */}
         <div className="flex items-center gap-3 min-w-0">
-            <Image
-            src="https://placehold.co/128x128.png"
-            width={48}
-            height={48}
-            alt="Album Art"
-            className="rounded-md aspect-square object-cover"
-            data-ai-hint="album cover"
+            <AlbumArt
+              src="https://placehold.co/128x128.png"
+              width={48}
+              height={48}
+              alt="Album Art"
+              className="rounded-md aspect-square object-cover"
             />
              <div className="text-left overflow-hidden">
                 <p className="font-semibold truncate text-sm">Salam</p>

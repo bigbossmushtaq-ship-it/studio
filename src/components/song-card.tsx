@@ -3,18 +3,16 @@ import { Play } from "lucide-react";
 import { Song } from "@/lib/data";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
+import AlbumArt from "./album-art";
 
 export function SongCard({ song }: { song: Song }) {
   return (
     <Card className="group flex flex-col gap-2 p-4 bg-card hover:bg-muted/80 transition-colors">
       <div className="relative">
-        <Image
+        <AlbumArt
           src={song.albumArt}
-          width={200}
-          height={200}
           alt={`Album art for ${song.title}`}
           className="w-full rounded-md aspect-square object-cover"
-          data-ai-hint="album cover"
         />
         <Button
           size="icon"
