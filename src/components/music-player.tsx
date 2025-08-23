@@ -55,25 +55,15 @@ export function MusicPlayer() {
        if (audioRef.current.src !== url) {
           audioRef.current.src = url;
           setProgress(0);
-       }
-       if (isPlaying) {
-         audioRef.current.load();
-         const playPromise = audioRef.current.play();
-         if (playPromise !== undefined) {
-           playPromise.catch(e => console.error("Play error:", e));
-         }
+          audioRef.current.load();
        }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSong, isPlaying]);
+  }, [currentSong]);
   
   useEffect(() => {
     if(audioRef.current) {
       if(isPlaying) {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(e => console.error("Play error:", e));
-        }
+        audioRef.current.play().catch(e => console.error("Play error:", e));
       } else {
         audioRef.current.pause();
       }
