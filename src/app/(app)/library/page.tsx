@@ -1,6 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-import { SongList } from "@/components/song-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, UserPlus, Mic } from "lucide-react";
 
