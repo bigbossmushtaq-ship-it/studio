@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
+import { Song } from '@/lib/data';
 
 interface AppContextType {
   // Music Player State
@@ -12,6 +13,8 @@ interface AppContextType {
   setProfilePic: (url: string) => void;
   audioRef: React.RefObject<HTMLAudioElement> | null;
   setAudioRef: (ref: React.RefObject<HTMLAudioElement>) => void;
+  currentSong: Song | null;
+  setCurrentSong: (song: Song | null) => void;
   // User State
   session: Session | null;
   user: User | null;
@@ -30,6 +33,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [profilePic, setProfilePicState] = useState("https://placehold.co/200x200.png");
   const [audioRef, setAudioRefState] = useState<React.RefObject<HTMLAudioElement> | null>(null);
+  const [currentSong, setCurrentSongState] = useState<Song | null>(null);
+
 
   // User State
   const [session, setSession] = useState<Session | null>(null);
@@ -111,6 +116,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setAudioRefState(ref);
   }
 
+  const setCurrentSong = (song: Song | null) => {
+    setCurrentSongState(song);
+  };
+
   const contextValue = {
     isPlaying,
     setIsPlaying,
@@ -118,6 +127,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setProfilePic,
     audioRef,
     setAudioRef,
+    currentSong,
+    setCurrentSong,
     session,
     user,
     username,
