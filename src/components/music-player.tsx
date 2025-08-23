@@ -62,20 +62,29 @@ export function MusicPlayer() {
   useEffect(() => {
     if (currentSong && audioRef.current) {
       const url = currentSong.song_url || currentSong.fileUrl;
-      setSongSource(url);
-      setSongSourceType(getFileType(url));
-      setProgress(0);
-      if (isPlaying) {
-        audioRef.current.load();
-        audioRef.current.play().catch(e => console.error("Play error:", e));
+      if (url !== songSource) {
+        setSongSource(url);
+        setSongSourceType(getFileType(url));
+        setProgress(0);
+        if (isPlaying) {
+          audioRef.current.load();
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(e => console.error("Play error:", e));
+          }
+        }
       }
     }
-  }, [currentSong]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSong, isPlaying]);
   
   useEffect(() => {
     if(audioRef.current) {
       if(isPlaying) {
-        audioRef.current.play().catch(e => console.error("Play error:", e));
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => console.error("Play error:", e));
+        }
       } else {
         audioRef.current.pause();
       }
