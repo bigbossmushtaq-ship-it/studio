@@ -97,8 +97,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         return { success: false };
       }
       // Manually refresh the session to ensure the user is logged in
-      if (data.session) {
-         await supabase.auth.refreshSession();
+      if (data.user) {
+         const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+         if(sessionError) {
+            setError(sessionError.message);
+         } else {
+            setSession(session);
+            setUser(session?.user ?? null);
+         }
       }
       return { success: true };
   }
