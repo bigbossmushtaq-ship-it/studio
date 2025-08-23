@@ -41,11 +41,13 @@ import { useApp } from "@/hooks/use-app";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Logo } from "@/components/icons/logo";
 
 function SidebarNav() {
   const pathname = usePathname();
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
   const { isMobile } = useSidebar();
+  const router = useRouter();
 
   return (
     <SidebarMenu>
@@ -195,6 +197,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         <Sidebar>
           <SidebarContent className="flex flex-col p-2">
              <SidebarHeader className="flex flex-col items-center justify-center p-4 gap-2">
+                 <div className="flex items-center gap-2">
+                    <Logo className="h-8 w-8" />
+                    <p className="font-semibold text-lg truncate">{username}</p>
+                 </div>
                 <MusicAvatar size={64} ringWidth={4}/>
                 <input type="file" ref={fileInputRef} onChange={handleProfilePicChange} className="hidden" accept="image/*" />
                 <Button variant="default" className="rounded-full" onClick={handleUploadClick}>
@@ -213,8 +219,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
                <SidebarSeparator />
-               <div className="flex items-center justify-between p-2">
-                   <p className="font-semibold truncate">{username}</p>
+               <div className="flex items-center justify-end p-2">
                   <Button variant="destructive" size="sm" onClick={handleLogout}>
                     <LogOut className="mr-2"/>Logout
                   </Button>

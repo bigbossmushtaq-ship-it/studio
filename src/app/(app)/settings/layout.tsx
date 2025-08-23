@@ -70,8 +70,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       <div className="mb-6">
         <Button asChild variant="ghost" className="pl-0">
           <Link href="/home">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+            <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
       </div>
