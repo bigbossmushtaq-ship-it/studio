@@ -185,10 +185,10 @@ export default function UploadPage() {
       // 2. Upload Song File
       const songPath = `public/${uuidv4()}`;
       const { error: songError } = await supabase.storage
-        .from('songs')
+        .from('music')
         .upload(songPath, songFile);
       if (songError) throw new Error(`Song Upload Failed: ${songError.message}`);
-      const { data: { publicUrl: songUrl } } = supabase.storage.from('songs').getPublicUrl(songPath);
+      const { data: { publicUrl: songUrl } } = supabase.storage.from('music').getPublicUrl(songPath);
        if (!songUrl) throw new Error('Could not get public URL for song.');
 
 
