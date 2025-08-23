@@ -50,18 +50,15 @@ export function MusicPlayer() {
   useEffect(() => {
     if (!audioRef.current) return;
 
+    // If a new song is selected, update src and play
+    if (currentSong && audioRef.current.src !== currentSong.song_url) {
+      audioRef.current.src = currentSong.song_url || '';
+      audioRef.current.load();
+    }
+    
     if (isPlaying) {
-      // If a new song is selected, update src and play
-      if (currentSong && audioRef.current.src !== currentSong.song_url) {
-        audioRef.current.src = currentSong.song_url || '';
-        audioRef.current.load();
-        audioRef.current.play().catch(e => console.error("Play error:", e));
-      } else {
-        // If it's the same song, just resume playback
-        audioRef.current.play().catch(e => console.error("Play error:", e));
-      }
+      audioRef.current.play().catch(e => console.error("Play error:", e));
     } else {
-      // If isPlaying is false, pause it
       audioRef.current.pause();
     }
   }, [isPlaying, currentSong]);
