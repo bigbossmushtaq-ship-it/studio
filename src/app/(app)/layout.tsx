@@ -44,74 +44,60 @@ import { useToast } from "@/hooks/use-toast";
 
 function SidebarNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
   const { isMobile } = useSidebar();
 
   return (
-    <>
-      <SidebarMenu>
-        {pathname !== '/home' && (
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => router.back()}
-              tooltip={isMobile ? undefined : "Go Back"}
-            >
-              <ArrowLeft />
-              Back
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        )}
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive("/home")}
+          tooltip={isMobile ? undefined : "Home"}
+        >
+          <Link href="/home">
+            <Home />
+            Home
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive("/search")}
+          tooltip={isMobile ? undefined : "Search"}
+        >
+          <Link href="/search">
+            <Search />
+            Search
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive("/library")}
+          tooltip={isMobile ? undefined : "Your Library"}
+        >
+          <Link href="/library">
+            <Library />
+            Your Library
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            isActive={isActive("/home")}
-            tooltip={isMobile ? undefined : "Home"}
-          >
-            <Link href="/home">
-              <Home />
-              Home
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            isActive={isActive("/search")}
-            tooltip={isMobile ? undefined : "Search"}
-          >
-            <Link href="/search">
-              <Search />
-              Search
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            isActive={isActive("/library")}
-            tooltip={isMobile ? undefined : "Your Library"}
-          >
-            <Link href="/library">
-              <Library />
-              Your Library
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-         <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            isActive={isActive("/upload")}
-            tooltip={isMobile ? undefined : "Upload"}
-          >
-            <Link href="/upload">
-              <Upload />
-              Upload
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive("/upload")}
+          tooltip={isMobile ? undefined : "Upload"}
+        >
+          <Link href="/upload">
+            <Upload />
+            Upload
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    </SidebarMenu>
   );
 }
 
@@ -153,6 +139,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { username, setProfilePic, logout, session, loading, currentSong } = useApp();
   const pathname = usePathname();
   const router = useRouter();
+  const { isMobile } = useSidebar();
 
   React.useEffect(() => {
     if (!loading && !session) {
@@ -217,6 +204,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </Button>
                </SidebarHeader>
                <div className="w-full">
+                {pathname !== '/home' && (
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        onClick={() => router.back()}
+                        tooltip={isMobile ? undefined : "Go Back"}
+                      >
+                        <ArrowLeft />
+                        Back
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                )}
                 <SidebarNav />
               </div>
 
