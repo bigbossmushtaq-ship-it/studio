@@ -31,7 +31,8 @@ export default function HomePage() {
   const { user } = useApp();
   const { toast } = useToast();
   const [uploadedSongs, setUploadedSongs] = React.useState<UploadedSong[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState("all");
 
   const fetchSongs = React.useCallback(async () => {
     setLoading(true);
@@ -62,13 +63,15 @@ export default function HomePage() {
   }, [toast]);
 
   React.useEffect(() => {
-    fetchSongs();
-  }, [fetchSongs]);
+    if (activeTab === "recent") {
+      fetchSongs();
+    }
+  }, [activeTab, fetchSongs]);
 
 
   return (
     <div className="space-y-8">
-      <Tabs defaultValue="all">
+      <Tabs defaultValue="all" onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="music">Music</TabsTrigger>
