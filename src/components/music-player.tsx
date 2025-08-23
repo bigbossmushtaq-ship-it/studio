@@ -18,14 +18,12 @@ import AlbumArt from "./album-art";
 export function MusicPlayer() {
   const { isPlaying, setIsPlaying, setAudioRef, currentSong } = useApp();
   const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(0.5);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (audioRef.current) {
       setAudioRef(audioRef);
-      audioRef.current.volume = volume;
       
       const setAudioData = () => {
         setDuration(audioRef.current?.duration || 0);
@@ -47,13 +45,13 @@ export function MusicPlayer() {
         audio.removeEventListener('ended', () => setIsPlaying(false));
       }
     }
-  }, [setAudioRef, volume, setIsPlaying]);
+  }, [setAudioRef, setIsPlaying]);
 
   useEffect(() => {
     if (currentSong && audioRef.current) {
        const url = currentSong.song_url || currentSong.fileUrl;
        if (audioRef.current.src !== url) {
-          audioRef.current.src = url;
+          audioRef.current.src = url || '';
           setProgress(0);
           audioRef.current.load();
        }
@@ -68,7 +66,7 @@ export function MusicPlayer() {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying]);
+  }, [isPlaying, currentSong]); // Re-run when currentSong changes too
 
   const handleProgressChange = (value: number[]) => {
     const newProgress = value[0];
@@ -93,7 +91,7 @@ export function MusicPlayer() {
           {/* Left Side: Album Art & Song Info */}
           <div className="flex items-center gap-3 min-w-0">
               <AlbumArt
-                src={currentSong.album_art_url || currentSong.albumArt}
+                src={currentSong.album_art_url || currentSong.albumArt || ''}
                 width={48}
                 height={48}
                 alt="Album Art"

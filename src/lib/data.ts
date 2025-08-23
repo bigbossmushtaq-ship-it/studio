@@ -4,12 +4,13 @@ export type Song = {
   artist: string;
   album: string;
   duration: string;
-  albumArt: string;
   genre: string;
   theme: string;
-  fileUrl: string;
-  album_art_url?: string;
-  song_url?: string;
+  album_art_url?: string; // from supabase
+  song_url?: string; // from supabase
+  // for mock data
+  albumArt?: string;
+  fileUrl?: string;
 };
 
 export type Playlist = {

@@ -19,7 +19,7 @@ export function SongCard({ song }: { song: Song }) {
     <Card className="group flex flex-col gap-2 p-4 bg-card hover:bg-muted/80 transition-colors">
       <div className="relative">
         <AlbumArt
-          src={song.album_art_url || song.albumArt}
+          src={song.album_art_url || song.albumArt || ''}
           alt={`Album art for ${song.title}`}
           className="w-full rounded-md aspect-square object-cover"
         />
