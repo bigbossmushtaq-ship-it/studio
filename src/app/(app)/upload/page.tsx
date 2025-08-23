@@ -75,7 +75,7 @@ export default function UploadPage() {
       }
       setSongs(data as Song[]);
     } catch (error: any) {
-      console.error("Error fetching songs:", error.message);
+      console.error("Error fetching songs:", error);
       toast({
         variant: 'destructive',
         title: "Failed to load songs",
