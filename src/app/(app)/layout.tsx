@@ -198,10 +198,9 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           <SidebarContent className="flex flex-col p-2">
              <SidebarHeader className="flex flex-col items-center justify-center p-4 gap-2">
                  <div className="flex items-center gap-2">
-                    <Logo className="h-8 w-8" />
+                    <MusicAvatar size={64} ringWidth={4}/>
                     <p className="font-semibold text-lg truncate">{username}</p>
                  </div>
-                <MusicAvatar size={64} ringWidth={4}/>
                 <input type="file" ref={fileInputRef} onChange={handleProfilePicChange} className="hidden" accept="image/*" />
                 <Button variant="default" className="rounded-full" onClick={handleUploadClick}>
                   <Pencil className="mr-2 h-3 w-3"/>Change Profile
