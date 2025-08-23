@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { SongList } from "@/components/song-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, UserPlus, Mic } from "lucide-react";
 
 export default function LibraryPage() {
   return (
@@ -13,6 +13,8 @@ export default function LibraryPage() {
       <Tabs defaultValue="playlists" className="w-full">
         <TabsList>
           <TabsTrigger value="playlists">Playlists</TabsTrigger>
+          <TabsTrigger value="artists">Artists</TabsTrigger>
+          <TabsTrigger value="podcasts">Podcasts</TabsTrigger>
           <TabsTrigger value="songs">Liked Songs</TabsTrigger>
         </TabsList>
         <TabsContent value="playlists" className="mt-6">
@@ -22,6 +24,26 @@ export default function LibraryPage() {
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
               Create playlist
+            </Button>
+          </div>
+        </TabsContent>
+        <TabsContent value="artists" className="mt-6">
+          <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-lg text-center">
+            <h3 className="text-xl font-semibold">You haven't followed any artists yet</h3>
+            <p className="text-muted-foreground mt-2 mb-4">Find artists you love and follow them.</p>
+            <Button>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Find artists
+            </Button>
+          </div>
+        </TabsContent>
+        <TabsContent value="podcasts" className="mt-6">
+           <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-lg text-center">
+            <h3 className="text-xl font-semibold">You haven't saved any podcasts yet</h3>
+            <p className="text-muted-foreground mt-2 mb-4">Browse and save your favorite podcasts.</p>
+            <Button>
+              <Mic className="mr-2 h-4 w-4" />
+              Find podcasts
             </Button>
           </div>
         </TabsContent>
