@@ -1,7 +1,8 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { playlists, songs } from "@/lib/data";
-import { PlaylistCard } from "@/components/playlist-card";
+
+import { Button } from "@/components/ui/button";
 import { SongList } from "@/components/song-list";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PlusCircle } from "lucide-react";
 
 export default function LibraryPage() {
   return (
@@ -15,14 +16,20 @@ export default function LibraryPage() {
           <TabsTrigger value="songs">Liked Songs</TabsTrigger>
         </TabsList>
         <TabsContent value="playlists" className="mt-6">
-           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {playlists.map((playlist) => (
-              <PlaylistCard key={playlist.id} playlist={playlist} />
-            ))}
+          <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-lg text-center">
+            <h3 className="text-xl font-semibold">Create your first playlist</h3>
+            <p className="text-muted-foreground mt-2 mb-4">It's easy, we'll help you.</p>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create playlist
+            </Button>
           </div>
         </TabsContent>
         <TabsContent value="songs" className="mt-6">
-          <SongList songs={songs} />
+           <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-lg text-center">
+            <h3 className="text-xl font-semibold">Songs you like will appear here</h3>
+            <p className="text-muted-foreground mt-2">Save songs by tapping the heart icon.</p>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
