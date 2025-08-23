@@ -17,17 +17,6 @@ import { suggestTheme } from '@/ai/flows/theme-suggestion';
 import { v4 as uuidv4 } from 'uuid';
 import AlbumArt from '@/components/album-art';
 
-type Song = {
-  id: string;
-  title: string;
-  artist: string;
-  album: string;
-  genre: string;
-  theme: string;
-  album_art_url: string;
-  song_url: string;
-};
-
 type FormErrors = {
   title?: boolean;
   artist?: boolean;
@@ -57,37 +46,6 @@ export default function UploadPage() {
   const [isSaving, setIsSaving] = React.useState(false);
   const [isSuggestingGenre, setIsSuggestingGenre] = React.useState(false);
   const [isSuggestingTheme, setIsSuggestingTheme] = React.useState(false);
-
-  // Display State
-  const [songs, setSongs] = React.useState<Song[]>([]);
-
-  const fetchSongs = React.useCallback(async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('songs')
-        .select('*')
-        .eq('uploaded_by', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-      setSongs(data as Song[]);
-    } catch (error: any) {
-      console.error("Error fetching songs:", error);
-      toast({
-        variant: 'destructive',
-        title: "Failed to load songs",
-        description: error.message || "Could not retrieve your song library. Please try again later.",
-      });
-    }
-  }, [user, toast]);
-
-  React.useEffect(() => {
-    fetchSongs();
-  }, [fetchSongs]);
-
 
   const handleSongFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -223,8 +181,6 @@ export default function UploadPage() {
       setSongFile(null);
       setAlbumArtFile(null);
       setErrors({});
-      // Refetch songs to update the list
-      fetchSongs(); 
     } catch (error: any) {
       console.error("Save failed:", error);
       toast({
@@ -243,7 +199,7 @@ export default function UploadPage() {
         <CardHeader>
           <CardTitle>Upload Song</CardTitle>
           <CardDescription>
-            Add your own music to TuneFlow. It will appear below after upload. Use the magic wand to get AI-powered suggestions for genre and theme based on the audio.
+            Add your own music to TuneFlow. It will appear on the home page after upload. Use the magic wand to get AI-powered suggestions for genre and theme based on the audio.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -336,32 +292,8 @@ export default function UploadPage() {
           </div>
         </CardContent>
       </Card>
-      
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight mb-4">Uploaded Songs</h2>
-        {songs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {songs.map((song) => (
-              <Card key={song.id} className="p-4 flex flex-col">
-                <AlbumArt
-                  src={song.album_art_url}
-                  alt={song.title}
-                  width={200}
-                  height={200}
-                  className="w-full h-auto aspect-square object-cover rounded-md mb-4"
-                />
-                <div className="flex-grow">
-                  <h3 className="font-semibold truncate">{song.title}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
-                </div>
-                <audio controls src={song.song_url} className="mt-4 w-full" />
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-center py-8">No songs uploaded yet.</p>
-        )}
-      </div>
     </div>
   );
 }
+
+    
