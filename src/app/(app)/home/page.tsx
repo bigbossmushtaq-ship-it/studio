@@ -10,23 +10,10 @@ import { useApp } from "@/hooks/use-app";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
-type UploadedSong = {
-  id: string;
-  title: string;
-  artist: string;
-  album: string;
-  genre: string;
-  theme: string;
-  album_art_url: string;
-  song_url: string;
-  duration: string;
-};
-
-
 export default function HomePage() {
   const { user } = useApp();
   const { toast } = useToast();
-  const [uploadedSongs, setUploadedSongs] = React.useState<UploadedSong[]>([]);
+  const [uploadedSongs, setUploadedSongs] = React.useState<Song[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState("all");
 
@@ -43,9 +30,7 @@ export default function HomePage() {
         throw error;
       }
       
-      const formattedSongs = data.map(s => ({...s, albumArt: s.album_art_url, fileUrl: s.song_url, duration: "3:00"}));
-
-      setUploadedSongs(formattedSongs as any[]);
+      setUploadedSongs(data as Song[]);
     } catch (error: any) {
       console.error("Error fetching songs:", error);
       toast({
@@ -106,7 +91,7 @@ export default function HomePage() {
           ) : uploadedSongs.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {uploadedSongs.map((song) => (
-                <SongCard key={song.id} song={{...song, albumArt: song.album_art_url, fileUrl: song.song_url}} />
+                <SongCard key={song.id} song={song} />
               ))}
             </div>
           ) : (

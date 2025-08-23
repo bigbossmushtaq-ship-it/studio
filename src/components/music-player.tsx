@@ -68,7 +68,7 @@ export function MusicPlayer() {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying, currentSong]); // Added currentSong dependency
+  }, [isPlaying]);
 
   const handleProgressChange = (value: number[]) => {
     const newProgress = value[0];
@@ -93,7 +93,7 @@ export function MusicPlayer() {
           {/* Left Side: Album Art & Song Info */}
           <div className="flex items-center gap-3 min-w-0">
               <AlbumArt
-                src={currentSong.albumArt || currentSong.album_art_url}
+                src={currentSong.album_art_url || currentSong.albumArt}
                 width={48}
                 height={48}
                 alt="Album Art"
