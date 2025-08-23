@@ -4,9 +4,7 @@ import * as React from "react";
 import { playlists, songs as mockSongs, Song } from "@/lib/data";
 import { SongCard } from "@/components/song-card";
 import { PlaylistCard } from "@/components/playlist-card";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { Play, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp } from "@/hooks/use-app";
 import { supabase } from "@/lib/supabase";
@@ -21,9 +19,7 @@ type UploadedSong = {
   theme: string;
   album_art_url: string;
   song_url: string;
-  duration: string; 
-  albumArt: string;
-  fileUrl: string;
+  duration: string;
 };
 
 
@@ -49,7 +45,7 @@ export default function HomePage() {
       
       const formattedSongs = data.map(s => ({...s, albumArt: s.album_art_url, fileUrl: s.song_url, duration: "3:00"}));
 
-      setUploadedSongs(formattedSongs as UploadedSong[]);
+      setUploadedSongs(formattedSongs as any[]);
     } catch (error: any) {
       console.error("Error fetching songs:", error);
       toast({
@@ -88,19 +84,6 @@ export default function HomePage() {
             </div>
           </div>
           <div>
-            <h3 className="text-2xl font-bold tracking-tight mb-4">New Release from Maroon 5</h3>
-            <div className="bg-card p-4 rounded-lg flex items-center gap-4">
-              <Image src="https://placehold.co/128x128.png" alt="Love is Like" width={128} height={128} className="rounded-md w-32 h-32" data-ai-hint="album cover" />
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Album</p>
-                <h4 className="text-2xl font-bold">Love Is Like</h4>
-                <p className="text-muted-foreground">Maroon 5</p>
-              </div>
-              <Button size="icon" className="h-12 w-12 rounded-full bg-primary text-primary-foreground"><Play className="h-6 w-6 fill-current" /></Button>
-            </div>
-          </div>
-
-          <div>
             <h3 className="text-2xl font-bold tracking-tight mb-4">Jump back in</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {mockSongs.map((song) => (
@@ -123,11 +106,11 @@ export default function HomePage() {
           ) : uploadedSongs.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {uploadedSongs.map((song) => (
-                <SongCard key={song.id} song={song} />
+                <SongCard key={song.id} song={{...song, albumArt: song.album_art_url, fileUrl: song.song_url}} />
               ))}
             </div>
           ) : (
-            <p className="text-center py-12 text-muted-foreground">You haven't uploaded any songs yet.</p>
+            <p className="text-center py-12 text-muted-foreground">No songs uploaded by the community yet.</p>
           )}
         </TabsContent>
       </Tabs>
