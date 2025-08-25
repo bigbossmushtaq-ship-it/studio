@@ -91,24 +91,24 @@ function SidebarNav() {
       <SidebarMenuItem>
         <SidebarMenuButton
           asChild
-          isActive={isActive("/profile")}
-          tooltip={isMobile ? undefined : "Profile"}
+          isActive={isActive("/create")}
+          tooltip={isMobile ? undefined : "Create"}
         >
-          <Link href="/profile">
-            <User />
-            Profile
+          <Link href="/upload">
+            <Upload />
+            Create
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton
           asChild
-          isActive={isActive("/upload")}
-          tooltip={isMobile ? undefined : "Create"}
+          isActive={isActive("/profile")}
+          tooltip={isMobile ? undefined : "Profile"}
         >
-          <Link href="/upload">
-            <Upload />
-            Create
+          <Link href="/profile">
+            <User />
+            Profile
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -151,9 +151,9 @@ const BottomNavBar = () => {
           <Library className="h-6 w-6" />
           <span className="text-xs">Your Library</span>
         </Link>
-        <Link href="/profile" className={`flex flex-col items-center gap-1 ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`}>
-          <User className="h-6 w-6" />
-          <span className="text-xs">Profile</span>
+        <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <Upload className="h-6 w-6" />
+          <span className="text-xs">Create</span>
         </Link>
       </div>
     </div>
