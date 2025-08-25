@@ -16,66 +16,51 @@ import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
 
 export function MusicPlayer() {
-  const { isPlaying, setIsPlaying, setAudioRef, currentSong, setCurrentSong } = useApp();
+  const { isPlaying, setIsPlaying, audioRef, currentSong, setCurrentSong } = useApp();
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  
+  useEffect(() => {
+    const audio = audioRef?.current;
+    if (!audio) return;
+
+    const setAudioData = () => setDuration(audio.duration);
+    const setAudioTime = () => {
+      setProgress((audio.currentTime / audio.duration) * 100);
+    };
+
+    audio.addEventListener('loadeddata', setAudioData);
+    audio.addEventListener('timeupdate', setAudioTime);
+
+    return () => {
+      audio.removeEventListener('loadeddata', setAudioData);
+      audio.removeEventListener('timeupdate', setAudioTime);
+    };
+  }, [audioRef]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      setAudioRef(audioRef);
-      
-      const setAudioData = () => {
-        setDuration(audioRef.current?.duration || 0);
-      }
-      const setAudioTime = () => {
-        const currentProgress = ((audioRef.current?.currentTime || 0) / (audioRef.current?.duration || 1)) * 100;
-        setProgress(currentProgress);
-      }
+    const audio = audioRef?.current;
+    if (!audio) return;
 
-      const audio = audioRef.current;
-      audio.addEventListener('loadeddata', setAudioData);
-      audio.addEventListener('timeupdate', setAudioTime);
-      
-      const handleEnded = () => setIsPlaying(false);
-      audio.addEventListener('ended', handleEnded);
-
-      return () => {
-        audio.removeEventListener('loadeddata', setAudioData);
-        audio.removeEventListener('timeupdate', setAudioTime);
-        audio.removeEventListener('ended', handleEnded);
-      }
-    }
-  }, [setAudioRef, setIsPlaying]);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-    
-    // If a new song is selected, update src and play
-    const songUrl = currentSong?.song_url || currentSong?.fileUrl;
-    if (currentSong && audioRef.current.src !== songUrl) {
-      audioRef.current.src = songUrl || '';
-      audioRef.current.load();
-    }
-    
     if (isPlaying) {
-      audioRef.current.play().catch(e => console.error("Play error:", e));
+      audio.play().catch(e => console.error("Play error:", e));
     } else {
-      audioRef.current.pause();
+      audio.pause();
     }
-  }, [isPlaying, currentSong]);
+  }, [isPlaying, audioRef]);
 
 
   const handleProgressChange = (value: number[]) => {
     const newProgress = value[0];
     setProgress(newProgress);
-     if(audioRef.current) {
-      audioRef.current.currentTime = (newProgress / 100) * duration;
+    const audio = audioRef?.current;
+     if(audio) {
+      audio.currentTime = (newProgress / 100) * duration;
     }
   };
 
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return "0:00";
+    if (isNaN(seconds) || seconds === 0) return "0:00";
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
@@ -89,7 +74,6 @@ export function MusicPlayer() {
 
   return (
     <footer className={cn("bg-card/95 backdrop-blur-lg rounded-md shadow-lg overflow-hidden transition-all duration-300", currentSong ? "h-auto p-2 opacity-100" : "h-0 p-0 opacity-0")}>
-       <audio ref={audioRef} crossOrigin="anonymous" />
        {currentSong && (
         <div className="flex items-center gap-4 relative">
           {/* Left Side: Album Art & Song Info */}
@@ -120,7 +104,7 @@ export function MusicPlayer() {
               </Button>
             </div>
             <div className="w-full flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">{formatTime(audioRef.current?.currentTime || 0)}</span>
+              <span className="text-xs text-muted-foreground">{formatTime(audioRef?.current?.currentTime || 0)}</span>
               <Slider 
                   value={[progress]} 
                   onValueChange={handleProgressChange} 

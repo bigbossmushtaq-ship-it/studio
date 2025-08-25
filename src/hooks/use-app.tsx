@@ -1,6 +1,6 @@
 
 "use client"
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 import { Song } from '@/lib/data';
@@ -12,7 +12,6 @@ interface AppContextType {
   profilePic: string;
   setProfilePic: (url: string) => void;
   audioRef: React.RefObject<HTMLAudioElement> | null;
-  setAudioRef: (ref: React.RefObject<HTMLAudioElement>) => void;
   currentSong: Song | null;
   setCurrentSong: (song: Song | null) => void;
   // User State
@@ -32,7 +31,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Music Player State
   const [isPlaying, setIsPlaying] = useState(false);
   const [profilePic, setProfilePicState] = useState("https://placehold.co/200x200.png");
-  const [audioRef, setAudioRefState] = useState<React.RefObject<HTMLAudioElement> | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(typeof Audio !== "undefined" ? new Audio() : null);
   const [currentSong, setCurrentSongState] = useState<Song | null>(null);
 
 
@@ -66,9 +65,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
       setLoading(false);
     });
+    
+    // Setup audio listeners
+    const audio = audioRef.current;
+    if (audio) {
+      audio.addEventListener('ended', () => setIsPlaying(false));
+      audio.crossOrigin = "anonymous";
+    }
+
 
     return () => {
       authListener.subscription.unsubscribe();
+       if (audio) {
+        audio.removeEventListener('ended', () => setIsPlaying(false));
+      }
     };
   }, []);
   
@@ -118,12 +128,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
   }
 
-  const setAudioRef = (ref: React.RefObject<HTMLAudioElement>) => {
-    setAudioRefState(ref);
-  }
 
   const setCurrentSong = (song: Song | null) => {
-    setCurrentSongState(song);
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    if (!song) {
+      audio.pause();
+      setIsPlaying(false);
+      setCurrentSongState(null);
+      return;
+    }
+    
+    const songUrl = song.song_url || song.fileUrl;
+    if (currentSong?.id !== song.id) {
+       setCurrentSongState(song);
+       audio.src = songUrl || '';
+       audio.load();
+    }
+    
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+       audio.play().catch(e => console.error("Error playing audio:", e));
+       setIsPlaying(true);
+    }
   };
 
   const contextValue = {
@@ -131,8 +161,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setIsPlaying,
     profilePic,
     setProfilePic,
-    audioRef,
-    setAudioRef,
+    audioRef: audioRef,
     currentSong,
     setCurrentSong,
     session,

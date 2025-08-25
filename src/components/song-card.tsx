@@ -8,12 +8,13 @@ import AlbumArt from "./album-art";
 import { useApp } from "@/hooks/use-app";
 
 export function SongCard({ song }: { song: Song }) {
-  const { setCurrentSong, setIsPlaying } = useApp();
+  const { setCurrentSong, currentSong, isPlaying } = useApp();
 
   const handlePlay = () => {
     setCurrentSong(song);
-    setIsPlaying(true);
   };
+  
+  const isThisSongPlaying = currentSong?.id === song.id && isPlaying;
 
   return (
     <Card className="group flex flex-col gap-2 p-4 bg-card hover:bg-muted/80 transition-colors">
