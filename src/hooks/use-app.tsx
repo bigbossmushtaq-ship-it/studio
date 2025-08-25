@@ -11,9 +11,12 @@ interface AppContextType {
   setIsPlaying: (isPlaying: boolean) => void;
   profilePic: string;
   setProfilePic: (url: string) => void;
-  audioRef: React.RefObject<HTMLAudioElement> | null;
+  audio: HTMLAudioElement | null;
   currentSong: Song | null;
   setCurrentSong: (song: Song | null) => void;
+  progress: number;
+  duration: number;
+  seek: (progress: number) => void;
   // User State
   session: Session | null;
   user: User | null;
@@ -31,8 +34,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Music Player State
   const [isPlaying, setIsPlaying] = useState(false);
   const [profilePic, setProfilePicState] = useState("https://placehold.co/200x200.png");
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [currentSong, setCurrentSongState] = useState<Song | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
 
 
   // User State
@@ -66,23 +71,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
     
-    // Setup audio listeners
-    const audio = audioRef.current;
-    if (audio) {
-      const handleEnded = () => setIsPlaying(false);
-      audio.addEventListener('ended', handleEnded);
-      audio.crossOrigin = "anonymous";
-      
-      return () => {
-        audio.removeEventListener('ended', handleEnded);
-      };
-    }
-
-
     return () => {
       authListener.subscription.unsubscribe();
+      if (audio) {
+        audio.pause();
+      }
     };
-  }, []);
+  }, [audio]);
   
   const login = async (email: string, pass: string) => {
       setLoading(true);
@@ -128,24 +123,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const logout = async () => {
     await supabase.auth.signOut();
+    if (audio) {
+      audio.pause();
+    }
+    setCurrentSongState(null);
+    setIsPlaying(false);
+    setAudio(null);
   }
 
+  const seek = (newProgress: number) => {
+    if (audio && isFinite(audio.duration)) {
+      audio.currentTime = (newProgress / 100) * audio.duration;
+      setProgress(newProgress);
+    }
+  };
 
   const setCurrentSong = (song: Song | null) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
     if (!song) {
-        audio.pause();
-        audio.src = '';
-        setIsPlaying(false);
+        if(audio) audio.pause();
         setCurrentSongState(null);
+        setIsPlaying(false);
+        setAudio(null);
         return;
     }
 
     const isSameSong = currentSong?.id === song.id;
 
-    if (isSameSong) {
+    if (isSameSong && audio) {
       if (isPlaying) {
         audio.pause();
         setIsPlaying(false);
@@ -155,15 +159,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           .catch((err) => console.error("Resume error:", err));
       }
     } else {
+      if (audio) {
+        audio.pause();
+      }
+      
+      const newAudio = new Audio(song.song_url || song.fileUrl || '');
+      newAudio.crossOrigin = "anonymous";
+      
+      const handleTimeUpdate = () => {
+         if (newAudio.duration) {
+           setProgress((newAudio.currentTime / newAudio.duration) * 100);
+           setDuration(newAudio.duration);
+         }
+      };
+      const handleEnded = () => setIsPlaying(false);
+
+      newAudio.addEventListener('timeupdate', handleTimeUpdate);
+      newAudio.addEventListener('ended', handleEnded);
+      
+      setAudio(newAudio);
       setCurrentSongState(song);
-      setIsPlaying(false);
 
-      audio.src = song.song_url || song.fileUrl || '';
-      audio.currentTime = 0;
-
-      audio.play()
+      newAudio.play()
         .then(() => setIsPlaying(true))
-        .catch((err) => console.error("Play new song error:", err));
+        .catch(err => {
+          console.error("Playback failed:", err);
+          setIsPlaying(false);
+        });
     }
   };
 
@@ -173,9 +195,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setIsPlaying,
     profilePic,
     setProfilePic,
-    audioRef: audioRef,
+    audio,
     currentSong,
     setCurrentSong,
+    progress,
+    duration,
+    seek,
     session,
     user,
     username,

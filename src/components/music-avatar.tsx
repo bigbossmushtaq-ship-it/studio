@@ -6,21 +6,23 @@ import { useTheme } from "@/hooks/use-theme";
 import { useEffect, useRef } from "react";
 
 export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringWidth?: number }) {
-  const { isPlaying, audioRef, profilePic } = useApp();
+  const { isPlaying, audio, profilePic } = useApp();
   const { spectrumVisualEffects } = useTheme();
   const rafRef = useRef(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const setupAudioContext = () => {
-      if (isPlaying && audioRef?.current && !audioContextRef.current) {
+      if (isPlaying && audio && !audioContextRef.current) {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         audioContextRef.current = ctx;
 
         try {
-          const source = ctx.createMediaElementSource(audioRef.current);
+          const source = ctx.createMediaElementSource(audio);
+          sourceRef.current = source;
           const analyser = ctx.createAnalyser();
           analyser.fftSize = 512;
           analyserRef.current = analyser;
@@ -28,17 +30,8 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
           source.connect(analyser);
           analyser.connect(ctx.destination);
         } catch (e) {
-          if (e instanceof DOMException && e.name === 'InvalidStateError') {
-             if (!analyserRef.current) {
-                const analyser = ctx.createAnalyser();
-                analyser.fftSize = 512;
-                analyserRef.current = analyser;
-                analyser.connect(ctx.destination);
-             }
-          } else {
             console.error("Error setting up audio context:", e)
             return; 
-          }
         }
 
         const data = new Uint8Array(analyserRef.current.frequencyBinCount);
@@ -73,6 +66,10 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
         cancelAnimationFrame(rafRef.current);
         rafRef.current = 0;
       }
+       if (sourceRef.current) {
+          sourceRef.current.disconnect();
+          sourceRef.current = null;
+      }
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(e => console.error("Error closing audio context", e));
         audioContextRef.current = null;
@@ -89,8 +86,9 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
       cleanup();
     }
     
+    // Cleanup on component unmount or when audio changes
     return cleanup;
-  }, [isPlaying, audioRef, spectrumVisualEffects]);
+  }, [isPlaying, audio, spectrumVisualEffects]);
   
   const total = size + ringWidth * 2;
 

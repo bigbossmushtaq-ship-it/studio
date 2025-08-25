@@ -16,43 +16,18 @@ import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
 
 export function MusicPlayer() {
-  const { isPlaying, setIsPlaying, audioRef, currentSong, setCurrentSong } = useApp();
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const { 
+    isPlaying, 
+    currentSong, 
+    setCurrentSong,
+    progress,
+    duration,
+    seek,
+  } = useApp();
   
-  useEffect(() => {
-    const audio = audioRef?.current;
-    if (!audio) return;
-
-    const setAudioData = () => setDuration(audio.duration);
-    const setAudioTime = () => {
-       if (audio.duration) {
-         setProgress((audio.currentTime / audio.duration) * 100);
-       }
-    };
-
-    audio.addEventListener('loadeddata', setAudioData);
-    audio.addEventListener('timeupdate', setAudioTime);
-
-    // Set initial duration if audio is already loaded
-    if (audio.readyState > 0) {
-      setAudioData();
-    }
-
-    return () => {
-      audio.removeEventListener('loadeddata', setAudioData);
-      audio.removeEventListener('timeupdate', setAudioTime);
-    };
-  }, [audioRef]);
-
-
   const handleProgressChange = (value: number[]) => {
     const newProgress = value[0];
-    setProgress(newProgress);
-    const audio = audioRef?.current;
-     if(audio && !isNaN(audio.duration)) {
-      audio.currentTime = (newProgress / 100) * audio.duration;
-    }
+    seek(newProgress);
   };
 
   const formatTime = (seconds: number) => {
@@ -63,12 +38,12 @@ export function MusicPlayer() {
   };
 
   const togglePlayPause = () => {
-    // We can just call setCurrentSong with the current song
-    // The hook's logic will handle the play/pause toggle
     if (currentSong) {
       setCurrentSong(currentSong);
     }
   };
+
+  const currentTime = (progress / 100) * duration;
 
   return (
     <footer className={cn("bg-card/95 backdrop-blur-lg rounded-md shadow-lg overflow-hidden transition-all duration-300", currentSong ? "h-auto p-2 opacity-100" : "h-0 p-0 opacity-0")}>
@@ -102,7 +77,7 @@ export function MusicPlayer() {
               </Button>
             </div>
             <div className="w-full flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">{formatTime(audioRef?.current?.currentTime || 0)}</span>
+              <span className="text-xs text-muted-foreground">{formatTime(currentTime)}</span>
               <Slider 
                   value={[progress]} 
                   onValueChange={handleProgressChange} 
