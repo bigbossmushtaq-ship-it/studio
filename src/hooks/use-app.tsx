@@ -26,6 +26,12 @@ interface AppContextType {
   login: (email: string, pass: string) => Promise<{success: boolean}>;
   signup: (email: string, pass: string) => Promise<{success: boolean}>;
   logout: () => Promise<void>;
+  // Playlist controls
+  playNext: () => void;
+  playPrevious: () => void;
+  playlist: Song[];
+  setPlaylist: (songs: Song[]) => void;
+  togglePlayPause: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -34,10 +40,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Music Player State
   const [isPlaying, setIsPlaying] = useState(false);
   const [profilePic, setProfilePicState] = useState("https://placehold.co/200x200.png");
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentSong, setCurrentSongState] = useState<Song | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playlist, setPlaylist] = useState<Song[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
 
   // User State
@@ -46,6 +56,34 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [username, setUsername] = useState("Guest");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Initialize audio element on client
+    const audioInstance = new Audio();
+    audioInstance.crossOrigin = "anonymous";
+    setAudio(audioInstance);
+
+    const handleTimeUpdate = () => {
+      if (audioInstance.duration) {
+        setProgress((audioInstance.currentTime / audioInstance.duration) * 100);
+        setDuration(audioInstance.duration);
+      }
+    };
+    const handleEnded = () => {
+      setIsPlaying(false);
+      playNext();
+    };
+
+    audioInstance.addEventListener('timeupdate', handleTimeUpdate);
+    audioInstance.addEventListener('ended', handleEnded);
+    
+    return () => {
+      audioInstance.removeEventListener('timeupdate', handleTimeUpdate);
+      audioInstance.removeEventListener('ended', handleEnded);
+      audioInstance.pause();
+    };
+  }, []);
+
 
   useEffect(() => {
     const getSession = async () => {
@@ -128,7 +166,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
     setCurrentSongState(null);
     setIsPlaying(false);
-    setAudio(null);
   }
 
   const seek = (newProgress: number) => {
@@ -138,59 +175,63 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const togglePlayPause = () => {
+    if (!audio || !currentSong) return;
+
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch(err => console.error("Resume error:", err));
+    }
+  };
+
+
   const setCurrentSong = (song: Song | null) => {
+    if (!audio) return;
+    
     if (!song) {
-        if(audio) audio.pause();
+        audio.pause();
         setCurrentSongState(null);
         setIsPlaying(false);
-        setAudio(null);
         return;
     }
 
     const isSameSong = currentSong?.id === song.id;
 
-    if (isSameSong && audio) {
-      if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
-      } else {
-        audio.play()
-          .then(() => setIsPlaying(true))
-          .catch((err) => console.error("Resume error:", err));
-      }
+    if (isSameSong) {
+      togglePlayPause();
     } else {
-      if (audio) {
-        audio.pause();
-      }
-      
-      const newAudio = new Audio(song.song_url || song.fileUrl || '');
-      newAudio.crossOrigin = "anonymous";
-      
-      const handleTimeUpdate = () => {
-         if (newAudio.duration) {
-           setProgress((newAudio.currentTime / newAudio.duration) * 100);
-           setDuration(newAudio.duration);
-         }
-      };
-      const handleEnded = () => setIsPlaying(false);
-
-      newAudio.addEventListener('timeupdate', handleTimeUpdate);
-      newAudio.addEventListener('ended', handleEnded);
-      
-      setAudio(newAudio);
       setCurrentSongState(song);
-
-      newAudio.play()
+      const songUrl = song.song_url || song.fileUrl || '';
+      audio.src = songUrl;
+      audio.currentTime = 0;
+      audio.play()
         .then(() => setIsPlaying(true))
-        .catch(err => {
-          console.error("Playback failed:", err);
-          setIsPlaying(false);
-        });
+        .catch(err => console.error("Play new song error:", err));
+    }
+  };
+
+  const playNext = () => {
+    if (playlist.length > 0) {
+      const nextIndex = (currentIndex + 1) % playlist.length;
+      setCurrentIndex(nextIndex);
+      setCurrentSong(playlist[nextIndex]);
+    }
+  };
+
+  const playPrevious = () => {
+    if (playlist.length > 0) {
+      const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      setCurrentIndex(prevIndex);
+      setCurrentSong(playlist[prevIndex]);
     }
   };
 
 
-  const contextValue = {
+  const contextValue: AppContextType = {
     isPlaying,
     setIsPlaying,
     profilePic,
@@ -209,6 +250,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     login,
     signup,
     logout,
+    playNext,
+    playPrevious,
+    playlist,
+    setPlaylist,
+    togglePlayPause,
   };
 
   return (

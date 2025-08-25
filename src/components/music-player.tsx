@@ -7,6 +7,8 @@ import {
   Pause,
   Laptop2,
   PlusCircle,
+  SkipBack,
+  SkipForward,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -19,10 +21,12 @@ export function MusicPlayer() {
   const { 
     isPlaying, 
     currentSong, 
-    setCurrentSong,
     progress,
     duration,
     seek,
+    togglePlayPause,
+    playNext,
+    playPrevious,
   } = useApp();
   
   const handleProgressChange = (value: number[]) => {
@@ -35,12 +39,6 @@ export function MusicPlayer() {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const togglePlayPause = () => {
-    if (currentSong) {
-      setCurrentSong(currentSong);
-    }
   };
 
   const currentTime = (progress / 100) * duration;
@@ -67,6 +65,14 @@ export function MusicPlayer() {
           {/* Center: Player Controls & Progress */}
           <div className="flex-1 flex flex-col items-center gap-1 mx-4">
             <div className="flex items-center gap-4">
+               <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground hover:text-foreground h-10 w-10"
+                onClick={playPrevious}
+              >
+                <SkipBack className="h-5 w-5 fill-current" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -74,6 +80,14 @@ export function MusicPlayer() {
                 onClick={togglePlayPause}
               >
                 {isPlaying ? <Pause className="h-7 w-7 fill-current" /> : <Play className="h-7 w-7 fill-current" />}
+              </Button>
+               <Button
+                variant="ghost"
+                size="icon"
+                className="text-foreground hover:text-foreground h-10 w-10"
+                onClick={playNext}
+              >
+                <SkipForward className="h-5 w-5 fill-current" />
               </Button>
             </div>
             <div className="w-full flex items-center gap-2">

@@ -11,7 +11,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
 export default function HomePage() {
-  const { user } = useApp();
+  const { user, setPlaylist } = useApp();
   const { toast } = useToast();
   const [uploadedSongs, setUploadedSongs] = React.useState<Song[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -30,7 +30,10 @@ export default function HomePage() {
         throw error;
       }
       
-      setUploadedSongs(data as Song[]);
+      const songs = data as Song[];
+      setUploadedSongs(songs);
+      setPlaylist(songs);
+
     } catch (error: any) {
       console.error("Error fetching songs:", error);
       toast({
@@ -41,13 +44,12 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, setPlaylist]);
 
   React.useEffect(() => {
-    if (activeTab === "recent") {
-      fetchSongs();
-    }
-  }, [activeTab, fetchSongs]);
+    // Fetch songs on initial load of the component for the "recent" tab
+    fetchSongs();
+  }, [fetchSongs]);
 
 
   return (
