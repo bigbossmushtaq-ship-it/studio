@@ -58,7 +58,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const setAudioRef = (el: HTMLAudioElement | null) => {
     setAudio(el);
   };
-  
+
   const playNext = useCallback(() => {
     if (playlist.length > 0) {
       const nextIndex = (currentIndex + 1) % playlist.length;
@@ -77,28 +77,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!audio) return;
-
-    // Initialize AudioContext and Analyser
-    if (!audioContextRef.current) {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      audioContextRef.current = ctx;
-      const analyserNode = ctx.createAnalyser();
-      analyserNode.fftSize = 512;
-      setAnalyser(analyserNode);
-      
-      // Connect audio element to context
-      if (!sourceRef.current) {
-        try {
-          sourceRef.current = ctx.createMediaElementSource(audio);
-          sourceRef.current.connect(analyserNode);
-          analyserNode.connect(ctx.destination);
-        } catch(e) {
-            if (!(e instanceof DOMException && e.name === 'InvalidStateError')) {
-              console.error("Error creating source node:", e)
-            }
-        }
-      }
-    }
 
     const handleTimeUpdate = () => {
       if (audio.duration) {
@@ -226,15 +204,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         .catch(err => console.error("Resume error:", err));
     }
   };
-
+  
   const setCurrentSong = (song: Song | null) => {
-    if (!audio) return;
-    
     if (!song) {
+      if (audio) {
         audio.pause();
-        setCurrentSongState(null);
-        setIsPlaying(false);
-        return;
+      }
+      setCurrentSongState(null);
+      setIsPlaying(false);
+      return;
     }
 
     const isSameSong = currentSong?.id === song.id;
@@ -247,32 +225,50 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCurrentIndex(songIndex);
       }
       setCurrentSongState(song);
-      const songUrl = song.song_url || song.fileUrl || '';
-      audio.src = songUrl;
-      setProgress(0);
-      
-      if (audioContextRef.current?.state === 'suspended') {
-        audioContextRef.current.resume();
-      }
-
-      audio.play()
-        .then(() => setIsPlaying(true))
-        .catch(err => console.error("Play new song error:", err));
     }
   };
   
    useEffect(() => {
-    if (playlist.length > 0 && audio && currentSong) {
+    if (!audio) return;
+
+    // Initialize AudioContext and Analyser only once
+    if (!audioContextRef.current) {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = ctx;
+      const analyserNode = ctx.createAnalyser();
+      analyserNode.fftSize = 512;
+      setAnalyser(analyserNode);
+      
+      try {
+        if (!sourceRef.current) {
+            sourceRef.current = ctx.createMediaElementSource(audio);
+        }
+        sourceRef.current.connect(analyserNode);
+        analyserNode.connect(ctx.destination);
+      } catch(e) {
+          if (!(e instanceof DOMException && e.name === 'InvalidStateError')) {
+            console.error("Error connecting audio source:", e);
+          }
+      }
+    }
+    
+    if (currentSong) {
         const songUrl = currentSong.song_url || currentSong.fileUrl || '';
         if (audio.src !== songUrl) {
             audio.src = songUrl;
-            setProgress(0);
-            if (isPlaying) {
-                audio.play().catch(e => console.error("Error playing next song", e));
-            }
+            audio.load();
+             if (audioContextRef.current?.state === 'suspended') {
+               audioContextRef.current.resume();
+             }
+            audio.play()
+                .then(() => setIsPlaying(true))
+                .catch(e => console.error("Error playing new song", e));
         }
+    } else {
+        audio.pause();
+        setIsPlaying(false);
     }
-  }, [currentSong, playlist, audio, isPlaying]);
+  }, [currentSong, audio]);
 
   // User State
   const [session, setSession] = useState<Session | null>(null);
