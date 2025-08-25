@@ -58,7 +58,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const setAudioRef = (el: HTMLAudioElement | null) => {
     setAudio(el);
   };
-
+  
   const playNext = useCallback(() => {
     if (playlist.length > 0) {
       const nextIndex = (currentIndex + 1) % playlist.length;
@@ -228,43 +228,46 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    useEffect(() => {
     if (!audio) return;
 
-    // Initialize AudioContext and Analyser only once
-    if (!audioContextRef.current) {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      audioContextRef.current = ctx;
-      
-      const analyserNode = ctx.createAnalyser();
-      analyserNode.fftSize = 512;
-      setAnalyser(analyserNode);
-      
-      try {
-        if (!sourceRef.current) {
-            sourceRef.current = ctx.createMediaElementSource(audio);
-        }
-        sourceRef.current.connect(analyserNode);
-        analyserNode.connect(ctx.destination);
-      } catch(e) {
-          if (!(e instanceof DOMException && e.name === 'InvalidStateError')) {
-            console.error("Error connecting audio source:", e);
-          }
-      }
-    }
-    
     if (currentSong) {
-        const songUrl = currentSong.song_url || currentSong.fileUrl || '';
-        if (audio.src !== songUrl) {
-            audio.src = songUrl;
-            audio.load();
-            if (audioContextRef.current?.state === 'suspended') {
-              audioContextRef.current.resume();
+      // Initialize AudioContext and Analyser only once
+      if (!audioContextRef.current) {
+        try {
+          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          audioContextRef.current = ctx;
+          
+          if (!sourceRef.current) {
+              sourceRef.current = ctx.createMediaElementSource(audio);
+          }
+          
+          const analyserNode = ctx.createAnalyser();
+          analyserNode.fftSize = 512;
+          setAnalyser(analyserNode);
+
+          // Correct connection: source -> analyser -> destination
+          sourceRef.current.connect(analyserNode);
+          analyserNode.connect(ctx.destination);
+
+        } catch(e) {
+            if (!(e instanceof DOMException && e.name === 'InvalidStateError')) {
+              console.error("Error setting up audio context:", e);
             }
-            audio.play()
-                .then(() => setIsPlaying(true))
-                .catch(e => {
-                  console.error("Error playing new song", e);
-                  setIsPlaying(false);
-                });
         }
+      }
+
+      const songUrl = currentSong.song_url || currentSong.fileUrl || '';
+      if (audio.src !== songUrl) {
+          audio.src = songUrl;
+          audio.load();
+          if (audioContextRef.current?.state === 'suspended') {
+            audioContextRef.current.resume();
+          }
+          audio.play()
+              .then(() => setIsPlaying(true))
+              .catch(e => {
+                console.error("Error playing new song", e);
+                setIsPlaying(false);
+              });
+      }
     } else {
         audio.pause();
         setIsPlaying(false);
