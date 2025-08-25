@@ -33,6 +33,8 @@ interface AppContextType {
   playlist: Song[];
   setPlaylist: (songs: Song[]) => void;
   togglePlayPause: () => void;
+  // Audio Visualizer
+  analyser: AnalyserNode | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -50,8 +52,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
+  // AudioContext for visualizer
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+
 
   const setAudioRef = (el: HTMLAudioElement | null) => {
     audioRef.current = el;
@@ -78,15 +83,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (!audio) return;
 
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = ctx;
+      const analyserNode = ctx.createAnalyser();
+      analyserNode.fftSize = 512;
+      setAnalyser(analyserNode);
     }
-
-    if (!sourceRef.current) {
+    
+    if (analyser && !sourceRef.current) {
         try {
             sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
-            sourceRef.current.connect(audioContextRef.current.destination);
+            sourceRef.current.connect(analyser);
+            analyser.connect(audioContextRef.current.destination);
         } catch(e) {
-            console.error("Error creating source node:", e)
+            // This can happen if the audio element is already connected.
+            if (!(e instanceof DOMException && e.name === 'InvalidStateError')) {
+              console.error("Error creating source node:", e)
+            }
         }
     }
 
@@ -107,7 +120,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [audio, playNext]);
+  }, [audio, playNext, analyser]);
 
 
   useEffect(() => {
@@ -297,6 +310,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     playlist,
     setPlaylist,
     togglePlayPause,
+    analyser,
   };
 
   return (
