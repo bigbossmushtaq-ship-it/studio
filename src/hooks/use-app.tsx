@@ -157,12 +157,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const songUrl = song.song_url || song.fileUrl || '';
       audio.src = songUrl;
       audio.currentTime = 0;
-      audio.load();
-      audio.onloadeddata = () => {
-        audio.play()
-          .then(() => setIsPlaying(true))
-          .catch((err) => console.error("Play error:", err));
-      };
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => console.error("Play error:", err));
     }
   };
 
