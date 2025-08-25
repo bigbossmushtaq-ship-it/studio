@@ -202,7 +202,7 @@ export default function UploadPage() {
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle>Upload Song</CardTitle>
+          <CardTitle>Create Song</CardTitle>
           <CardDescription>
             Add your own music to TuneFlow. It will appear on the home page after upload. Use the magic wand to get AI-powered suggestions for genre and theme based on the audio.
           </CardDescription>

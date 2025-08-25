@@ -92,11 +92,11 @@ function SidebarNav() {
         <SidebarMenuButton
           asChild
           isActive={isActive("/upload")}
-          tooltip={isMobile ? undefined : "Upload"}
+          tooltip={isMobile ? undefined : "Create"}
         >
           <Link href="/upload">
             <Upload />
-            Upload
+            Create
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
