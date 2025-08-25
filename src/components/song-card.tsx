@@ -24,17 +24,19 @@ export function SongCard({ song }: { song: Song }) {
           alt={`Album art for ${song.title}`}
           className="w-full rounded-md aspect-square object-cover"
         />
-        <Button
+      </div>
+      <div className="truncate pt-2 flex justify-between items-center">
+        <div className="truncate">
+            <p className="font-semibold truncate">{song.title}</p>
+            <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
+        </div>
+         <Button
           size="icon"
           onClick={handlePlay}
-          className="absolute bottom-2 right-2 h-12 w-12 rounded-full bg-primary text-primary-foreground opacity-0 shadow-lg transition-all group-hover:opacity-100 group-hover:bottom-3 scale-0 group-hover:scale-100"
+          className="h-10 w-10 rounded-full bg-primary text-primary-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100 scale-90 group-hover:scale-100 flex-shrink-0"
         >
           <Play className="h-6 w-6 fill-current" />
         </Button>
-      </div>
-      <div className="truncate pt-2">
-        <p className="font-semibold truncate">{song.title}</p>
-        <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
       </div>
     </Card>
   );
