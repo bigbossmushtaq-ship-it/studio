@@ -142,6 +142,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const isSameSong = currentSong?.id === song.id;
+    const songUrl = song.song_url || song.fileUrl || '';
 
     if (isSameSong) {
       if (isPlaying) {
@@ -154,12 +155,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     } else {
       setCurrentSongState(song);
-      const songUrl = song.song_url || song.fileUrl || '';
+      setIsPlaying(false);
+
       audio.src = songUrl;
       audio.currentTime = 0;
-      audio.play()
-        .then(() => setIsPlaying(true))
-        .catch((err) => console.error("Play error:", err));
+
+      // wait until audio is ready
+      audio.onloadedmetadata = () => {
+        audio.play()
+          .then(() => setIsPlaying(true))
+          .catch((err) => console.error("Play error:", err));
+      };
+      
+      audio.load();
     }
   };
 
