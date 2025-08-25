@@ -139,25 +139,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCurrentSongState(null);
         return;
     }
-    
-    const songUrl = song.song_url || song.fileUrl || '';
 
+    // Same song → toggle
     if (currentSong?.id === song.id) {
-        // Same song, toggle play/pause
-        if (isPlaying) {
-            audio.pause();
-            setIsPlaying(false);
-        } else {
-            audio.play().catch(e => console.error("Error playing audio:", e));
-            setIsPlaying(true);
-        }
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        audio.play().then(() => setIsPlaying(true))
+          .catch((err) => console.error("Resume error:", err));
+      }
     } else {
-        // New song
-        setCurrentSongState(song);
-        audio.src = songUrl;
-        audio.load();
-        audio.play().catch(e => console.error("Error playing audio:", e));
-        setIsPlaying(true);
+      // New song → switch source and play from start
+      setCurrentSongState(song);
+      const songUrl = song.song_url || song.fileUrl || '';
+      audio.src = songUrl;
+      audio.currentTime = 0;  // reset position
+      audio.play().then(() => setIsPlaying(true))
+        .catch((err) => console.error("Play error:", err));
     }
   };
 
