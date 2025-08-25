@@ -33,7 +33,7 @@ export function SongCard({ song }: { song: Song }) {
          <Button
           size="icon"
           onClick={handlePlay}
-          className="h-10 w-10 rounded-full bg-primary text-primary-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100 scale-90 group-hover:scale-100 flex-shrink-0"
+          className="h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0"
         >
           <Play className="h-6 w-6 fill-current" />
         </Button>
