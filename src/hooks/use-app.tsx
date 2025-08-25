@@ -133,9 +133,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Stop and clear player if song is null
     if (!song) {
         audio.pause();
+        audio.src = '';
         setIsPlaying(false);
         setCurrentSongState(null);
         return;
@@ -143,25 +143,26 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const isSameSong = currentSong?.id === song.id;
 
-    // If it's the same song, toggle play/pause
     if (isSameSong) {
       if (isPlaying) {
         audio.pause();
         setIsPlaying(false);
       } else {
-        audio.play().then(() => {
-          setIsPlaying(true);
-        }).catch(err => console.error("Audio resume error:", err));
+        audio.play()
+          .then(() => setIsPlaying(true))
+          .catch((err) => console.error("Resume error:", err));
       }
     } else {
-      // If it's a new song, set the source and play
       setCurrentSongState(song);
       const songUrl = song.song_url || song.fileUrl || '';
       audio.src = songUrl;
-      audio.currentTime = 0; // Start from the beginning
-      audio.play().then(() => {
-        setIsPlaying(true);
-      }).catch(err => console.error("Audio play error:", err));
+      audio.currentTime = 0;
+      audio.load();
+      audio.onloadeddata = () => {
+        audio.play()
+          .then(() => setIsPlaying(true))
+          .catch((err) => console.error("Play error:", err));
+      };
     }
   };
 
