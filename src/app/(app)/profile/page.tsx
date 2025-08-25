@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useApp } from "@/hooks/use-app";
 import { supabase } from "@/lib/supabase";
 import { Song } from "@/lib/data";
@@ -62,6 +62,12 @@ export default function ProfilePage() {
   }, [user, toast]);
 
 
+  const handleNext = useCallback(() => {
+    if (songs.length === 0) return;
+    setCurrentIndex((prev) => (prev + 1) % songs.length);
+    setIsPlaying(true);
+  }, [songs.length]);
+
   // Update progress bar
   useEffect(() => {
     const audio = audioRef.current;
@@ -85,7 +91,7 @@ export default function ProfilePage() {
       audio.removeEventListener("loadedmetadata", updateProgress);
       audio.removeEventListener("ended", handleSongEnd);
     };
-  }, [currentIndex]);
+  }, [handleNext]);
 
 
   const handlePlayPause = () => {
@@ -102,12 +108,8 @@ export default function ProfilePage() {
     setIsPlaying(!isPlaying);
   };
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % songs.length);
-    setIsPlaying(true);
-  };
-
   const handlePrev = () => {
+    if (songs.length === 0) return;
     setCurrentIndex((prev) => (prev - 1 + songs.length) % songs.length);
     setIsPlaying(true);
   };
@@ -120,20 +122,26 @@ export default function ProfilePage() {
     setProgress(newTime);
   };
   
-  // Autoplay effect when index changes
+  // Autoplay effect when index changes or user clicks play
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio && songs.length > 0) {
-      audio.src = songs[currentIndex].song_url || '';
-      audio.load();
+    if (audio && currentSong) {
+      if (audio.src !== (currentSong.song_url || '')) {
+         audio.src = currentSong.song_url || '';
+         audio.load();
+      }
+      
       if (isPlaying) {
         audio.play().catch(err => {
             console.error("Auto play error:", err);
+            toast({ variant: 'destructive', title: "Playback error", description: err.message });
             setIsPlaying(false); // Set to false if autoplay fails
         });
+      } else {
+        audio.pause();
       }
     }
-  }, [currentIndex, songs]);
+  }, [currentIndex, isPlaying, currentSong, toast]);
 
   if (loading) {
     return (
@@ -188,11 +196,11 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex items-center justify-center gap-2">
-                <Button onClick={handlePrev} variant="ghost" size="icon"><SkipBack className="w-6 h-6 fill-current" /></Button>
+                <Button onClick={handlePrev} variant="ghost" size="icon" disabled={songs.length < 2}><SkipBack className="w-6 h-6 fill-current" /></Button>
                 <Button onClick={handlePlayPause} size="icon" className="w-16 h-16 rounded-full">
                     {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current" />}
                 </Button>
-                <Button onClick={handleNext} variant="ghost" size="icon"><SkipForward className="w-6 h-6 fill-current" /></Button>
+                <Button onClick={handleNext} variant="ghost" size="icon" disabled={songs.length < 2}><SkipForward className="w-6 h-6 fill-current" /></Button>
             </div>
 
         </CardContent>
