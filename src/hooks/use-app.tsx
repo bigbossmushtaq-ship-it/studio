@@ -77,6 +77,31 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!audio) return;
+    
+    // Setup AudioContext and analyser only once
+    if (!audioContextRef.current) {
+        try {
+          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          audioContextRef.current = ctx;
+
+          const analyserNode = ctx.createAnalyser();
+          analyserNode.fftSize = 512;
+          setAnalyser(analyserNode);
+
+          // prevent creating multiple sources
+          if(!sourceRef.current) {
+             sourceRef.current = ctx.createMediaElementSource(audio);
+          }
+          
+          // Connect the audio graph: source -> analyser -> speakers
+          sourceRef.current.connect(analyserNode);
+          analyserNode.connect(ctx.destination);
+
+        } catch(e) {
+            console.error("Error setting up audio context:", e);
+        }
+    }
+
 
     const handleTimeUpdate = () => {
       if (audio.duration) {
@@ -196,9 +221,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play()
-        .then(() => setIsPlaying(true))
-        .catch(err => console.error("Resume error:", err));
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (err) {
+        console.error("Playback error:", err)
+        setIsPlaying(false);
+      }
     }
   };
   
@@ -227,33 +256,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
    useEffect(() => {
     if (!audio) return;
-
-    // Initialize AudioContext and Analyser only once when audio element is ready.
-    if (!audioContextRef.current) {
-        try {
-          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-          audioContextRef.current = ctx;
-          
-          const analyserNode = ctx.createAnalyser();
-          analyserNode.fftSize = 512;
-          setAnalyser(analyserNode);
-
-          sourceRef.current = ctx.createMediaElementSource(audio);
-          // Correct connection: source -> analyser -> destination
-          sourceRef.current.connect(analyserNode);
-          analyserNode.connect(ctx.destination);
-
-        } catch(e) {
-            console.error("Error setting up audio context:", e);
-        }
-      }
-
+    
     if (currentSong) {
       const songUrl = currentSong.song_url || currentSong.fileUrl || '';
       if (audio.src !== songUrl) {
           audio.src = songUrl;
           audio.load();
-           if (audioContextRef.current?.state === 'suspended') {
+          if (audioContextRef.current?.state === 'suspended') {
             audioContextRef.current.resume();
           }
           audio.play()
@@ -318,3 +327,5 @@ export const useApp = (): AppContextType => {
   }
   return context;
 };
+
+    
