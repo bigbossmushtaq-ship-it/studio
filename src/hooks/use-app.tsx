@@ -262,16 +262,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       if (audio.src !== songUrl) {
           audio.src = songUrl;
           audio.load();
-          if (audioContextRef.current?.state === 'suspended') {
-            audioContextRef.current.resume();
-          }
-          audio.play()
-              .then(() => setIsPlaying(true))
-              .catch(e => {
-                console.error("Error playing new song", e);
-                setIsPlaying(false);
-              });
       }
+       if (audioContextRef.current?.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+      audio.play()
+          .then(() => setIsPlaying(true))
+          .catch(e => {
+            console.error("Error playing new song", e);
+            setIsPlaying(false);
+          });
     } else {
         audio.pause();
         setIsPlaying(false);
