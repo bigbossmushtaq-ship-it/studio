@@ -62,7 +62,7 @@ export default function UrlAudioPlayerPage() {
 
   const handlePlaybackError = (e: any) => {
       console.error("Playback Error:", e);
-      setError("Invalid audio URL or format is not supported.");
+      setError("Invalid audio URL or format is not supported. Check for CORS errors in the console.");
       setIsPlaying(false);
   }
   
@@ -133,7 +133,7 @@ export default function UrlAudioPlayerPage() {
           )}
 
           <div className="pt-4 space-y-4">
-             <audio ref={audioRef} preload="auto" className="hidden" />
+             <audio ref={audioRef} preload="auto" className="hidden" crossOrigin="anonymous" />
              <Slider 
                 value={[progress]} 
                 onValueChange={handleSeek} 
