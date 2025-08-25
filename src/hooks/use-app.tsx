@@ -1,6 +1,6 @@
 
 "use client"
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 import { Song } from '@/lib/data';
@@ -43,27 +43,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Music Player State
   const [isPlaying, setIsPlaying] = useState(false);
   const [profilePic, setProfilePicState] = useState("https://placehold.co/200x200.png");
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [currentSong, setCurrentSongState] = useState<Song | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-
   // AudioContext for visualizer
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
 
-
   const setAudioRef = (el: HTMLAudioElement | null) => {
-    audioRef.current = el;
     setAudio(el);
   };
   
-  const playNext = React.useCallback(() => {
+  const playNext = useCallback(() => {
     if (playlist.length > 0) {
       const nextIndex = (currentIndex + 1) % playlist.length;
       setCurrentIndex(nextIndex);
@@ -82,25 +78,26 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!audio) return;
 
+    // Initialize AudioContext and Analyser
     if (!audioContextRef.current) {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = ctx;
       const analyserNode = ctx.createAnalyser();
       analyserNode.fftSize = 512;
       setAnalyser(analyserNode);
-    }
-    
-    if (analyser && !sourceRef.current) {
+      
+      // Connect audio element to context
+      if (!sourceRef.current) {
         try {
-            sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
-            sourceRef.current.connect(analyser);
-            analyser.connect(audioContextRef.current.destination);
+          sourceRef.current = ctx.createMediaElementSource(audio);
+          sourceRef.current.connect(analyserNode);
+          analyserNode.connect(ctx.destination);
         } catch(e) {
-            // This can happen if the audio element is already connected.
             if (!(e instanceof DOMException && e.name === 'InvalidStateError')) {
               console.error("Error creating source node:", e)
             }
         }
+      }
     }
 
     const handleTimeUpdate = () => {
@@ -120,7 +117,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [audio, playNext, analyser]);
+  }, [audio, playNext]);
 
 
   useEffect(() => {
@@ -229,7 +226,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         .catch(err => console.error("Resume error:", err));
     }
   };
-
 
   const setCurrentSong = (song: Song | null) => {
     if (!audio) return;
