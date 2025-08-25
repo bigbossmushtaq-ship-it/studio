@@ -124,11 +124,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     return () => {
       authListener.subscription.unsubscribe();
-      if (audio) {
-        audio.pause();
-      }
     };
-  }, [audio]);
+  }, []);
   
   const login = async (email: string, pass: string) => {
       setLoading(true);
@@ -235,6 +232,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (!audioContextRef.current) {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
       audioContextRef.current = ctx;
+      
       const analyserNode = ctx.createAnalyser();
       analyserNode.fftSize = 512;
       setAnalyser(analyserNode);
@@ -257,12 +255,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (audio.src !== songUrl) {
             audio.src = songUrl;
             audio.load();
-             if (audioContextRef.current?.state === 'suspended') {
-               audioContextRef.current.resume();
-             }
+            if (audioContextRef.current?.state === 'suspended') {
+              audioContextRef.current.resume();
+            }
             audio.play()
                 .then(() => setIsPlaying(true))
-                .catch(e => console.error("Error playing new song", e));
+                .catch(e => {
+                  console.error("Error playing new song", e);
+                  setIsPlaying(false);
+                });
         }
     } else {
         audio.pause();
