@@ -26,11 +26,18 @@ export function MusicPlayer() {
 
     const setAudioData = () => setDuration(audio.duration);
     const setAudioTime = () => {
-      setProgress((audio.currentTime / audio.duration) * 100);
+       if (audio.duration) {
+         setProgress((audio.currentTime / audio.duration) * 100);
+       }
     };
 
     audio.addEventListener('loadeddata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
+
+    // Set initial duration if audio is already loaded
+    if (audio.readyState > 0) {
+      setAudioData();
+    }
 
     return () => {
       audio.removeEventListener('loadeddata', setAudioData);
@@ -38,24 +45,13 @@ export function MusicPlayer() {
     };
   }, [audioRef]);
 
-  useEffect(() => {
-    const audio = audioRef?.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.play().catch(e => console.error("Play error:", e));
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying, audioRef]);
-
 
   const handleProgressChange = (value: number[]) => {
     const newProgress = value[0];
     setProgress(newProgress);
     const audio = audioRef?.current;
-     if(audio) {
-      audio.currentTime = (newProgress / 100) * duration;
+     if(audio && !isNaN(audio.duration)) {
+      audio.currentTime = (newProgress / 100) * audio.duration;
     }
   };
 
@@ -67,8 +63,10 @@ export function MusicPlayer() {
   };
 
   const togglePlayPause = () => {
+    // We can just call setCurrentSong with the current song
+    // The hook's logic will handle the play/pause toggle
     if (currentSong) {
-      setIsPlaying(!isPlaying);
+      setCurrentSong(currentSong);
     }
   };
 

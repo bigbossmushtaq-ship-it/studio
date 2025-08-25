@@ -31,7 +31,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Music Player State
   const [isPlaying, setIsPlaying] = useState(false);
   const [profilePic, setProfilePicState] = useState("https://placehold.co/200x200.png");
-  const audioRef = useRef<HTMLAudioElement>(typeof Audio !== "undefined" ? new Audio() : null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [currentSong, setCurrentSongState] = useState<Song | null>(null);
 
 
@@ -132,29 +132,35 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const setCurrentSong = (song: Song | null) => {
     const audio = audioRef.current;
     if (!audio) return;
-    
+
     if (!song) {
-      audio.pause();
-      setIsPlaying(false);
-      setCurrentSongState(null);
-      return;
+        audio.pause();
+        setIsPlaying(false);
+        setCurrentSongState(null);
+        return;
     }
     
-    const songUrl = song.song_url || song.fileUrl;
-    if (currentSong?.id !== song.id) {
-       setCurrentSongState(song);
-       audio.src = songUrl || '';
-       audio.load();
-    }
-    
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
+    const songUrl = song.song_url || song.fileUrl || '';
+
+    if (currentSong?.id === song.id) {
+        // Same song, toggle play/pause
+        if (isPlaying) {
+            audio.pause();
+            setIsPlaying(false);
+        } else {
+            audio.play().catch(e => console.error("Error playing audio:", e));
+            setIsPlaying(true);
+        }
     } else {
-       audio.play().catch(e => console.error("Error playing audio:", e));
-       setIsPlaying(true);
+        // New song
+        setCurrentSongState(song);
+        audio.src = songUrl;
+        audio.load();
+        audio.play().catch(e => console.error("Error playing audio:", e));
+        setIsPlaying(true);
     }
   };
+
 
   const contextValue = {
     isPlaying,

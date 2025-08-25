@@ -3,9 +3,7 @@ import type { Metadata } from "next";
 import { PT_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Toaster } from "@/components/ui/toaster";
-import { AppProvider } from "@/hooks/use-app";
-import { ThemeProvider } from "@/hooks/use-theme";
+import { ClientRoot } from "./client-root";
 
 const ptSans = PT_Sans({
   subsets: ["latin"],
@@ -31,12 +29,7 @@ export default function RootLayout({
           ptSans.variable
         )}
       >
-        <ThemeProvider>
-          <AppProvider>
-            {children}
-          </AppProvider>
-        </ThemeProvider>
-        <Toaster />
+        <ClientRoot>{children}</ClientRoot>
       </body>
     </html>
   );
