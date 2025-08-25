@@ -228,37 +228,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    useEffect(() => {
     if (!audio) return;
 
-    if (currentSong) {
-      // Initialize AudioContext and Analyser only once
-      if (!audioContextRef.current) {
+    // Initialize AudioContext and Analyser only once when audio element is ready.
+    if (!audioContextRef.current) {
         try {
           const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
           audioContextRef.current = ctx;
-          
-          if (!sourceRef.current) {
-              sourceRef.current = ctx.createMediaElementSource(audio);
-          }
           
           const analyserNode = ctx.createAnalyser();
           analyserNode.fftSize = 512;
           setAnalyser(analyserNode);
 
+          sourceRef.current = ctx.createMediaElementSource(audio);
           // Correct connection: source -> analyser -> destination
           sourceRef.current.connect(analyserNode);
           analyserNode.connect(ctx.destination);
 
         } catch(e) {
-            if (!(e instanceof DOMException && e.name === 'InvalidStateError')) {
-              console.error("Error setting up audio context:", e);
-            }
+            console.error("Error setting up audio context:", e);
         }
       }
 
+    if (currentSong) {
       const songUrl = currentSong.song_url || currentSong.fileUrl || '';
       if (audio.src !== songUrl) {
           audio.src = songUrl;
           audio.load();
-          if (audioContextRef.current?.state === 'suspended') {
+           if (audioContextRef.current?.state === 'suspended') {
             audioContextRef.current.resume();
           }
           audio.play()
