@@ -35,9 +35,10 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
       rafRef.current = requestAnimationFrame(loop);
     };
 
+    // Temporarily disabled until AudioContext issues are fully resolved.
     if (isPlaying && spectrumVisualEffects && analyser) {
       if (!rafRef.current) {
-          loop();
+          // loop();
       }
     } else {
        if (rafRef.current) {
@@ -83,7 +84,7 @@ export function MusicAvatar({ size = 32, ringWidth = 2 }: { size?: number, ringW
             filter: "hue-rotate(calc(var(--spin) * 60deg))",
             WebkitMask: `radial-gradient(transparent ${size/2}px, black ${size/2}px)`,
             mask: `radial-gradient(transparent ${size/2}px, black ${size/2}px)`,
-            display: spectrumVisualEffects ? 'block' : 'none',
+            display: spectrumVisualEffects && analyser ? 'block' : 'none',
             transform: "scale(calc(1 + var(--pulse) * 0.2))"
           }}
         />

@@ -50,9 +50,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  // AudioContext for visualizer
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  // This is being disabled temporarily to fix core playback.
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
 
   const setAudioRef = (el: HTMLAudioElement | null) => {
@@ -77,31 +75,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!audio) return;
-    
-    // Setup AudioContext and analyser only once
-    if (!audioContextRef.current) {
-        try {
-          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-          audioContextRef.current = ctx;
-
-          const analyserNode = ctx.createAnalyser();
-          analyserNode.fftSize = 512;
-          setAnalyser(analyserNode);
-
-          // prevent creating multiple sources
-          if(!sourceRef.current) {
-             sourceRef.current = ctx.createMediaElementSource(audio);
-          }
-          
-          // Connect the audio graph: source -> analyser -> speakers
-          sourceRef.current.connect(analyserNode);
-          analyserNode.connect(ctx.destination);
-
-        } catch(e) {
-            console.error("Error setting up audio context:", e);
-        }
-    }
-
 
     const handleTimeUpdate = () => {
       if (audio.duration) {
@@ -213,10 +186,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const togglePlayPause = async () => {
     if (!audio || !currentSong) return;
 
-    if (audioContextRef.current?.state === 'suspended') {
-      await audioContextRef.current.resume();
-    }
-
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
@@ -256,6 +225,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCurrentIndex(0);
       }
       setCurrentSongState(song);
+      // This will trigger the useEffect below to play the song
     }
   };
   
@@ -269,9 +239,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
     
     const playAudio = async () => {
-       if (audioContextRef.current?.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
       try {
         await audio.play();
         setIsPlaying(true);
