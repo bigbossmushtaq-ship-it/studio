@@ -12,6 +12,7 @@ interface AppContextType {
   profilePic: string;
   setProfilePic: (url: string) => void;
   audio: HTMLAudioElement | null;
+  setAudioRef: (el: HTMLAudioElement | null) => void;
   currentSong: Song | null;
   setCurrentSong: (song: Song | null) => void;
   progress: number;
@@ -49,40 +50,64 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
 
-  // User State
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [username, setUsername] = useState("Guest");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const setAudioRef = (el: HTMLAudioElement | null) => {
+    audioRef.current = el;
+    setAudio(el);
+  };
   
+  const playNext = React.useCallback(() => {
+    if (playlist.length > 0) {
+      const nextIndex = (currentIndex + 1) % playlist.length;
+      setCurrentIndex(nextIndex);
+      setCurrentSongState(playlist[nextIndex]);
+    }
+  }, [playlist, currentIndex]);
+
+  const playPrevious = () => {
+    if (playlist.length > 0) {
+      const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+      setCurrentIndex(prevIndex);
+      setCurrentSongState(playlist[prevIndex]);
+    }
+  };
+
   useEffect(() => {
-    // Initialize audio element on client
-    const audioInstance = new Audio();
-    audioInstance.crossOrigin = "anonymous";
-    setAudio(audioInstance);
+    if (!audio) return;
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+
+    if (!sourceRef.current) {
+        try {
+            sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
+            sourceRef.current.connect(audioContextRef.current.destination);
+        } catch(e) {
+            console.error("Error creating source node:", e)
+        }
+    }
 
     const handleTimeUpdate = () => {
-      if (audioInstance.duration) {
-        setProgress((audioInstance.currentTime / audioInstance.duration) * 100);
-        setDuration(audioInstance.duration);
+      if (audio.duration) {
+        setProgress((audio.currentTime / audio.duration) * 100);
+        setDuration(audio.duration);
       }
     };
     const handleEnded = () => {
-      setIsPlaying(false);
       playNext();
     };
 
-    audioInstance.addEventListener('timeupdate', handleTimeUpdate);
-    audioInstance.addEventListener('ended', handleEnded);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
     
     return () => {
-      audioInstance.removeEventListener('timeupdate', handleTimeUpdate);
-      audioInstance.removeEventListener('ended', handleEnded);
-      audioInstance.pause();
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
     };
-  }, []);
+  }, [audio, playNext]);
 
 
   useEffect(() => {
@@ -175,8 +200,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const togglePlayPause = () => {
+  const togglePlayPause = async () => {
     if (!audio || !currentSong) return;
+
+    if (audioContextRef.current?.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
 
     if (isPlaying) {
       audio.pause();
@@ -204,32 +233,44 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (isSameSong) {
       togglePlayPause();
     } else {
+      const songIndex = playlist.findIndex(s => s.id === song.id);
+      if (songIndex !== -1) {
+        setCurrentIndex(songIndex);
+      }
       setCurrentSongState(song);
       const songUrl = song.song_url || song.fileUrl || '';
       audio.src = songUrl;
-      audio.currentTime = 0;
+      setProgress(0);
+      
+      if (audioContextRef.current?.state === 'suspended') {
+        audioContextRef.current.resume();
+      }
+
       audio.play()
         .then(() => setIsPlaying(true))
         .catch(err => console.error("Play new song error:", err));
     }
   };
-
-  const playNext = () => {
-    if (playlist.length > 0) {
-      const nextIndex = (currentIndex + 1) % playlist.length;
-      setCurrentIndex(nextIndex);
-      setCurrentSong(playlist[nextIndex]);
+  
+   useEffect(() => {
+    if (playlist.length > 0 && audio && currentSong) {
+        const songUrl = currentSong.song_url || currentSong.fileUrl || '';
+        if (audio.src !== songUrl) {
+            audio.src = songUrl;
+            setProgress(0);
+            if (isPlaying) {
+                audio.play().catch(e => console.error("Error playing next song", e));
+            }
+        }
     }
-  };
+  }, [currentSong, playlist, audio, isPlaying]);
 
-  const playPrevious = () => {
-    if (playlist.length > 0) {
-      const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-      setCurrentIndex(prevIndex);
-      setCurrentSong(playlist[prevIndex]);
-    }
-  };
-
+  // User State
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState('Guest');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const contextValue: AppContextType = {
     isPlaying,
@@ -237,6 +278,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     profilePic,
     setProfilePic,
     audio,
+    setAudioRef,
     currentSong,
     setCurrentSong,
     progress,
