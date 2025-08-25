@@ -156,18 +156,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setCurrentSongState(song);
       setIsPlaying(false);
-
       audio.src = songUrl;
       audio.currentTime = 0;
-
-      // wait until audio is ready
-      audio.onloadedmetadata = () => {
-        audio.play()
-          .then(() => setIsPlaying(true))
-          .catch((err) => console.error("Play error:", err));
-      };
-      
-      audio.load();
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => console.error("Play error:", err));
     }
   };
 
