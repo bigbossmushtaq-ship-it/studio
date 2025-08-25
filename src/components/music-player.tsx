@@ -16,7 +16,7 @@ import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
 
 export function MusicPlayer() {
-  const { isPlaying, setIsPlaying, setAudioRef, currentSong } = useApp();
+  const { isPlaying, setIsPlaying, setAudioRef, currentSong, setCurrentSong } = useApp();
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -36,23 +36,25 @@ export function MusicPlayer() {
       const audio = audioRef.current;
       audio.addEventListener('loadeddata', setAudioData);
       audio.addEventListener('timeupdate', setAudioTime);
-      audio.addEventListener('ended', () => setIsPlaying(false));
-
+      
+      const handleEnded = () => setIsPlaying(false);
+      audio.addEventListener('ended', handleEnded);
 
       return () => {
         audio.removeEventListener('loadeddata', setAudioData);
         audio.removeEventListener('timeupdate', setAudioTime);
-        audio.removeEventListener('ended', () => setIsPlaying(false));
+        audio.removeEventListener('ended', handleEnded);
       }
     }
   }, [setAudioRef, setIsPlaying]);
 
   useEffect(() => {
     if (!audioRef.current) return;
-
+    
     // If a new song is selected, update src and play
-    if (currentSong && audioRef.current.src !== currentSong.song_url) {
-      audioRef.current.src = currentSong.song_url || '';
+    const songUrl = currentSong?.song_url || currentSong?.fileUrl;
+    if (currentSong && audioRef.current.src !== songUrl) {
+      audioRef.current.src = songUrl || '';
       audioRef.current.load();
     }
     
@@ -79,6 +81,12 @@ export function MusicPlayer() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const togglePlayPause = () => {
+    if (currentSong) {
+      setIsPlaying(!isPlaying);
+    }
+  };
+
   return (
     <footer className={cn("bg-card/95 backdrop-blur-lg rounded-md shadow-lg overflow-hidden transition-all duration-300", currentSong ? "h-auto p-2 opacity-100" : "h-0 p-0 opacity-0")}>
        <audio ref={audioRef} crossOrigin="anonymous" />
@@ -87,7 +95,7 @@ export function MusicPlayer() {
           {/* Left Side: Album Art & Song Info */}
           <div className="flex items-center gap-3 min-w-0">
               <AlbumArt
-                src={currentSong.album_art_url || ''}
+                src={currentSong.album_art_url || currentSong.albumArt || ''}
                 width={48}
                 height={48}
                 alt="Album Art"
@@ -106,7 +114,7 @@ export function MusicPlayer() {
                 variant="ghost"
                 size="icon"
                 className="text-foreground hover:text-foreground h-10 w-10"
-                onClick={() => setIsPlaying(!isPlaying)}
+                onClick={togglePlayPause}
               >
                 {isPlaying ? <Pause className="h-7 w-7 fill-current" /> : <Play className="h-7 w-7 fill-current" />}
               </Button>
