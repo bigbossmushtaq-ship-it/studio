@@ -249,33 +249,39 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const songIndex = playlist.findIndex(s => s.id === song.id);
       if (songIndex !== -1) {
         setCurrentIndex(songIndex);
+      } else {
+        // If the song is not in the current playlist, add it and play
+        const newPlaylist = [song, ...playlist];
+        setPlaylist(newPlaylist);
+        setCurrentIndex(0);
       }
       setCurrentSongState(song);
     }
   };
   
    useEffect(() => {
-    if (!audio) return;
+    if (!audio || !currentSong) return;
     
-    if (currentSong) {
-      const songUrl = currentSong.song_url || currentSong.fileUrl || '';
-      if (audio.src !== songUrl) {
-          audio.src = songUrl;
-          audio.load();
-      }
-       if (audioContextRef.current?.state === 'suspended') {
-        audioContextRef.current.resume();
-      }
-      audio.play()
-          .then(() => setIsPlaying(true))
-          .catch(e => {
-            console.error("Error playing new song", e);
-            setIsPlaying(false);
-          });
-    } else {
-        audio.pause();
-        setIsPlaying(false);
+    const songUrl = currentSong.song_url || currentSong.fileUrl || '';
+    if (audio.src !== songUrl) {
+        audio.src = songUrl;
+        audio.load();
     }
+    
+    const playAudio = async () => {
+       if (audioContextRef.current?.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (e) {
+        console.error("Error playing new song", e);
+        setIsPlaying(false);
+      }
+    }
+    playAudio();
+
   }, [currentSong, audio]);
 
   // User State
@@ -327,5 +333,3 @@ export const useApp = (): AppContextType => {
   }
   return context;
 };
-
-    
