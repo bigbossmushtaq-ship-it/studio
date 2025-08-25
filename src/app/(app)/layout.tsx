@@ -91,18 +91,6 @@ function SidebarNav() {
       <SidebarMenuItem>
         <SidebarMenuButton
           asChild
-          isActive={isActive("/create")}
-          tooltip={isMobile ? undefined : "Create"}
-        >
-          <Link href="/upload">
-            <Upload />
-            Create
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          asChild
           isActive={isActive("/profile")}
           tooltip={isMobile ? undefined : "Profile"}
         >
