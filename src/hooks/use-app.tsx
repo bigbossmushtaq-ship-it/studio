@@ -69,16 +69,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     // Setup audio listeners
     const audio = audioRef.current;
     if (audio) {
-      audio.addEventListener('ended', () => setIsPlaying(false));
+      const handleEnded = () => setIsPlaying(false);
+      audio.addEventListener('ended', handleEnded);
       audio.crossOrigin = "anonymous";
+      
+      return () => {
+        audio.removeEventListener('ended', handleEnded);
+      };
     }
 
 
     return () => {
       authListener.subscription.unsubscribe();
-       if (audio) {
-        audio.removeEventListener('ended', () => setIsPlaying(false));
-      }
     };
   }, []);
   
@@ -159,13 +161,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       audio.src = song.song_url || song.fileUrl || '';
       audio.currentTime = 0;
 
-      audio.oncanplaythrough = () => {
-        audio.play()
-          .then(() => setIsPlaying(true))
-          .catch((err) => console.error("Play new song error:", err));
-      };
-
-      audio.load();
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => console.error("Play new song error:", err));
     }
   };
 
