@@ -1,6 +1,6 @@
 
 import Image from "next/image";
-import { Play } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { Song } from "@/lib/data";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -8,13 +8,17 @@ import AlbumArt from "./album-art";
 import { useApp } from "@/hooks/use-app";
 
 export function SongCard({ song }: { song: Song }) {
-  const { setCurrentSong, currentSong, isPlaying } = useApp();
+  const { setCurrentSong, currentSong, isPlaying, togglePlayPause } = useApp();
 
-  const handlePlay = () => {
-    setCurrentSong(song);
-  };
-  
   const isThisSongPlaying = currentSong?.id === song.id && isPlaying;
+
+  const handlePlayPause = () => {
+    if (isThisSongPlaying) {
+      togglePlayPause();
+    } else {
+      setCurrentSong(song);
+    }
+  };
 
   return (
     <Card className="group flex flex-col gap-2 p-4 bg-card hover:bg-muted/80 transition-colors">
@@ -32,10 +36,14 @@ export function SongCard({ song }: { song: Song }) {
         </div>
          <Button
           size="icon"
-          onClick={handlePlay}
+          onClick={handlePlayPause}
           className="h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0"
         >
-          <Play className="h-6 w-6 fill-current" />
+          {isThisSongPlaying ? (
+            <Pause className="h-6 w-6 fill-current" />
+          ) : (
+            <Play className="h-6 w-6 fill-current" />
+          )}
         </Button>
       </div>
     </Card>
