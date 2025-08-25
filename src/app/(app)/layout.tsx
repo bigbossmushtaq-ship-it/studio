@@ -17,6 +17,7 @@ import {
   Pencil,
   Plus,
   Loader2,
+  Music,
 } from "lucide-react";
 import {
   Sidebar,
@@ -96,6 +97,18 @@ function SidebarNav() {
           <Link href="/upload">
             <Upload />
             Upload
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+       <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive("/url-player")}
+          tooltip={isMobile ? undefined : "URL Player"}
+        >
+          <Link href="/url-player">
+            <Music />
+            URL Player
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
