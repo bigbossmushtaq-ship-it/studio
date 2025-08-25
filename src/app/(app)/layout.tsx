@@ -88,7 +88,19 @@ function SidebarNav() {
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-        <SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive("/profile")}
+          tooltip={isMobile ? undefined : "Profile"}
+        >
+          <Link href="/profile">
+            <User />
+            Profile
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
         <SidebarMenuButton
           asChild
           isActive={isActive("/upload")}
@@ -109,18 +121,6 @@ function SidebarNav() {
           <Link href="/url-player">
             <Music />
             URL Player
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          asChild
-          isActive={isActive("/profile")}
-          tooltip={isMobile ? undefined : "Profile"}
-        >
-          <Link href="/profile">
-            <User />
-            Profile
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
