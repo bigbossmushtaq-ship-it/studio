@@ -71,7 +71,7 @@ export default function ProfilePage() {
       setProgress(audio.currentTime);
       setDuration(audio.duration || 0);
     };
-
+    
     const handleSongEnd = () => {
         handleNext();
     }
@@ -104,12 +104,12 @@ export default function ProfilePage() {
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % songs.length);
-    // isPlaying will be handled by the useEffect below
+    setIsPlaying(true);
   };
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + songs.length) % songs.length);
-     // isPlaying will be handled by the useEffect below
+    setIsPlaying(true);
   };
 
   const handleSeek = (value: number[]) => {
@@ -124,14 +124,14 @@ export default function ProfilePage() {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio && songs.length > 0) {
-        audio.src = songs[currentIndex].song_url || '';
-        audio.load();
-        audio.play().then(() => {
-            setIsPlaying(true);
-        }).catch(err => {
+      audio.src = songs[currentIndex].song_url || '';
+      audio.load();
+      if (isPlaying) {
+        audio.play().catch(err => {
             console.error("Auto play error:", err);
-            setIsPlaying(false);
+            setIsPlaying(false); // Set to false if autoplay fails
         });
+      }
     }
   }, [currentIndex, songs]);
 
