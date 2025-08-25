@@ -26,7 +26,7 @@ export default function UrlAudioPlayerPage() {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handlePlay = () => {
+  const handlePlayPause = () => {
     if (!urlInput) {
       setError("Please enter an audio URL.");
       return;
@@ -35,23 +35,21 @@ export default function UrlAudioPlayerPage() {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // New song
     if (audioSrc !== urlInput) {
-      // New URL
       setAudioSrc(urlInput);
       audio.src = urlInput;
       audio.load();
-      audio.play().then(() => setIsPlaying(true)).catch(handleError);
+      audio.play().then(() => setIsPlaying(true)).catch(handlePlaybackError);
     } else {
-      // Same song, resume
-      audio.play().then(() => setIsPlaying(true)).catch(handleError);
+      // Same song, toggle play/pause
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        audio.play().then(() => setIsPlaying(true)).catch(handlePlaybackError);
+      }
     }
-  };
-
-  const handlePause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.pause();
-    setIsPlaying(false);
   };
   
   const handleSeek = (value: number[]) => {
@@ -62,7 +60,8 @@ export default function UrlAudioPlayerPage() {
     setCurrentTime(newTime);
   };
 
-  const handleError = () => {
+  const handlePlaybackError = (e: any) => {
+      console.error("Playback Error:", e);
       setError("Invalid audio URL or format is not supported.");
       setIsPlaying(false);
   }
@@ -72,20 +71,24 @@ export default function UrlAudioPlayerPage() {
     if (!audio) return;
 
     const setAudioData = () => {
-        setDuration(audio.duration);
-        setCurrentTime(audio.currentTime);
+        if(isFinite(audio.duration)) {
+          setDuration(audio.duration);
+        }
     }
 
     const setAudioTime = () => setCurrentTime(audio.currentTime);
+    const handleEnded = () => setIsPlaying(false);
 
-    audio.addEventListener('loadeddata', setAudioData);
+    audio.addEventListener('loadedmetadata', setAudioData);
     audio.addEventListener('timeupdate', setAudioTime);
-    audio.addEventListener('error', handleError);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handlePlaybackError);
 
     return () => {
-        audio.removeEventListener('loadeddata', setAudioData);
+        audio.removeEventListener('loadedmetadata', setAudioData);
         audio.removeEventListener('timeupdate', setAudioTime);
-        audio.removeEventListener('error', handleError);
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handlePlaybackError);
     }
   }, []);
 
@@ -109,17 +112,15 @@ export default function UrlAudioPlayerPage() {
                 type="url"
                 placeholder="https://example.com/audio.mp3"
                 value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
+                onChange={(e) => {
+                    setUrlInput(e.target.value);
+                    setError(null);
+                }}
               />
-              {isPlaying ? (
-                <Button onClick={handlePause} variant="destructive">
-                  <Pause className="mr-2 h-4 w-4" /> Pause
-                </Button>
-              ) : (
-                <Button onClick={handlePlay}>
-                  <Play className="mr-2 h-4 w-4" /> Play
-                </Button>
-              )}
+              <Button onClick={handlePlayPause}>
+                {isPlaying && audioSrc === urlInput ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                {isPlaying && audioSrc === urlInput ? 'Pause' : 'Play'}
+              </Button>
             </div>
           </div>
           
@@ -137,7 +138,7 @@ export default function UrlAudioPlayerPage() {
                 value={[progress]} 
                 onValueChange={handleSeek} 
                 className="w-full"
-                disabled={!audioSrc}
+                disabled={!audioSrc || !isFinite(duration)}
              />
              <div className="flex justify-between text-sm text-muted-foreground">
                 <span>{formatTime(currentTime)}</span>
