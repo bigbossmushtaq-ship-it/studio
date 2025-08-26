@@ -84,7 +84,7 @@ export function MusicPlayer() {
 
   return (
     <div className="relative h-full w-full pointer-events-none flex justify-center">
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {!isExpanded ? (
           <motion.div
             key="mini-player"
