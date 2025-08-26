@@ -35,6 +35,7 @@ interface AppContextType {
   togglePlayPause: () => void;
   // Audio Visualizer
   analyser: AnalyserNode | null;
+  direction: number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -49,6 +50,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [duration, setDuration] = useState(0);
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
   
   // This is being disabled temporarily to fix core playback.
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
@@ -59,6 +61,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const playNext = useCallback(() => {
     if (playlist.length > 0) {
+      setDirection(1);
       const nextIndex = (currentIndex + 1) % playlist.length;
       setCurrentIndex(nextIndex);
       setCurrentSongState(playlist[nextIndex]);
@@ -67,6 +70,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const playPrevious = () => {
     if (playlist.length > 0) {
+      setDirection(-1);
       const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
       setCurrentIndex(prevIndex);
       setCurrentSongState(playlist[prevIndex]);
@@ -284,6 +288,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setPlaylist,
     togglePlayPause,
     analyser,
+    direction,
   };
 
   return (
