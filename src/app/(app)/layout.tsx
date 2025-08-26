@@ -91,12 +91,12 @@ function SidebarNav() {
        <SidebarMenuItem>
         <SidebarMenuButton
           asChild
-          isActive={isActive("/profile")}
-          tooltip={isMobile ? undefined : "Profile"}
+          isActive={isActive("/upload")}
+          tooltip={isMobile ? undefined : "Create"}
         >
-          <Link href="/profile">
-            <User />
-            Profile
+          <Link href="/upload">
+            <Upload />
+            Create
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -139,9 +139,9 @@ const BottomNavBar = () => {
           <Library className="h-6 w-6" />
           <span className="text-xs">Your Library</span>
         </Link>
-        <Link href="/upload" className={`flex flex-col items-center gap-1 ${isActive('/upload') ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Upload className="h-6 w-6" />
-          <span className="text-xs">Create</span>
+        <Link href="/profile" className={`flex flex-col items-center gap-1 ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground'}`}>
+          <User className="h-6 w-6" />
+          <span className="text-xs">Profile</span>
         </Link>
       </div>
     </div>
@@ -224,10 +224,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                <SidebarSeparator />
                <div className="flex flex-col gap-1 py-2">
                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/upload")} tooltip={isMobile ? undefined : "Create"}>
-                      <Link href="/upload">
-                        <Upload />
-                        Create
+                    <SidebarMenuButton asChild isActive={isActive("/profile")} tooltip={isMobile ? undefined : "Profile"}>
+                      <Link href="/profile">
+                        <User />
+                        Profile
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -257,12 +257,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           </main>
         </SidebarInset>
       </div>
-       <div className={cn("fixed bottom-0 left-0 right-0 w-full z-40 transition-all duration-200 ease-linear md:left-auto md:w-[calc(100%-4rem)] group-data-[state=expanded]:md:w-[calc(100%-17rem)]",
-         currentSong ? (isMobile ? 'bottom-[64px]' : 'bottom-0') : "-bottom-full"
+       <div className={cn("fixed bottom-0 left-0 right-0 w-full z-40 md:left-auto md:w-[calc(100%-4rem)] group-data-[state=expanded]:md:w-[calc(100%-17rem)] transition-transform duration-300 ease-in-out",
+         currentSong ? "translate-y-0" : "translate-y-full"
        )}>
-           <div className="p-0 md:p-2">
-             <MusicPlayer />
-           </div>
+          <MusicPlayer />
        </div>
        {!isSettingsPage && <BottomNavBar />}
     </div>
