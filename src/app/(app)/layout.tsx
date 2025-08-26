@@ -249,13 +249,14 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           </main>
         </SidebarInset>
       </div>
-      {!isSettingsPage && (
-         <div className="fixed bottom-[63px] md:bottom-2 left-0 right-0 md:left-auto md:right-2 w-full md:w-[calc(100%-4rem)] group-data-[state=expanded]:md:w-[calc(100%-17rem)] z-40 transition-all duration-200 ease-linear">
-           <div className="p-2 md:p-0">
+       <div className={cn("fixed bottom-0 md:bottom-2 left-0 right-0 md:left-auto md:right-2 w-full z-40 transition-all duration-200 ease-linear",
+         "md:w-[calc(100%-4rem-0.5rem)] group-data-[state=expanded]:md:w-[calc(100%-17rem-0.5rem)]",
+         currentSong ? "bottom-[64px] md:bottom-2" : "bottom-0"
+         )}>
+           <div className="p-0 md:p-0">
              <MusicPlayer />
            </div>
          </div>
-      )}
        {!isSettingsPage && <BottomNavBar />}
     </div>
   );
