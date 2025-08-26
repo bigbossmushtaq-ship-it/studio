@@ -162,18 +162,38 @@ export function MusicPlayer() {
                         {...swipeHandlers}
                         className="w-full max-w-sm"
                     >
-                        <AlbumArt
-                            src={currentSong.album_art_url || ""}
-                            alt={currentSong.title}
-                            width={500}
-                            height={500}
-                            className="w-full aspect-square rounded-2xl shadow-2xl object-cover"
-                        />
+                         <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentSong.id}
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -50 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <AlbumArt
+                                    src={currentSong.album_art_url || ""}
+                                    alt={currentSong.title}
+                                    width={500}
+                                    height={500}
+                                    className="w-full aspect-square rounded-2xl shadow-2xl object-cover"
+                                />
+                            </motion.div>
+                        </AnimatePresence>
                     </motion.div>
 
                     <div className="w-full max-w-sm text-center">
-                        <h2 className="text-3xl font-bold">{currentSong.title}</h2>
-                        <p className="text-lg text-white/70 mt-1">{currentSong.artist}</p>
+                        <AnimatePresence mode="wait">
+                             <motion.div
+                                key={currentSong.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.3, delay: 0.1 }}
+                             >
+                                <h2 className="text-3xl font-bold">{currentSong.title}</h2>
+                                <p className="text-lg text-white/70 mt-1">{currentSong.artist}</p>
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
 
 
