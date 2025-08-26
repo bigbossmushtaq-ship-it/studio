@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -139,11 +138,16 @@ export function MusicPlayer() {
                 onDragEnd={(e, info) => {
                   if (info.offset.y > 100) setExpanded(false);
                 }}
-                className="fixed inset-0 flex flex-col items-center justify-center text-white pointer-events-auto"
+                className="fixed inset-0 flex flex-col items-center justify-center text-white pointer-events-auto overflow-hidden"
                 style={{
                     background: `linear-gradient(to bottom, ${bgColor}, #000)`,
                 }}
             >
+                <div 
+                    className="absolute inset-0 bg-cover bg-center blur-2xl scale-125 opacity-30"
+                    style={{ backgroundImage: `url(${currentSong.album_art_url})`}}
+                />
+
                 <button
                 onClick={() => setExpanded(false)}
                 className="absolute top-6 right-6 text-gray-300 z-10"
@@ -151,7 +155,7 @@ export function MusicPlayer() {
                 <ChevronsDown className="w-8 h-8" />
                 </button>
                 
-                 <div className="flex-1 flex flex-col items-center justify-center gap-8 w-full px-8">
+                 <div className="relative flex-1 flex flex-col items-center justify-center gap-8 w-full px-8">
                     <motion.div 
                         {...swipeHandlers}
                         className="w-full max-w-sm"
