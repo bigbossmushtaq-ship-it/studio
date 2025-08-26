@@ -1,13 +1,14 @@
+
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, SkipBack, SkipForward, X, ChevronsDown } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
 import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
 import { Slider } from "./ui/slider";
 import ColorThief from 'colorthief';
+import { Play, Pause, SkipBack, SkipForward, X, ChevronsDown } from "lucide-react";
 
 const colorThief = new ColorThief();
 
@@ -81,7 +82,7 @@ export function MusicPlayer() {
   return (
     <div className="fixed bottom-0 left-0 right-0 h-full w-full pointer-events-none flex justify-center">
       <AnimatePresence mode="wait">
-        {!expanded && (
+        {!expanded ? (
           <motion.div
             key="mini-player"
             {...swipeHandlers}
@@ -124,9 +125,7 @@ export function MusicPlayer() {
               {isPlaying ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current" />}
             </button>
           </motion.div>
-        )}
-
-        {expanded && (
+        ) : (
             <motion.div
                 key="full-player"
                 initial={{ y: "100%" }}
