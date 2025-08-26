@@ -184,6 +184,7 @@ export default function ProfilePage() {
 
              <div className="w-full space-y-2">
                 <Slider
+                    key={currentSong?.id}
                     min={0}
                     max={duration || 100}
                     value={[progress]}

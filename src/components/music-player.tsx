@@ -30,19 +30,19 @@ export function MusicPlayer() {
     playPrevious,
   } = useApp();
   
-  const [dominantColor, setDominantColor] = useState('hsl(var(--primary))');
+  const [dominantColor, setDominantColor] = useState('hsl(var(--player-background))');
   const [expanded, setExpanded] = useState(false);
   const imgRef = useRef(null);
   
   useEffect(() => {
-    if (!currentSong?.album_art_url) {
-        setDominantColor('hsl(var(--primary))');
+    if (typeof window === 'undefined' || !currentSong?.album_art_url) {
+        setDominantColor('hsl(var(--player-background))');
         return;
     };
 
-    const img = new Image();
+    const img = document.createElement('img');
     img.crossOrigin = "Anonymous"; // Important for CORS
-    img.src = currentSong.album_art_url;
+    img.src = currentSong.album_art_url || '/default-album.png';
     
     img.onload = () => {
       try {
@@ -51,11 +51,11 @@ export function MusicPlayer() {
         setDominantColor(`rgb(${r}, ${g}, ${b})`);
       } catch (error) {
         console.error("Error getting dominant color", error);
-        setDominantColor('hsl(var(--primary))'); // fallback
+        setDominantColor('hsl(var(--player-background))'); // fallback
       }
     };
     img.onerror = () => {
-        setDominantColor('hsl(var(--primary))'); // fallback
+        setDominantColor('hsl(var(--player-background))'); // fallback
     }
 
   }, [currentSong]);
@@ -114,6 +114,7 @@ export function MusicPlayer() {
             </div>
             <div className="w-full max-w-sm space-y-2">
               <Slider 
+                  key={currentSong.id + "-slider-expanded"}
                   value={[progress]} 
                   onValueChange={handleProgressChange} 
                   className="w-full [&>span:first-child]:bg-white/30 [&>span>span]:bg-white"
