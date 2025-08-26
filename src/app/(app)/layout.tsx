@@ -88,7 +88,7 @@ function SidebarNav() {
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      <SidebarMenuItem>
+       <SidebarMenuItem>
         <SidebarMenuButton
           asChild
           isActive={isActive("/profile")}
@@ -223,6 +223,14 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="mt-auto w-full space-y-2">
                <SidebarSeparator />
                <div className="flex flex-col gap-1 py-2">
+                 <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/upload")} tooltip={isMobile ? undefined : "Create"}>
+                      <Link href="/upload">
+                        <Upload />
+                        Create
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 <Link href="/settings" className={cn(buttonVariants({ variant: "ghost" }), isActive('/settings') && "bg-muted", "justify-start")}>
                   <Settings className="mr-2"/> Settings
                 </Link>
