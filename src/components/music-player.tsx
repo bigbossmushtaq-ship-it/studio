@@ -24,7 +24,6 @@ export function MusicPlayer() {
   const [dominantColor, setDominantColor] = React.useState<string | null>(
     null
   );
-  const imgRef = React.useRef<HTMLImageElement>(null);
 
   React.useEffect(() => {
     if (currentSong?.album_art_url) {
@@ -64,16 +63,17 @@ export function MusicPlayer() {
     enter: (direction: number) => ({
       x: direction > 0 ? 300 : -300,
       opacity: 0,
+      transition: { duration: 0.3, ease: "easeInOut" },
     }),
     center: {
       x: 0,
       opacity: 1,
-      transition: { duration: 0.3 },
+      transition: { duration: 0.3, ease: "easeInOut" },
     },
     exit: (direction: number) => ({
       x: direction < 0 ? 300 : -300,
       opacity: 0,
-      transition: { duration: 0.3 },
+      transition: { duration: 0.3, ease: "easeInOut" },
     }),
   };
 
@@ -85,7 +85,7 @@ export function MusicPlayer() {
     <div
       {...handlers}
       className={cn(
-        "bg-background/80 backdrop-blur-sm text-foreground p-3 rounded-t-lg shadow-lg"
+        "bg-background/80 backdrop-blur-sm text-foreground p-3 rounded-t-lg shadow-lg overflow-hidden h-24 flex flex-col justify-center"
       )}
       style={{
         background: dominantColor ? `linear-gradient(135deg, ${dominantColor}, #0a0a0a)` : undefined,
@@ -122,7 +122,7 @@ export function MusicPlayer() {
           </Button>
         </motion.div>
       </AnimatePresence>
-      <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden mt-2">
+      <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden mt-auto absolute bottom-3 left-3 right-3">
         <div
           className={cn("h-1.5 rounded-full", !dominantColor && "bg-primary")}
           style={{ width: `${progress}%`, backgroundColor: dominantColor || undefined }}
