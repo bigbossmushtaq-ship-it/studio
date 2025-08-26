@@ -9,15 +9,14 @@ import {
   SkipForward,
   ChevronUp,
   ChevronDown,
-  Headphones,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
-import { useTheme } from "@/hooks/use-theme";
+import ColorThief from "colorthief";
 
 export function MusicPlayer() {
   const { 
@@ -31,8 +30,36 @@ export function MusicPlayer() {
     playPrevious,
   } = useApp();
   
-  const { theme } = useTheme();
+  const [dominantColor, setDominantColor] = useState('hsl(var(--primary))');
   const [expanded, setExpanded] = useState(false);
+  const imgRef = useRef(null);
+  
+  useEffect(() => {
+    if (!currentSong?.album_art_url) {
+        setDominantColor('hsl(var(--primary))');
+        return;
+    };
+
+    const img = new Image();
+    img.crossOrigin = "Anonymous"; // Important for CORS
+    img.src = currentSong.album_art_url;
+    
+    img.onload = () => {
+      try {
+        const colorThief = new ColorThief();
+        const [r, g, b] = colorThief.getColor(img);
+        setDominantColor(`rgb(${r}, ${g}, ${b})`);
+      } catch (error) {
+        console.error("Error getting dominant color", error);
+        setDominantColor('hsl(var(--primary))'); // fallback
+      }
+    };
+    img.onerror = () => {
+        setDominantColor('hsl(var(--primary))'); // fallback
+    }
+
+  }, [currentSong]);
+
 
   const handleProgressChange = (value: number[]) => {
     const newProgress = value[0];
@@ -48,11 +75,10 @@ export function MusicPlayer() {
 
   const currentTime = (progress / 100) * duration;
   
-  const songColor = currentSong?.color || 'hsl(var(--primary))';
-
   const playerStyle = {
-    '--song-color': songColor,
-    '--song-color-contrast': 'white', // You might need a function to determine contrast
+    '--song-color': dominantColor,
+    'background': `linear-gradient(135deg, ${dominantColor}, hsl(var(--player-background)))`,
+    'color': 'white', 
   } as React.CSSProperties;
 
 
@@ -63,8 +89,8 @@ export function MusicPlayer() {
   if (expanded) {
     return (
        <div 
-        style={playerStyle}
-        className="fixed inset-0 bg-[--song-color] text-[--song-color-contrast] z-50 flex flex-col p-4"
+        style={{ background: dominantColor }}
+        className="fixed inset-0 text-white z-50 flex flex-col p-4"
        >
          <div className="flex justify-between items-center">
             <span className="text-sm font-bold uppercase">Now Playing</span>
@@ -73,8 +99,10 @@ export function MusicPlayer() {
             </Button>
          </div>
          <div className="flex-1 flex flex-col items-center justify-center gap-8">
-            <AlbumArt
-                src={currentSong.album_art_url || currentSong.albumArt || ''}
+            <Image
+                ref={imgRef}
+                crossOrigin="anonymous"
+                src={currentSong.album_art_url || ''}
                 width={300}
                 height={300}
                 alt="Album Art"
@@ -109,23 +137,24 @@ export function MusicPlayer() {
     <footer 
         style={playerStyle}
         className={cn(
-            "bg-[--song-color] text-[--song-color-contrast] rounded-t-lg transition-all duration-300 p-2 shadow-2xl",
+            "rounded-t-lg transition-all duration-300 p-3 shadow-2xl text-white",
              currentSong ? "opacity-100" : "opacity-0"
         )}
     >
-       <div className="flex items-center gap-4 cursor-pointer" onClick={() => setExpanded(true)}>
-          {/* Album Art */}
-          <AlbumArt
-            src={currentSong.album_art_url || currentSong.albumArt || ''}
-            width={40}
-            height={40}
-            alt="Album Art"
-            className="rounded-md aspect-square object-cover"
-          />
-           {/* Song Info */}
-           <div className="text-left overflow-hidden flex-1">
-              <p className="font-semibold truncate text-sm">{currentSong.title}</p>
-          </div>
+       <div className="flex items-center gap-4">
+           <div className="flex items-center gap-3 flex-1 cursor-pointer"  onClick={() => setExpanded(true)}>
+                <AlbumArt
+                    src={currentSong.album_art_url || ''}
+                    width={48}
+                    height={48}
+                    alt="Album Art"
+                    className="rounded-md aspect-square object-cover"
+                />
+                <div className="truncate">
+                    <p className="font-semibold truncate text-sm">{currentSong.title}</p>
+                    <p className="text-xs opacity-80 truncate">{currentSong.artist}</p>
+                </div>
+           </div>
           {/* Controls */}
           <div className="flex items-center gap-2">
             <Button
@@ -135,11 +164,10 @@ export function MusicPlayer() {
                   e.stopPropagation();
                   togglePlayPause();
                 }}
-                className="text-white bg-white/20 hover:bg-white/30 rounded-full h-8 w-8"
+                className="text-white bg-white/20 hover:bg-white/30 rounded-full h-10 w-10"
               >
-                {isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+                {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
               </Button>
-               <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hidden sm:flex"><Headphones className="h-5 w-5" /></Button>
           </div>
        </div>
        {/* Progress Bar */}
