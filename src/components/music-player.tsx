@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import { useApp } from "@/hooks/use-app";
@@ -56,7 +56,7 @@ export function MusicPlayer() {
 
     extractColor(currentSong.album_art_url)
       .then(setBgColor)
-      .catch(setBgColor);
+      .catch(() => setBgColor('#111827')); // Set fallback on error too
 
   }, [currentSong]);
   
