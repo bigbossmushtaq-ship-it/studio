@@ -19,9 +19,9 @@ import AlbumArt from "./album-art";
 import ColorThief from "colorthief";
 
 export function MusicPlayer() {
-  const { 
-    isPlaying, 
-    currentSong, 
+  const {
+    isPlaying,
+    currentSong,
     progress,
     duration,
     seek,
@@ -29,11 +29,15 @@ export function MusicPlayer() {
     playNext,
     playPrevious,
   } = useApp();
-  
+
   const [dominantColor, setDominantColor] = useState('hsl(var(--player-background))');
   const [expanded, setExpanded] = useState(false);
   const imgRef = useRef(null);
   
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const swipeThreshold = 50;
+
   useEffect(() => {
     if (typeof window === 'undefined' || !currentSong?.album_art_url) {
         setDominantColor('hsl(var(--player-background))');
@@ -72,6 +76,27 @@ export function MusicPlayer() {
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+  
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const swipeDistance = touchStartX.current - touchEndX.current;
+    if (swipeDistance > swipeThreshold) {
+      // Swiped left
+      playNext();
+    } else if (swipeDistance < -swipeThreshold) {
+      // Swiped right
+      playPrevious();
+    }
+  };
+
 
   const currentTime = (progress / 100) * duration;
   
@@ -91,6 +116,9 @@ export function MusicPlayer() {
        <div 
         style={{ background: dominantColor }}
         className="fixed inset-0 text-white z-50 flex flex-col p-4"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
        >
          <div className="flex justify-between items-center">
             <span className="text-sm font-bold uppercase">Now Playing</span>
