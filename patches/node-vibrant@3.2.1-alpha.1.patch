@@ -1,0 +1,11 @@
+patch-package
+--- a/node_modules/node-vibrant/lib/worker.js
++++ b/node_modules/node-vibrant/lib/worker.js
+@@ -1,5 +1,6 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+-exports.DefaultWorker = require('web-worker');
++const DefaultWorker = typeof window === 'object' ? require('web-worker') : undefined;
++exports.DefaultWorker = DefaultWorker;
+ //# sourceMappingURL=worker.js.map
+\ No newline at end of file

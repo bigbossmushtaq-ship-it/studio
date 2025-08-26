@@ -1,0 +1,12 @@
+diff --git a/node_modules/node-vibrant/lib/worker.js b/node_modules/node-vibrant/lib/worker.js
+index 4519985..e5c3e53 100644
+--- a/node_modules/node-vibrant/lib/worker.js
++++ b/node_modules/node-vibrant/lib/worker.js
+@@ -1,5 +1,6 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+-exports.DefaultWorker = require('web-worker');
++var require_1 = require;
++exports.DefaultWorker = typeof self === 'object' && self.constructor && self.constructor.name === 'DedicatedWorkerGlobalScope' ? self : require_1('web-worker');
+ //# sourceMappingURL=worker.js.map
+\ No newline at end of file

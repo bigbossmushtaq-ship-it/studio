@@ -8,8 +8,30 @@ import { useSwipeable } from "react-swipeable";
 import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
 import { Slider } from "./ui/slider";
-import Vibrant from "node-vibrant";
-import { useTheme } from "@/hooks/use-theme";
+import ColorThief from 'colorthief';
+
+const colorThief = new ColorThief();
+
+async function extractColor(url: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = url;
+    img.onload = () => {
+      try {
+        const color = colorThief.getColor(img);
+        resolve(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+      } catch (e) {
+        console.warn("Color extraction failed, falling back to default.", e);
+        resolve('#111827'); // Fallback color
+      }
+    };
+    img.onerror = () => {
+      console.warn("Image could not be loaded for color extraction.");
+      resolve('#111827'); // Fallback color
+    }
+  });
+}
 
 export function MusicPlayer() {
   const {
@@ -22,29 +44,19 @@ export function MusicPlayer() {
     playPrevious,
     seek,
   } = useApp();
-  const { theme } = useTheme();
   
   const [expanded, setExpanded] = useState(false);
-  const [bgColor, setBgColor] = useState<string | undefined>(undefined);
+  const [bgColor, setBgColor] = useState<string>('#111827');
 
   useEffect(() => {
     if (!currentSong?.album_art_url) {
-      // Fallback to theme color if no album art
-      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary');
-      setBgColor(`hsl(${primaryColor})`);
+      setBgColor('#111827'); // Default color if no art
       return;
     };
 
-    Vibrant.from(currentSong.album_art_url).getPalette().then((palette) => {
-      setBgColor(palette.Vibrant?.hex || '#111827');
-    }).catch(err => {
-      console.error("Failed to get vibrant color", err);
-      // Fallback on error
-      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary');
-      setBgColor(`hsl(${primaryColor})`);
-    });
+    extractColor(currentSong.album_art_url).then(setBgColor);
 
-  }, [currentSong, theme]);
+  }, [currentSong]);
   
   const handleSeek = (value: number[]) => {
       seek(value[0]);
@@ -92,15 +104,17 @@ export function MusicPlayer() {
               alt={currentSong.title}
               width={56}
               height={56}
-              className="w-14 h-14 rounded-xl flex-shrink-0"
+              className="w-14 h-14 rounded-xl flex-shrink-0 object-cover"
             />
             <div className="flex-1 overflow-hidden">
               <h3 className="text-lg font-semibold truncate">{currentSong.title}</h3>
               <p className="text-sm text-gray-300 truncate">{currentSong.artist}</p>
               <div className="h-1 w-full bg-gray-600 rounded mt-1">
                 <motion.div
-                  className="h-1 rounded bg-teal-400"
-                  style={{ width: `${progress}%` }}
+                  className="h-1 rounded"
+                  style={{ backgroundColor: bgColor }}
+                  animate={{ width: `${progress}%` }}
+                   transition={{ ease: "linear", duration: 0.2 }}
                 />
               </div>
             </div>
@@ -147,7 +161,7 @@ export function MusicPlayer() {
                     alt={currentSong.title}
                     width={288}
                     height={288}
-                    className="w-72 h-72 rounded-2xl mb-8 shadow-2xl"
+                    className="w-72 h-72 rounded-2xl mb-8 shadow-2xl object-cover"
                 />
                 <div className="text-center mb-6">
                     <h2 className="text-3xl font-bold">{currentSong.title}</h2>
@@ -156,16 +170,14 @@ export function MusicPlayer() {
 
 
                  <div className="w-4/5 max-w-md space-y-2">
-                    <div className="relative h-2 w-full cursor-pointer" onClick={handleTapProgress}>
-                        <div className="h-2 w-full bg-white/20 rounded-full" />
-                        <motion.div 
-                            className="absolute top-0 left-0 h-2 rounded-full"
-                            style={{ backgroundColor: bgColor }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ ease: "linear", duration: 0.2 }}
-                        />
-                    </div>
-                    <div className="flex justify-between text-xs text-muted-foreground font-mono">
+                    <Slider
+                        min={0}
+                        max={100}
+                        value={[progress]}
+                        onValueChange={handleSeek}
+                        className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-white/70 font-mono">
                         <span>{formatTime(duration * (progress / 100))}</span>
                         <span>{formatTime(duration)}</span>
                     </div>
