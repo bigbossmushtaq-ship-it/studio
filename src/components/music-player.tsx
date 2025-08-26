@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import { useApp } from "@/hooks/use-app";
@@ -14,6 +14,9 @@ const colorThief = new ColorThief();
 
 async function extractColor(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
+    if (!url) {
+      return reject('#111827');
+    }
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.src = url;
