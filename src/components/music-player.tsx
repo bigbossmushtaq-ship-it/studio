@@ -8,7 +8,7 @@ import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
 import { Slider } from "./ui/slider";
 import ColorThief from 'colorthief';
-import { Play, Pause, SkipBack, SkipForward, X, ChevronsDown } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, ChevronsDown } from "lucide-react";
 
 const colorThief = new ColorThief();
 
@@ -48,7 +48,7 @@ export function MusicPlayer() {
     seek,
   } = useApp();
   
-  const [expanded, setExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [bgColor, setBgColor] = useState<string>('#111827');
 
   useEffect(() => {
@@ -83,13 +83,13 @@ export function MusicPlayer() {
   if (!currentSong) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-full w-full pointer-events-none flex justify-center">
-      <AnimatePresence mode="wait">
-        {!expanded ? (
+    <div className="relative h-full w-full pointer-events-none flex justify-center">
+      <AnimatePresence>
+        {!isExpanded ? (
           <motion.div
             key="mini-player"
             {...swipeHandlers}
-            onClick={() => setExpanded(true)}
+            onClick={() => setIsExpanded(true)}
             className="fixed bottom-4 flex items-center gap-3 p-3 rounded-2xl w-[95%] max-w-md text-white shadow-lg cursor-pointer pointer-events-auto"
             style={{
               background: `linear-gradient(to right, ${bgColor}, #1f2937)`
@@ -98,7 +98,7 @@ export function MusicPlayer() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 200, damping: 30 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             <AlbumArt
               src={currentSong.album_art_url || ""}
@@ -138,7 +138,7 @@ export function MusicPlayer() {
                 drag="y"
                 dragConstraints={{ top: 0, bottom: 0 }}
                 onDragEnd={(e, info) => {
-                  if (info.offset.y > 100) setExpanded(false);
+                  if (info.offset.y > 100) setIsExpanded(false);
                 }}
                 className="fixed inset-0 flex flex-col items-center justify-center text-white pointer-events-auto overflow-hidden"
                 style={{
@@ -151,7 +151,7 @@ export function MusicPlayer() {
                 />
 
                 <button
-                onClick={() => setExpanded(false)}
+                onClick={() => setIsExpanded(false)}
                 className="absolute top-6 right-6 text-gray-300 z-10"
                 >
                 <ChevronsDown className="w-8 h-8" />
