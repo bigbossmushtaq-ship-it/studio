@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -106,7 +105,7 @@ export function MusicPlayer() {
             alt={currentSong.title}
             width={48}
             height={48}
-            className="w-12 h-12 rounded-lg object-cover"
+            className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
           />
           <div className="flex-1 overflow-hidden">
             <h3 className="font-semibold truncate">{currentSong.title}</h3>
