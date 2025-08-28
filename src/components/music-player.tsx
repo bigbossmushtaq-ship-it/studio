@@ -41,9 +41,11 @@ export function MusicPlayer() {
             }
         };
 
+        // If image is already loaded (e.g. from cache), extract color immediately
         if (imgRef.current.complete) {
              extractColor();
         } else {
+            // Otherwise, wait for it to load
             imgRef.current.onload = extractColor;
         }
     }
@@ -79,34 +81,47 @@ export function MusicPlayer() {
        {!isExpanded && (
           <motion.div
             {...swipeHandlers}
-            className="fixed bottom-16 md:bottom-2 left-0 right-0 mx-2 rounded-2xl shadow-lg flex items-center p-3 cursor-pointer text-white"
-            style={{ backgroundColor: bgColor, transition: "background-color 0.4s ease" }}
             onClick={() => setIsExpanded(true)}
+            className="fixed bottom-16 left-2 right-2 rounded-2xl shadow-lg flex items-center justify-between p-3 cursor-pointer"
+            style={{
+              backgroundColor: bgColor,
+              transition: "background-color 0.4s ease",
+            }}
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
             transition={{ duration: 0.3 }}
           >
-            <img
+             <img
               ref={imgRef}
-              src={currentSong.album_art_url || ""}
+              src={currentSong.album_art_url || "/default-album.png"}
               alt="cover"
-              crossOrigin="anonymous"
-              className="w-12 h-12 rounded-lg"
+              className="w-12 h-12 rounded-lg object-cover"
             />
-            <div className="flex-1 ml-3 overflow-hidden" >
-              <p className="font-semibold truncate">{currentSong.title}</p>
-              <p className="text-gray-300 text-sm truncate">{currentSong.artist}</p>
+            <div className="flex-1 ml-3 overflow-hidden">
+                <p className="text-white font-semibold truncate text-sm">{currentSong.title}</p>
+                <p className="text-gray-200 text-xs truncate">{currentSong.artist}</p>
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                togglePlayPause();
-              }}
-              className="p-2 rounded-full text-white transition-transform active:scale-90"
-            >
-              {isPlaying ? <Pause className="w-8 h-8"/> : <Play className="w-8 h-8"/>}
-            </button>
+            <div className="flex items-center space-x-2 text-white">
+                <button
+                    onClick={(e) => { e.stopPropagation(); playPrevious(); }}
+                    className="p-1 rounded-full text-white/80 hover:text-white transition-colors"
+                >
+                    <SkipBack className="w-5 h-5 fill-current" />
+                </button>
+                 <button
+                    onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}
+                    className="p-2 rounded-full text-white transition-transform active:scale-90"
+                 >
+                    {isPlaying ? <Pause className="w-6 h-6 fill-current"/> : <Play className="w-6 h-6 fill-current"/>}
+                </button>
+                 <button
+                    onClick={(e) => { e.stopPropagation(); playNext(); }}
+                    className="p-1 rounded-full text-white/80 hover:text-white transition-colors"
+                 >
+                    <SkipForward className="w-5 h-5 fill-current" />
+                </button>
+            </div>
           </motion.div>
        )}
       </AnimatePresence>
