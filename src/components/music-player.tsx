@@ -1,13 +1,9 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useApp } from "@/hooks/use-app";
-import AlbumArt from "./album-art";
-import { Slider } from "./ui/slider";
-import { Play, Pause, SkipBack, SkipForward, ChevronDown, Music2 } from "lucide-react";
-import ColorThief from "colorthief";
 import { useSwipeable } from "react-swipeable";
 import MiniPlayer from "./mini-player"; 
 import FullPlayer from "./full-player";
@@ -25,38 +21,9 @@ export function MusicPlayer() {
   } = useApp();
   
   const [isExpanded, setIsExpanded] = useState(false);
-  const [bgColor, setBgColor] = useState("#121212");
-  const imgRef = useRef<HTMLImageElement>(null);
+  const [bgColor, setBgColor] = useState("rgb(30,30,30)");
 
   const albumArtUrl = currentSong?.album_art_url || currentSong?.albumArt;
-
-  useEffect(() => {
-    if (albumArtUrl && imgRef.current) {
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        img.src = albumArtUrl;
-        
-        const extractColor = () => {
-            try {
-                const colorThief = new ColorThief();
-                const result = colorThief.getColor(img);
-                setBgColor(`rgb(${result[0]}, ${result[1]}, ${result[2]})`);
-            } catch (err) {
-                console.warn("ColorThief failed, using default background:", err);
-                setBgColor("#121212");
-            }
-        };
-
-        if (img.complete) {
-             extractColor();
-        } else {
-            img.onload = extractColor;
-        }
-    } else {
-        setBgColor("#121212");
-    }
-  }, [albumArtUrl]);
-
 
   const handleSeek = (value: number[]) => {
     seek(value[0]);
@@ -86,9 +53,9 @@ export function MusicPlayer() {
       <AnimatePresence>
        {!isExpanded && (
           <MiniPlayer 
-            song={currentSong}
-            isPlaying={isPlaying}
+            song={{...currentSong, isPlaying}}
             bgColor={bgColor}
+            setBgColor={setBgColor}
             onOpen={() => setIsExpanded(true)}
             onPlayPause={togglePlayPause}
             onNext={playNext}
@@ -116,8 +83,6 @@ export function MusicPlayer() {
           />
         )}
       </AnimatePresence>
-       {/* Hidden image for color extraction */}
-      <img ref={imgRef} src={albumArtUrl} alt="hidden cover" className="hidden" />
     </>
   );
 }
