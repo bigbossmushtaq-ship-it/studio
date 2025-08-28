@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import AlbumArt from "./album-art";
 import { useApp } from "@/hooks/use-app";
+import { cn } from "@/lib/utils";
 
 export function SongCard({ song }: { song: Song }) {
   const { setCurrentSong, currentSong, isPlaying, togglePlayPause } = useApp();
@@ -21,7 +22,10 @@ export function SongCard({ song }: { song: Song }) {
   };
 
   return (
-    <Card className="group flex flex-col gap-2 p-4 bg-card hover:bg-muted/80 transition-colors">
+    <Card
+      onClick={handlePlayPause}
+      className="group flex cursor-pointer flex-col gap-2 p-4 bg-card hover:bg-muted/80 transition-colors"
+    >
       <div className="relative">
         <AlbumArt
           src={song.album_art_url || song.albumArt || ''}
@@ -36,8 +40,11 @@ export function SongCard({ song }: { song: Song }) {
         </div>
          <Button
           size="icon"
-          onClick={handlePlayPause}
-          className="h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent card's onClick from firing
+            handlePlayPause();
+          }}
+          className={cn("h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0 transition-opacity opacity-0 group-hover:opacity-100", isThisSongPlaying && "opacity-100")}
         >
           {isThisSongPlaying ? (
             <Pause className="h-6 w-6 fill-current" />
