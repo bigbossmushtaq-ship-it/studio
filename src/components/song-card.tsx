@@ -32,19 +32,13 @@ export function SongCard({ song }: { song: Song }) {
           alt={`Album art for ${song.title}`}
           className="w-full rounded-md aspect-square object-cover"
         />
-      </div>
-      <div className="truncate pt-2 flex justify-between items-center">
-        <div className="truncate">
-            <p className="font-semibold truncate">{song.title}</p>
-            <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
-        </div>
-         <Button
+        <Button
           size="icon"
           onClick={(e) => {
             e.stopPropagation(); // Prevent card's onClick from firing
             handlePlayPause();
           }}
-          className={cn("h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0 transition-opacity opacity-0 group-hover:opacity-100", isThisSongPlaying && "opacity-100")}
+          className={cn("absolute bottom-2 right-2 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0 transition-opacity opacity-0 group-hover:opacity-100", isThisSongPlaying && "opacity-100")}
         >
           {isThisSongPlaying ? (
             <Pause className="h-6 w-6 fill-current" />
@@ -52,6 +46,10 @@ export function SongCard({ song }: { song: Song }) {
             <Play className="h-6 w-6 fill-current" />
           )}
         </Button>
+      </div>
+      <div className="truncate pt-2">
+        <p className="font-semibold truncate">{song.title}</p>
+        <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
       </div>
     </Card>
   );
