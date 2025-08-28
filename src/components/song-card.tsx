@@ -39,8 +39,7 @@ export function SongCard({ song }: { song: Song }) {
             handlePlayPause();
           }}
           className={cn(
-            "absolute bottom-2 right-2 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0 transition-opacity",
-            isThisSongPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            "absolute bottom-2 right-2 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0 transition-opacity"
           )}
         >
           {isThisSongPlaying ? (
