@@ -26,6 +26,31 @@ export function MusicPlayer() {
   const [bgColor, setBgColor] = useState("#121212");
   const imgRef = useRef<HTMLImageElement>(null);
 
+  useEffect(() => {
+    if (currentSong && imgRef.current) {
+        // Ensure the image is fully loaded, especially with crossOrigin
+        imgRef.current.crossOrigin = "Anonymous";
+        const extractColor = () => {
+            if (!imgRef.current) return;
+            try {
+                const colorThief = new ColorThief();
+                const result = colorThief.getColor(imgRef.current);
+                setBgColor(`rgb(${result[0]}, ${result[1]}, ${result[2]})`);
+            } catch (err) {
+                console.warn("ColorThief failed, using default background:", err);
+                setBgColor("#121212");
+            }
+        };
+
+        if (imgRef.current.complete) {
+             extractColor();
+        } else {
+            imgRef.current.onload = extractColor;
+        }
+    }
+  }, [currentSong]);
+
+
   const handleSeek = (value: number[]) => {
     seek(value[0]);
   };
@@ -38,25 +63,6 @@ export function MusicPlayer() {
       .toString()
       .padStart(2, "0")}`;
   };
-  
-  const extractColor = () => {
-    if (!imgRef.current) return;
-    try {
-      const colorThief = new ColorThief();
-      const result = colorThief.getColor(imgRef.current);
-      setBgColor(`rgb(${result[0]}, ${result[1]}, ${result[2]})`);
-    } catch (err) {
-      console.warn("ColorThief failed, using default background:", err);
-      setBgColor("#121212");
-    }
-  };
-
-  // Effect to extract color when song changes
-  useEffect(() => {
-    if (currentSong && imgRef.current) {
-      imgRef.current.src = currentSong.album_art_url || "";
-    }
-  }, [currentSong]);
   
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => playNext(),
@@ -74,26 +80,26 @@ export function MusicPlayer() {
        {!isExpanded && (
           <motion.div
             key="mini-player"
-            className="fixed bottom-16 md:bottom-0 left-0 right-0 p-3 z-50 flex items-center justify-between bg-neutral-900/80 backdrop-blur-md text-white cursor-pointer shadow-lg"
+            className="fixed bottom-16 md:bottom-2 left-0 right-0 p-3 z-50 text-white cursor-pointer shadow-lg mx-2 rounded-2xl flex items-center"
             onClick={() => setIsExpanded(true)}
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
             transition={{ duration: 0.3 }}
-             {...swipeHandlers}
+            style={{ backgroundColor: bgColor }}
+            {...swipeHandlers}
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <img
+               <img
                 ref={imgRef}
                 src={currentSong.album_art_url || ""}
                 alt="cover"
                 crossOrigin="anonymous"
-                onLoad={extractColor}
-                className="w-12 h-12 rounded-md"
+                className="w-12 h-12 rounded-lg"
               />
-              <div className="truncate">
-                <p className="text-sm font-semibold truncate">{currentSong.title}</p>
-                <p className="text-xs text-gray-300 truncate">{currentSong.artist}</p>
+              <div className="truncate flex-1 ml-3 overflow-hidden cursor-pointer" onClick={() => setIsExpanded(true)}>
+                <p className="text-white font-semibold truncate">{currentSong.title}</p>
+                <p className="text-gray-300 text-sm truncate">{currentSong.artist}</p>
               </div>
             </div>
             <button
@@ -113,17 +119,13 @@ export function MusicPlayer() {
         {isExpanded && (
           <motion.div
             key="full-player"
-            className="fixed inset-0 flex flex-col text-white"
+            className="fixed inset-0 flex flex-col text-white z-50"
             style={{ backgroundColor: bgColor }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            onDragEnd={(e, info) => {
-              if (info.offset.y > 200) setIsExpanded(false);
-            }}
+            {...swipeHandlers}
           >
              <div className="absolute inset-0 -z-10">
                 <img src={currentSong.album_art_url} className="w-full h-full object-cover blur-2xl scale-125 opacity-30"/>
