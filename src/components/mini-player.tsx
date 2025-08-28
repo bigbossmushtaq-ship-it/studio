@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import ColorThief from "colorthief";
 import type { Song } from "@/lib/data";
@@ -26,6 +26,8 @@ export default function MiniPlayer({
   setBgColor,
 }: MiniPlayerProps) {
   const imgRef = useRef<HTMLImageElement | null>(null);
+  const [didSwipe, setDidSwipe] = useState(false);
+
 
   // Extract blended colors from album art
   useEffect(() => {
@@ -60,20 +62,39 @@ export default function MiniPlayer({
     }
   }, [song?.album_art_url, setBgColor]);
 
-  // Swipe handlers
   const handlers = useSwipeable({
-    onSwipedLeft: () => onNext(),
-    onSwipedRight: () => onPrev(),
+    onSwipedLeft: () => {
+      setDidSwipe(true);
+      onNext();
+    },
+    onSwipedRight: () => {
+      setDidSwipe(true);
+      onPrev();
+    },
     preventScrollOnSwipe: true,
     trackMouse: true,
   });
+
+  // Reset swipe state after each gesture
+  useEffect(() => {
+    if (didSwipe) {
+      const timeout = setTimeout(() => setDidSwipe(false), 200); // a bit longer to be safe
+      return () => clearTimeout(timeout);
+    }
+  }, [didSwipe]);
+
+  const handleOpen = () => {
+    if (!didSwipe) {
+      onOpen();
+    }
+  }
 
   if (!song) return null;
 
   return (
     <div
       {...handlers}
-      onClick={onOpen}
+      onClick={handleOpen}
       className="fixed bottom-20 md:bottom-4 left-2 right-2 md:left-auto md:w-96 rounded-2xl shadow-lg flex items-center justify-between p-3 cursor-pointer z-40"
       style={{
         background: bgColor,
