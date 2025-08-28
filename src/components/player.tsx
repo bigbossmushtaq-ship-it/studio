@@ -28,7 +28,7 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
   const [bgGradient, setBgGradient] = useState("from-gray-800 to-gray-900");
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // Auto-play when track changes
+  // Auto-play when track changes and handle loading
   useEffect(() => {
     const audio = audioRef.current;
     if (audio && track?.song_url) {
@@ -36,15 +36,20 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
       audio.src = track.song_url;
       audio.load();
 
-      // Play after the data is loaded
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.then(_ => {
-          setIsPlaying(true);
-        }).catch(error => {
-          console.error("Autoplay failed", error);
-          setIsPlaying(false);
-        });
+      const handleCanPlay = () => {
+          audio.play().then(() => {
+              setIsPlaying(true);
+          }).catch(error => {
+              console.error("Autoplay failed", error);
+              setIsPlaying(false);
+          });
+      }
+
+      audio.addEventListener('canplay', handleCanPlay);
+      
+      // Cleanup
+      return () => {
+          audio.removeEventListener('canplay', handleCanPlay);
       }
     }
   }, [track]);
