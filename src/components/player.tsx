@@ -12,7 +12,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
-import { Song } from "@/lib/data";
+import type { Song } from "@/lib/data";
 
 interface PlayerProps {
   track: Song;
@@ -22,18 +22,24 @@ interface PlayerProps {
 
 export default function Player({ track, onNext, onPrev }: PlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [bgGradient, setBgGradient] = useState("from-gray-800 to-gray-900");
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   // Auto-play when track changes
   useEffect(() => {
-    if (audioRef.current && track) {
-        audioRef.current.src = track.song_url!;
-        audioRef.current.play()
-            .then(() => setIsPlaying(true))
-            .catch(e => console.error("Autoplay failed", e));
+    const audio = audioRef.current;
+    if (audio && track?.song_url) {
+      audio.src = track.song_url;
+      audio.load();
+      audio.play().then(() => {
+          setIsPlaying(true);
+      }).catch(e => {
+        console.error("Autoplay failed", e)
+        setIsPlaying(false);
+      });
     }
   }, [track]);
 
@@ -70,6 +76,7 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     const updateProgress = () => {
       if (audio.duration) {
          setProgress((audio.currentTime / audio.duration) * 100);
+         setDuration(audio.duration);
       }
     };
     const handleSongEnd = () => {
@@ -108,10 +115,16 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     onSwipedRight: onPrev,
     preventScrollOnSwipe: true,
   });
+  
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || seconds < 0) return "00:00";
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   return (
     <>
-      {/* Mini Player (always visible) */}
       <motion.div
         {...swipeHandlers}
         className={`fixed bottom-[70px] md:bottom-0 left-0 right-0 p-4 bg-gradient-to-r ${bgGradient} shadow-lg cursor-pointer pointer-events-auto`}
@@ -152,17 +165,15 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
         </div>
       </motion.div>
 
-      {/* Full Screen Player */}
       <AnimatePresence>
         {isFullScreen && (
           <motion.div
-            className={`fixed inset-0 bg-gradient-to-b ${bgGradient} p-6 flex flex-col`}
+            className={`fixed inset-0 bg-gradient-to-b ${bgGradient} p-6 flex flex-col z-50`}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 100, damping: 20 }}
           >
-            {/* Top bar */}
             <div className="flex justify-between items-center mb-4 flex-shrink-0">
               <button
                 onClick={() => setIsFullScreen(false)}
@@ -174,7 +185,6 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
               <div className="w-8" /> {/* spacer */}
             </div>
 
-            {/* Album Art */}
             <motion.img
               src={track.album_art_url}
               alt={track.title}
@@ -184,7 +194,6 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
               transition={{ duration: 0.4 }}
             />
 
-            {/* Song Info */}
             <div className="text-center flex-shrink-0">
                 <h1 className="text-white text-2xl font-bold">
                 {track.title}
@@ -194,8 +203,7 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
                 </p>
             </div>
             
-             {/* Progress Bar */}
-            <div className="w-full mb-6 flex-shrink-0">
+             <div className="w-full mb-2 flex-shrink-0 space-y-1">
                 <div 
                     className="relative w-full h-2 bg-white/20 rounded-full cursor-pointer" 
                     onClick={handleSeek}>
@@ -204,9 +212,12 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
                         style={{ width: `${progress}%` }}
                     />
                 </div>
+                <div className="flex justify-between text-xs text-white">
+                    <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
+                    <span>{formatTime(duration)}</span>
+                </div>
             </div>
 
-            {/* Controls */}
             <div className="flex justify-center items-center gap-6 mb-6 flex-shrink-0">
               <button onClick={onPrev}>
                 <SkipBack className="text-white w-8 h-8 fill-current" />
@@ -226,7 +237,6 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
               </button>
             </div>
 
-            {/* Artist Profile & Lyrics Placeholder */}
             <div className="flex-1 overflow-y-auto text-white space-y-4">
               <div className="p-4 bg-black/30 rounded-xl">
                 <h3 className="font-bold mb-2">About the Artist</h3>
@@ -245,7 +255,6 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
         )}
       </AnimatePresence>
 
-      {/* Hidden Audio */}
       <audio ref={audioRef} onEnded={onNext}/>
     </>
   );

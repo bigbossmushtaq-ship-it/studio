@@ -22,17 +22,9 @@ interface AppContextType {
   playlist: Song[];
   setPlaylist: (songs: Song[]) => void;
   currentSong: Song | null;
-  setCurrentSong: (song: Song) => void;
-  isPlaying: boolean;
-  setIsPlaying: (playing: boolean) => void;
-  togglePlayPause: () => void;
+  setCurrentSong: (song: Song | null) => void;
   playNext: () => void;
   playPrev: () => void;
-  
-  // Global Audio Element
-  audioRef: HTMLAudioElement | null;
-  setAudioRef: (ref: HTMLAudioElement) => void;
-  analyser: AnalyserNode | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -48,15 +40,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   // Music Player State
   const [playlist, setPlaylist] = useState<Song[]>([]);
-  const [currentSong, setCurrentSongState] = useState<Song | null>(null);
-  const [isPlaying, setIsPlayingState] = useState(false);
-
-  // Global Audio Element
-  const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
-  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
-  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
-  const [audioSource, setAudioSource] = useState<MediaElementAudioSourceNode | null>(null);
-
+  const [currentSong, setCurrentSong] = useState<Song | null>(null);
 
   useEffect(() => {
     const getSession = async () => {
@@ -129,98 +113,30 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const logout = async () => {
     await supabase.auth.signOut();
-  }
-  
-  const setupAudioContext = useCallback(() => {
-      if (!audioRef) return;
-      if (audioContext && audioSource) return;
-
-      try {
-        const context = audioContext || new (window.AudioContext || (window as any).webkitAudioContext)();
-        const analyserNode = context.createAnalyser();
-        analyserNode.fftSize = 256;
-        
-        if (!audioSource) {
-            const source = context.createMediaElementSource(audioRef);
-            setAudioSource(source);
-            source.connect(analyserNode);
-        }
-        analyserNode.connect(context.destination);
-
-        setAudioContext(context);
-        setAnalyser(analyserNode);
-      } catch (e) {
-        console.error("Failed to setup audio context:", e);
-      }
-  }, [audioContext, audioRef, audioSource]);
-
-
-  const setCurrentSong = (song: Song) => {
-    setupAudioContext();
-    setCurrentSongState(song);
-    setIsPlayingState(true);
-  }
-  
-  const togglePlayPause = () => {
-    if (!currentSong) return;
-    if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-    setIsPlayingState(!isPlaying);
+    setCurrentSong(null);
   }
 
   const playNext = useCallback(() => {
     if (playlist.length === 0 || !currentSong) return;
     const currentIndex = playlist.findIndex(s => s.id === currentSong.id);
     if (currentIndex === -1) {
-      if (playlist.length > 0) setCurrentSongState(playlist[0]);
+      if (playlist.length > 0) setCurrentSong(playlist[0]);
       return;
     }
     const nextIndex = (currentIndex + 1) % playlist.length;
-    setCurrentSongState(playlist[nextIndex]);
-    setIsPlayingState(true);
+    setCurrentSong(playlist[nextIndex]);
   }, [playlist, currentSong]);
 
   const playPrev = () => {
     if (playlist.length === 0 || !currentSong) return;
     const currentIndex = playlist.findIndex(s => s.id === currentSong.id);
     if (currentIndex === -1) {
-      if (playlist.length > 0) setCurrentSongState(playlist[0]);
+      if (playlist.length > 0) setCurrentSong(playlist[0]);
       return;
     }
     const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-    setCurrentSongState(playlist[prevIndex]);
-    setIsPlayingState(true);
+    setCurrentSong(playlist[prevIndex]);
   }
-
-  useEffect(() => {
-    if (audioRef) {
-      if (isPlaying) {
-         audioRef.play().catch(e => {
-          console.error("Playback failed:", e);
-          setIsPlayingState(false);
-        });
-      } else {
-        audioRef.pause();
-      }
-    }
-  }, [isPlaying, audioRef]);
-  
-  useEffect(() => {
-    if (audioRef && currentSong?.song_url) {
-      if (audioRef.src !== currentSong.song_url) {
-        audioRef.src = currentSong.song_url;
-        audioRef.load();
-        if(isPlaying) {
-            audioRef.play().catch(e => {
-                console.error("Failed to play new track:", e);
-                setIsPlayingState(false);
-            });
-        }
-      }
-    }
-  }, [currentSong, audioRef, isPlaying]);
-
 
   const contextValue: AppContextType = {
     profilePic,
@@ -237,14 +153,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setPlaylist,
     currentSong,
     setCurrentSong,
-    isPlaying,
-    setIsPlaying: setIsPlayingState,
-    togglePlayPause,
     playNext,
     playPrev,
-    audioRef,
-    setAudioRef,
-    analyser
   };
 
   return (

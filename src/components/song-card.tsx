@@ -9,16 +9,12 @@ import { useApp } from "@/hooks/use-app";
 import { cn } from "@/lib/utils";
 
 export function SongCard({ song }: { song: Song }) {
-  const { setCurrentSong, currentSong, isPlaying, togglePlayPause } = useApp();
+  const { setCurrentSong, currentSong } = useApp();
 
-  const isThisSongPlaying = currentSong?.id === song.id && isPlaying;
+  const isThisSongPlaying = currentSong?.id === song.id;
 
   const handlePlayPause = () => {
-    if (isThisSongPlaying) {
-      togglePlayPause();
-    } else {
       setCurrentSong(song);
-    }
   };
 
   return (
