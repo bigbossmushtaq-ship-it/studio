@@ -25,7 +25,6 @@ export default function MiniPlayer({
   bgColor,
   setBgColor,
 }: MiniPlayerProps) {
-  const imgRef = useRef<HTMLImageElement | null>(null);
   const [didSwipe, setDidSwipe] = useState(false);
 
   // Extract blended colors from album art
