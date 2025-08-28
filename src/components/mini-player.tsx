@@ -1,10 +1,9 @@
-
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSwipeable } from "react-swipeable";
 import ColorThief from "colorthief";
 import type { Song } from "@/lib/data";
-import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import AlbumArt from "./album-art";
 
 interface MiniPlayerProps {
@@ -17,32 +16,47 @@ interface MiniPlayerProps {
   setBgColor: (color: string) => void;
 }
 
-export default function MiniPlayer({ song, onPlayPause, onNext, onPrev, onOpen, bgColor, setBgColor }: MiniPlayerProps) {
+export default function MiniPlayer({
+  song,
+  onPlayPause,
+  onNext,
+  onPrev,
+  onOpen,
+  bgColor,
+  setBgColor,
+}: MiniPlayerProps) {
   const imgRef = useRef<HTMLImageElement | null>(null);
 
-  // Extract dominant color
+  // Extract blended colors from album art
   useEffect(() => {
     if (!imgRef.current || !song?.album_art_url) return;
 
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.src = song.album_art_url;
-    
-    const extractColor = () => {
+
+    const extractColors = () => {
       try {
         const colorThief = new ColorThief();
-        const result = colorThief.getColor(img);
-        setBgColor(`rgb(${result[0]},${result[1]},${result[2]})`);
+        const palette = colorThief.getPalette(img, 5); // grab 5 dominant shades
+        if (palette && palette.length >= 2) {
+          const gradient = `linear-gradient(135deg, rgb(${palette[0].join(
+            ","
+          )}), rgb(${palette[1].join(",")}))`;
+          setBgColor(gradient);
+        } else {
+          setBgColor("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
+        }
       } catch (err) {
         console.warn("Color extraction failed:", err);
-        setBgColor("rgb(30,30,30)");
+        setBgColor("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
       }
     };
-    
+
     if (img.complete) {
-        extractColor();
+      extractColors();
     } else {
-        img.onload = extractColor;
+      img.onload = extractColors;
     }
   }, [song?.album_art_url, setBgColor]);
 
@@ -62,12 +76,17 @@ export default function MiniPlayer({ song, onPlayPause, onNext, onPrev, onOpen, 
       onClick={onOpen}
       className="fixed bottom-20 md:bottom-4 left-2 right-2 md:left-auto md:w-96 rounded-2xl shadow-lg flex items-center justify-between p-3 cursor-pointer z-40"
       style={{
-        backgroundColor: bgColor,
-        transition: "background-color 0.4s ease",
+        background: bgColor,
+        transition: "background 0.5s ease",
       }}
     >
-        {/* Hidden image for color extraction */}
-      <img ref={imgRef} src={song.album_art_url} alt="hidden cover" className="hidden" />
+      {/* Hidden image for color extraction */}
+      <img
+        ref={imgRef}
+        src={song.album_art_url}
+        alt="hidden cover"
+        className="hidden"
+      />
 
       {/* Cover */}
       <AlbumArt
@@ -80,21 +99,16 @@ export default function MiniPlayer({ song, onPlayPause, onNext, onPrev, onOpen, 
 
       {/* Song Info */}
       <div className="flex-1 ml-3 overflow-hidden">
-        <p className="text-white font-semibold truncate text-sm">{song.title || "Unknown Song"}</p>
-        <p className="text-gray-200 text-xs truncate">{song.artist || "Unknown Artist"}</p>
+        <p className="text-white font-semibold truncate text-sm">
+          {song.title || "Unknown Song"}
+        </p>
+        <p className="text-gray-200 text-xs truncate">
+          {song.artist || "Unknown Artist"}
+        </p>
       </div>
 
-      {/* Controls */}
-      <div className="flex items-center space-x-2 text-white">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onPrev();
-          }}
-          className="p-2 rounded-full hover:bg-white/10"
-        >
-          <SkipBack className="w-5 h-5 fill-current" />
-        </button>
+      {/* Play / Pause */}
+      <div className="flex items-center text-white">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -102,16 +116,11 @@ export default function MiniPlayer({ song, onPlayPause, onNext, onPrev, onOpen, 
           }}
           className="p-2 rounded-full hover:bg-white/10"
         >
-          {song.isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current" />}
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNext();
-          }}
-          className="p-2 rounded-full hover:bg-white/10"
-        >
-          <SkipForward className="w-5 h-5 fill-current" />
+          {song.isPlaying ? (
+            <Pause className="w-6 h-6 fill-current" />
+          ) : (
+            <Play className="w-6 h-6 fill-current" />
+          )}
         </button>
       </div>
     </div>

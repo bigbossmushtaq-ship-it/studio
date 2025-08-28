@@ -46,7 +46,7 @@ export default function FullPlayer({
       exit={{ y: "100%" }}
       transition={{ type: "tween", ease: "easeInOut", duration: 0.4 }}
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ backgroundColor: bgColor }}
+      style={{ background: bgColor }}
     >
       <div className="relative flex-grow flex flex-col items-center justify-center p-4 text-white">
         <button
