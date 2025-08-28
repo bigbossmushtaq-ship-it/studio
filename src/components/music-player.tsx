@@ -8,6 +8,7 @@ import AlbumArt from "./album-art";
 import { Slider } from "./ui/slider";
 import { Play, Pause, SkipBack, SkipForward, ChevronDown } from "lucide-react";
 import ColorThief from "colorthief";
+import { useSwipeable } from "react-swipeable";
 
 export function MusicPlayer() {
   const {
@@ -53,28 +54,33 @@ export function MusicPlayer() {
   // Effect to extract color when song changes
   useEffect(() => {
     if (currentSong && imgRef.current) {
-      // The image element is for the mini-player, we need to make sure it's loaded
-      // by setting its src and then using the onload callback.
       imgRef.current.src = currentSong.album_art_url || "";
     }
   }, [currentSong]);
+  
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => playNext(),
+    onSwipedRight: () => playPrevious(),
+    preventScrollOnSwipe: true,
+    trackMouse: true
+  });
 
 
   if (!currentSong) return null;
 
   return (
     <>
-      {/* Mini Player - Conditionally rendered using AnimatePresence in the parent */}
-       <AnimatePresence>
+      <AnimatePresence>
        {!isExpanded && (
           <motion.div
             key="mini-player"
-            className="fixed bottom-16 md:bottom-0 left-0 right-0 p-3 flex items-center justify-between bg-neutral-900/80 backdrop-blur-md text-white cursor-pointer shadow-lg"
+            className="fixed bottom-16 md:bottom-0 left-0 right-0 p-3 z-50 flex items-center justify-between bg-neutral-900/80 backdrop-blur-md text-white cursor-pointer shadow-lg"
             onClick={() => setIsExpanded(true)}
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
             transition={{ duration: 0.3 }}
+             {...swipeHandlers}
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <img
@@ -103,7 +109,6 @@ export function MusicPlayer() {
        )}
       </AnimatePresence>
       
-      {/* Expanded Full Player */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -120,6 +125,10 @@ export function MusicPlayer() {
               if (info.offset.y > 200) setIsExpanded(false);
             }}
           >
+             <div className="absolute inset-0 -z-10">
+                <img src={currentSong.album_art_url} className="w-full h-full object-cover blur-2xl scale-125 opacity-30"/>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            </div>
             <div
               className="p-4 cursor-pointer text-gray-200 flex items-center justify-center relative"
               onClick={() => setIsExpanded(false)}
