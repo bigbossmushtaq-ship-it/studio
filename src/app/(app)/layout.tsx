@@ -255,7 +255,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                <MusicAvatar size={32} ringWidth={2}/>
             </SidebarTrigger>
           </header>
-          <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && mainContentPadding)}>
+          <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", mainContentPadding)}>
             {children}
           </main>
         </SidebarInset>
