@@ -1,13 +1,13 @@
 
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSwipeable } from "react-swipeable";
 import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
 import { Slider } from "./ui/slider";
-import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, ChevronDown } from "lucide-react";
+import ColorThief from "colorthief";
 
 export function MusicPlayer() {
   const {
@@ -20,16 +20,14 @@ export function MusicPlayer() {
     playPrevious,
     seek,
   } = useApp();
+  
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [bgColor, setBgColor] = useState("#121212");
+  const imgRef = useRef<HTMLImageElement>(null);
 
   const handleSeek = (value: number[]) => {
     seek(value[0]);
   };
-
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => playNext(),
-    onSwipedRight: () => playPrevious(),
-    trackMouse: true,
-  });
 
   const formatTime = (seconds: number) => {
     if (isNaN(seconds) || seconds <= 0) return "00:00";
@@ -39,108 +37,146 @@ export function MusicPlayer() {
       .toString()
       .padStart(2, "0")}`;
   };
+  
+  const extractColor = () => {
+    if (!imgRef.current) return;
+    try {
+      const colorThief = new ColorThief();
+      const result = colorThief.getColor(imgRef.current);
+      setBgColor(`rgb(${result[0]}, ${result[1]}, ${result[2]})`);
+    } catch (err) {
+      console.warn("ColorThief failed, using default background:", err);
+      setBgColor("#121212");
+    }
+  };
+
+  // Effect to extract color when song changes
+  useEffect(() => {
+    if (currentSong && imgRef.current) {
+      // The image element is for the mini-player, we need to make sure it's loaded
+      // by setting its src and then using the onload callback.
+      imgRef.current.src = currentSong.album_art_url || "";
+    }
+  }, [currentSong]);
+
 
   if (!currentSong) return null;
 
   return (
-    <motion.div
-      key="full-player"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 35 }}
-      className="fixed inset-0 flex flex-col items-center justify-center text-white bg-neutral-900/90 backdrop-blur-lg overflow-hidden"
-    >
-      <div className="absolute inset-0 -z-10">
-        <AnimatePresence mode="wait">
+    <>
+      {/* Mini Player - Conditionally rendered using AnimatePresence in the parent */}
+       <AnimatePresence>
+       {!isExpanded && (
           <motion.div
-            key={currentSong.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeIn" }}
-            className="h-full w-full bg-cover bg-center"
-            style={{ backgroundImage: `url(${currentSong.album_art_url})` }}
-          />
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-2xl" />
-      </div>
-
-      <div className="relative flex-1 flex flex-col items-center justify-center gap-8 w-full px-8">
-        <div {...swipeHandlers} className="w-full max-w-sm">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSong.id}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
+            key="mini-player"
+            className="fixed bottom-16 md:bottom-0 left-0 right-0 p-3 flex items-center justify-between bg-neutral-900/80 backdrop-blur-md text-white cursor-pointer shadow-lg"
+            onClick={() => setIsExpanded(true)}
+            initial={{ y: 100 }}
+            animate={{ y: 0 }}
+            exit={{ y: 100 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <img
+                ref={imgRef}
+                src={currentSong.album_art_url || ""}
+                alt="cover"
+                crossOrigin="anonymous"
+                onLoad={extractColor}
+                className="w-12 h-12 rounded-md"
+              />
+              <div className="truncate">
+                <p className="text-sm font-semibold truncate">{currentSong.title}</p>
+                <p className="text-xs text-gray-300 truncate">{currentSong.artist}</p>
+              </div>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlayPause();
+              }}
+              className="p-2 rounded-full text-white transition-transform active:scale-90"
             >
-              <AlbumArt
+              {isPlaying ? <Pause className="w-8 h-8"/> : <Play className="w-8 h-8"/>}
+            </button>
+          </motion.div>
+       )}
+      </AnimatePresence>
+      
+      {/* Expanded Full Player */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            key="full-player"
+            className="fixed inset-0 flex flex-col text-white"
+            style={{ backgroundColor: bgColor }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            onDragEnd={(e, info) => {
+              if (info.offset.y > 200) setIsExpanded(false);
+            }}
+          >
+            <div
+              className="p-4 cursor-pointer text-gray-200 flex items-center justify-center relative"
+              onClick={() => setIsExpanded(false)}
+            >
+              <ChevronDown className="h-6 w-6 absolute left-4" />
+              <p className="font-bold">Now Playing</p>
+            </div>
+            <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4">
+               <AlbumArt
                 src={currentSong.album_art_url || ""}
                 alt={currentSong.title}
                 width={500}
                 height={500}
-                className="w-full aspect-square rounded-2xl shadow-2xl object-cover"
+                className="w-full max-w-sm aspect-square rounded-2xl shadow-2xl object-cover"
               />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div className="w-full max-w-sm text-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSong.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <h2 className="text-3xl font-bold">{currentSong.title}</h2>
-              <p className="text-lg text-white/70 mt-1">{currentSong.artist}</p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div className="w-full max-w-sm space-y-2">
-          <Slider
-            min={0}
-            max={100}
-            value={[progress]}
-            onValueChange={handleSeek}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-white/70 font-mono">
-            <span>{formatTime(duration * (progress / 100))}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6">
-          <button
-            onClick={playPrevious}
-            className="p-4 rounded-full text-white/80 hover:text-white transition-transform active:scale-90"
-          >
-            <SkipBack className="w-8 h-8 fill-current" />
-          </button>
-          <button
-            onClick={togglePlayPause}
-            className="p-5 rounded-full bg-white/90 hover:bg-white text-black transition-transform active:scale-90"
-          >
-            {isPlaying ? (
-              <Pause className="w-10 h-10 fill-current" />
-            ) : (
-              <Play className="w-10 h-10 fill-current" />
-            )}
-          </button>
-          <button
-            onClick={playNext}
-            className="p-4 rounded-full text-white/80 hover:text-white transition-transform active:scale-90"
-          >
-            <SkipForward className="w-8 h-8 fill-current" />
-          </button>
-        </div>
-      </div>
-    </motion.div>
+              <div className="text-center w-full max-w-sm">
+                <h2 className="text-2xl font-bold">{currentSong.title}</h2>
+                <p className="text-lg text-white/70 mt-1">{currentSong.artist}</p>
+              </div>
+            </div>
+            
+            <div className="p-6 w-full max-w-sm mx-auto">
+               <div className="space-y-2">
+                <Slider
+                  min={0}
+                  max={100}
+                  value={[progress]}
+                  onValueChange={handleSeek}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-white/70 font-mono">
+                  <span>{formatTime(duration * (progress / 100))}</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
+              </div>
+              <div className="flex justify-center items-center space-x-6 mt-4">
+                <button onClick={playPrevious}>
+                  <SkipBack className="w-8 h-8 fill-current" />
+                </button>
+                <button
+                  onClick={togglePlayPause}
+                  className="p-5 rounded-full bg-white/90 hover:bg-white text-black transition-transform active:scale-90"
+                >
+                  {isPlaying ? (
+                    <Pause className="w-10 h-10 fill-current" />
+                  ) : (
+                    <Play className="w-10 h-10 fill-current ml-1" />
+                  )}
+                </button>
+                <button onClick={playNext}>
+                  <SkipForward className="w-8 h-8 fill-current" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

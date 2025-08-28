@@ -203,6 +203,9 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+  
+  const mainContentPadding = currentSong ? "pb-32 md:pb-24" : "pb-24 md:pb-8";
+
 
   return (
      <div className={`grid h-screen w-full grid-rows-[1fr_auto] bg-background ${theme}`} style={customStyle}>
@@ -252,13 +255,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                <MusicAvatar size={32} ringWidth={2}/>
             </SidebarTrigger>
           </header>
-          <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && "pb-24 md:pb-8")}>
+          <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && mainContentPadding)}>
             {children}
           </main>
         </SidebarInset>
       </div>
-       <div className={cn("fixed inset-0 z-50 pointer-events-none", currentSong && "pointer-events-auto")}>
-          <MusicPlayer />
+       <div className="fixed inset-0 z-50 pointer-events-none">
+          {currentSong && <MusicPlayer />}
        </div>
        {!isSettingsPage && <BottomNavBar />}
     </div>
