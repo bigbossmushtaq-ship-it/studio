@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -27,10 +28,11 @@ export function ClientRoot({
   return (
     <ThemeProvider>
       <AppProvider>
-        <GlobalAudio />
         {children}
         <Toaster />
       </AppProvider>
     </ThemeProvider>
   )
 }
+
+    

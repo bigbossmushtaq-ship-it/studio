@@ -24,11 +24,14 @@ interface AppContextType {
   currentSong: Song | null;
   setCurrentSong: (song: Song) => void;
   isPlaying: boolean;
+  setIsPlaying: (playing: boolean) => void;
   togglePlayPause: () => void;
   playNext: () => void;
   playPrev: () => void;
   
   // Global Audio Element
+  audioRef: HTMLAudioElement | null;
+  setAudioRef: (ref: HTMLAudioElement) => void;
   analyser: AnalyserNode | null;
 }
 
@@ -52,6 +55,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [audioSource, setAudioSource] = useState<MediaElementAudioSourceNode | null>(null);
 
 
   useEffect(() => {
@@ -83,18 +87,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
   
-  useEffect(() => {
-    // Initialize audio element
-    const audio = new Audio();
-    audio.crossOrigin = "anonymous";
-    setAudioRef(audio);
-
-    // Cleanup
-    return () => {
-        audio.pause();
-    }
-  }, []);
-
   const login = async (email: string, pass: string) => {
       setLoading(true);
       setError(null);
@@ -140,21 +132,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }
   
   const setupAudioContext = useCallback(() => {
-      if (audioContext || !audioRef) return;
-      try {
-        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const source = context.createMediaElementSource(audioRef);
-        const analyserNode = context.createAnalyser();
-        analyserNode.fftSize = 256;
-        source.connect(analyserNode);
-        analyserNode.connect(context.destination);
-        
-        setAudioContext(context);
-        setAnalyser(analyserNode);
-      } catch (e) {
-        console.error("Failed to create audio context:", e);
+      if (!audioRef) return;
+      // Only create context if it doesn't exist
+      if (!audioContext) {
+        try {
+          const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const analyserNode = context.createAnalyser();
+          analyserNode.fftSize = 256;
+          setAudioContext(context);
+          setAnalyser(analyserNode);
+        } catch (e) {
+          console.error("Failed to create audio context:", e);
+        }
       }
-  }, [audioContext, audioRef]);
+
+      // Only create source if it doesn't exist
+      if (audioContext && !audioSource) {
+        try {
+            const source = audioContext.createMediaElementSource(audioRef);
+            setAudioSource(source);
+            source.connect(analyser!);
+            analyser!.connect(audioContext.destination);
+        } catch (e) {
+            console.error("Failed to create media element source:", e);
+        }
+      }
+  }, [audioContext, audioRef, audioSource, analyser]);
 
   const setCurrentSong = (song: Song) => {
     setupAudioContext();
@@ -164,6 +167,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const togglePlayPause = () => {
     if (!currentSong) return;
+    // This is the first interaction, try to resume context
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
     setIsPlayingState(!isPlaying);
   }
 
@@ -235,9 +242,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     currentSong,
     setCurrentSong,
     isPlaying,
+    setIsPlaying: setIsPlayingState,
     togglePlayPause,
     playNext,
     playPrev,
+    audioRef,
+    setAudioRef,
     analyser
   };
 
@@ -255,3 +265,5 @@ export const useApp = (): AppContextType => {
   }
   return context;
 };
+
+    
