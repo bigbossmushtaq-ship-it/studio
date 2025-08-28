@@ -32,7 +32,6 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio && track?.song_url) {
-      // Set the source and load it
       audio.src = track.song_url;
       audio.load();
 
@@ -43,15 +42,17 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
         });
         setIsPlaying(true);
       };
-
+      
+      // Use 'canplay' event to start playing
       audio.addEventListener('canplay', handleCanPlay);
 
-      // Cleanup
+      // Clean up the event listener
       return () => {
         audio.removeEventListener('canplay', handleCanPlay);
       };
     }
   }, [track]);
+
 
   // Extract dominant color from album art
   useEffect(() => {
