@@ -1,40 +1,13 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import { useApp } from "@/hooks/use-app";
 import AlbumArt from "./album-art";
 import { Slider } from "./ui/slider";
-import ColorThief from 'colorthief';
 import { Play, Pause, SkipBack, SkipForward, ChevronsDown } from "lucide-react";
-
-const colorThief = new ColorThief();
-
-async function extractColor(url: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    if (!url) {
-      return reject('#111827');
-    }
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = url;
-    img.onload = () => {
-      try {
-        const color = colorThief.getColor(img);
-        resolve(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
-      } catch (e) {
-        console.warn("Color extraction failed, falling back to default.", e);
-        reject('#111827'); // Fallback color
-      }
-    };
-    img.onerror = () => {
-      console.warn("Image could not be loaded for color extraction.");
-      reject('#111827'); // Fallback color
-    }
-  });
-}
 
 export function MusicPlayer() {
   const {
@@ -49,20 +22,7 @@ export function MusicPlayer() {
   } = useApp();
   
   const [isExpanded, setIsExpanded] = useState(false);
-  const [bgColor, setBgColor] = useState<string>('#111827');
 
-  useEffect(() => {
-    if (!currentSong?.album_art_url) {
-      setBgColor('#111827'); // Default color if no art
-      return;
-    };
-
-    extractColor(currentSong.album_art_url)
-      .then(setBgColor)
-      .catch(() => setBgColor('#111827')); // Set fallback on error too
-
-  }, [currentSong]);
-  
   const handleSeek = (value: number[]) => {
       seek(value[0]);
   }
@@ -74,7 +34,7 @@ export function MusicPlayer() {
   });
   
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return "00:00";
+    if (isNaN(seconds) || seconds <= 0) return "00:00";
     const minutes = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
@@ -83,17 +43,14 @@ export function MusicPlayer() {
   if (!currentSong) return null;
 
   return (
-    <div className="relative h-full w-full pointer-events-none flex justify-center">
-      <AnimatePresence mode="wait">
+    <>
+      <AnimatePresence>
         {!isExpanded ? (
           <motion.div
             key="mini-player"
             {...swipeHandlers}
             onClick={() => setIsExpanded(true)}
-            className="fixed bottom-4 flex items-center gap-3 p-3 rounded-2xl w-[95%] max-w-md text-white shadow-lg cursor-pointer pointer-events-auto"
-            style={{
-              background: `linear-gradient(to right, ${bgColor}, #1f2937)`
-            }}
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 p-3 rounded-2xl w-[95%] max-w-md text-white shadow-lg cursor-pointer bg-neutral-900/80 backdrop-blur-sm"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
@@ -140,25 +97,17 @@ export function MusicPlayer() {
                 onDragEnd={(e, info) => {
                   if (info.offset.y > 100) setIsExpanded(false);
                 }}
-                className="fixed inset-0 flex flex-col items-center justify-center text-white pointer-events-auto overflow-hidden"
-                style={{
-                    background: `linear-gradient(to bottom, ${bgColor}, #000)`,
-                }}
+                className="fixed inset-0 flex flex-col items-center justify-center text-white bg-neutral-900/90 backdrop-blur-lg overflow-hidden"
             >
-                <div 
-                    className="absolute inset-0 bg-cover bg-center blur-2xl scale-125 opacity-30"
-                    style={{ backgroundImage: `url(${currentSong.album_art_url})`}}
-                />
-
                 <button
-                onClick={() => setIsExpanded(false)}
-                className="absolute top-6 right-6 text-gray-300 z-10"
+                    onClick={() => setIsExpanded(false)}
+                    className="absolute top-6 right-6 text-gray-300 z-10"
                 >
-                <ChevronsDown className="w-8 h-8" />
+                    <ChevronsDown className="w-8 h-8" />
                 </button>
                 
                  <div className="relative flex-1 flex flex-col items-center justify-center gap-8 w-full px-8">
-                    <motion.div 
+                    <div 
                         {...swipeHandlers}
                         className="w-full max-w-sm"
                     >
@@ -179,7 +128,7 @@ export function MusicPlayer() {
                                 />
                             </motion.div>
                         </AnimatePresence>
-                    </motion.div>
+                    </div>
 
                     <div className="w-full max-w-sm text-center">
                         <AnimatePresence mode="wait">
@@ -195,7 +144,6 @@ export function MusicPlayer() {
                             </motion.div>
                         </AnimatePresence>
                     </div>
-
 
                     <div className="w-full max-w-sm space-y-2">
                         <Slider
@@ -235,6 +183,6 @@ export function MusicPlayer() {
             </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
