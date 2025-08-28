@@ -138,3 +138,18 @@ body {
 #avatar-visualizer-container {
     transition: box-shadow 0.2s ease-out;
 }
+
+@keyframes swipe-left {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-100%); opacity: 0; }
+}
+@keyframes swipe-right {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+.animate-swipe-left {
+  animation: swipe-left 0.3s ease-out forwards;
+}
+.animate-swipe-right {
+  animation: swipe-right 0.3s ease-out forwards;
+}

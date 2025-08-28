@@ -34,7 +34,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button, buttonVariants } from "@/components/ui/button";
-import MusicPlayer from "@/components/music-player";
+import PlayerContainer from "@/components/player-container";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { MusicAvatar } from "@/components/music-avatar";
@@ -204,7 +204,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
-  const mainContentPadding = currentSong ? "pb-40 md:pb-24" : "pb-24 md:pb-8";
+  const mainContentPadding = currentSong ? "pb-32 md:pb-24" : "pb-24 md:pb-8";
 
 
   return (
@@ -261,7 +261,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         </SidebarInset>
       </div>
        <div className="fixed inset-0 z-50 pointer-events-none">
-          <MusicPlayer />
+          <PlayerContainer />
        </div>
        {!isSettingsPage && <BottomNavBar />}
     </div>

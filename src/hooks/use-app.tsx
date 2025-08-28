@@ -24,15 +24,11 @@ interface AppContextType {
   currentSong: Song | null;
   setCurrentSong: (song: Song) => void;
   isPlaying: boolean;
-  setIsPlaying: (playing: boolean) => void;
   togglePlayPause: () => void;
   playNext: () => void;
   playPrev: () => void;
-  progress: number;
   
   // Global Audio Element
-  audioRef: HTMLAudioElement | null;
-  setAudioRef: (ref: HTMLAudioElement) => void;
   analyser: AnalyserNode | null;
 }
 
@@ -51,13 +47,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [currentSong, setCurrentSongState] = useState<Song | null>(null);
   const [isPlaying, setIsPlayingState] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   // Global Audio Element
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
-  const [sourceNode, setSourceNode] = useState<MediaElementAudioSourceNode | null>(null);
 
 
   useEffect(() => {
@@ -87,6 +81,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       authListener.subscription.unsubscribe();
     };
+  }, []);
+  
+  useEffect(() => {
+    // Initialize audio element
+    const audio = new Audio();
+    audio.crossOrigin = "anonymous";
+    setAudioRef(audio);
+
+    // Cleanup
+    return () => {
+        audio.pause();
+    }
   }, []);
 
   const login = async (email: string, pass: string) => {
@@ -133,8 +139,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
   }
   
-  const setCurrentSong = (song: Song) => {
-    if (audioRef && !audioContext) {
+  const setupAudioContext = useCallback(() => {
+      if (audioContext || !audioRef) return;
       try {
         const context = new (window.AudioContext || (window as any).webkitAudioContext)();
         const source = context.createMediaElementSource(audioRef);
@@ -144,29 +150,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         analyserNode.connect(context.destination);
         
         setAudioContext(context);
-        setSourceNode(source);
         setAnalyser(analyserNode);
       } catch (e) {
         console.error("Failed to create audio context:", e);
       }
-    }
-    setCurrentSongState(song);
-    setIsPlaying(true);
-  }
+  }, [audioContext, audioRef]);
 
-  const setIsPlaying = (playing: boolean) => {
-    if (!audioRef) return;
-    setIsPlayingState(playing);
-    if(playing) {
-      audioRef.play().catch(e => console.error("Playback error:", e));
-    } else {
-      audioRef.pause();
-    }
+  const setCurrentSong = (song: Song) => {
+    setupAudioContext();
+    setCurrentSongState(song);
+    setIsPlayingState(true);
   }
   
   const togglePlayPause = () => {
     if (!currentSong) return;
-    setIsPlaying(!isPlaying);
+    setIsPlayingState(!isPlaying);
   }
 
   const playNext = useCallback(() => {
@@ -188,15 +186,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Audio event listeners
   useEffect(() => {
     if (!audioRef) return;
-
-    const handleTimeUpdate = () => setProgress(audioRef.currentTime);
     const handleEnded = () => playNext();
-    
-    audioRef.addEventListener('timeupdate', handleTimeUpdate);
     audioRef.addEventListener('ended', handleEnded);
-
     return () => {
-      audioRef.removeEventListener('timeupdate', handleTimeUpdate);
       audioRef.removeEventListener('ended', handleEnded);
     }
   }, [audioRef, playNext]);
@@ -209,7 +201,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         audioRef.src = currentSong.song_url!;
         audioRef.load();
       }
-      if (isPlaying) {
+    }
+  }, [currentSong, audioRef]);
+
+  // Handle play/pause state
+  useEffect(() => {
+    if(audioRef) {
+      if(isPlaying) {
          audioRef.play().catch(e => {
           console.error("Autoplay failed:", e);
           setIsPlayingState(false);
@@ -218,7 +216,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         audioRef.pause();
       }
     }
-  }, [currentSong, audioRef, isPlaying]);
+  }, [isPlaying, audioRef]);
 
 
   const contextValue: AppContextType = {
@@ -237,13 +235,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     currentSong,
     setCurrentSong,
     isPlaying,
-    setIsPlaying,
     togglePlayPause,
     playNext,
     playPrev,
-    progress,
-    audioRef,
-    setAudioRef,
     analyser
   };
 
