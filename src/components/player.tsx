@@ -22,7 +22,7 @@ interface PlayerProps {
 
 export default function Player({ track, onNext, onPrev }: PlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [bgGradient, setBgGradient] = useState("from-gray-800 to-gray-900");
@@ -32,14 +32,20 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio && track?.song_url) {
+      // Set the source and load it
       audio.src = track.song_url;
       audio.load();
-      audio.play().then(() => {
+
+      // Play after the data is loaded
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(_ => {
           setIsPlaying(true);
-      }).catch(e => {
-        console.error("Autoplay failed", e)
-        setIsPlaying(false);
-      });
+        }).catch(error => {
+          console.error("Autoplay failed", error);
+          setIsPlaying(false);
+        });
+      }
     }
   }, [track]);
 
