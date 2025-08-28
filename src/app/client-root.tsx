@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -17,7 +16,7 @@ function GlobalAudio() {
     }
   }, [setAudioRef]);
 
-  return <audio ref={audioRef} preload="auto" className="hidden" />;
+  return <audio ref={audioRef} preload="auto" className="hidden" crossOrigin="anonymous"/>;
 }
 
 export function ClientRoot({
