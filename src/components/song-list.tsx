@@ -32,7 +32,7 @@ function SongItemRow({ song, index, onPlay, onPause, isPlaying, currentSong }: {
       <TableCell>
         <div className="flex items-center gap-4">
           <AlbumArt
-            src={song.album_art_url || song.albumArt}
+            src={song.album_art_url}
             width={40}
             height={40}
             alt={song.title}

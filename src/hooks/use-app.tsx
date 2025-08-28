@@ -17,7 +17,7 @@ interface AppContextType {
   setCurrentSong: (song: Song | null) => void;
   progress: number;
   duration: number;
-  seek: (progress: number) => void;
+  seek: (time: number) => void;
   // User State
   session: Session | null;
   user: User | null;
@@ -180,10 +180,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setIsPlaying(false);
   }
 
-  const seek = (newProgress: number) => {
+  const seek = (time: number) => {
     if (audio && isFinite(audio.duration)) {
-      audio.currentTime = (newProgress / 100) * audio.duration;
-      setProgress(newProgress);
+      audio.currentTime = time;
+       setProgress((time / audio.duration) * 100);
     }
   };
 
@@ -236,7 +236,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
    useEffect(() => {
     if (!audio || !currentSong) return;
     
-    const songUrl = currentSong.song_url || currentSong.fileUrl || '';
+    const songUrl = currentSong.song_url || '';
     if (audio.src !== songUrl) {
         audio.src = songUrl;
         audio.load();

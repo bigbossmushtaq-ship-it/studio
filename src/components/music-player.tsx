@@ -23,10 +23,12 @@ export function MusicPlayer() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [bgColor, setBgColor] = useState("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
 
-  const albumArtUrl = currentSong?.album_art_url || currentSong?.albumArt;
+  const albumArtUrl = currentSong?.album_art_url;
 
   const handleSeek = (value: number[]) => {
-    seek(value[0]);
+    const newProgress = value[0];
+    const newTime = (newProgress / 100) * duration;
+    seek(newTime); // assuming seek takes time in seconds
   };
 
   const formatTime = (seconds: number) => {

@@ -28,7 +28,7 @@ export function SongCard({ song }: { song: Song }) {
     >
       <div className="relative">
         <AlbumArt
-          src={song.album_art_url || song.albumArt || ''}
+          src={song.album_art_url || ''}
           alt={`Album art for ${song.title}`}
           className="w-full rounded-md aspect-square object-cover"
         />
