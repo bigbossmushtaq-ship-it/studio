@@ -56,6 +56,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Global Audio Element
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [sourceNode, setSourceNode] = useState<MediaElementAudioSourceNode | null>(null);
+
 
   useEffect(() => {
     const getSession = async () => {
@@ -131,6 +134,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }
   
   const setCurrentSong = (song: Song) => {
+    if (audioRef && !audioContext) {
+      try {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const source = context.createMediaElementSource(audioRef);
+        const analyserNode = context.createAnalyser();
+        analyserNode.fftSize = 256;
+        source.connect(analyserNode);
+        analyserNode.connect(context.destination);
+        
+        setAudioContext(context);
+        setSourceNode(source);
+        setAnalyser(analyserNode);
+      } catch (e) {
+        console.error("Failed to create audio context:", e);
+      }
+    }
     setCurrentSongState(song);
     setIsPlaying(true);
   }
@@ -146,6 +165,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }
   
   const togglePlayPause = () => {
+    if (!currentSong) return;
     setIsPlaying(!isPlaying);
   }
 
@@ -153,33 +173,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (playlist.length === 0 || !currentSong) return;
     const currentIndex = playlist.findIndex(s => s.id === currentSong.id);
     const nextIndex = (currentIndex + 1) % playlist.length;
-    setCurrentSong(playlist[nextIndex]);
+    setCurrentSongState(playlist[nextIndex]);
+    setIsPlayingState(true);
   }, [playlist, currentSong]);
 
   const playPrev = () => {
     if (playlist.length === 0 || !currentSong) return;
     const currentIndex = playlist.findIndex(s => s.id === currentSong.id);
     const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-    setCurrentSong(playlist[prevIndex]);
+    setCurrentSongState(playlist[prevIndex]);
+    setIsPlayingState(true);
   }
-  
-  // Audio setup
-  useEffect(() => {
-    if (audioRef) {
-      try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const source = audioContext.createMediaElementSource(audioRef);
-        const analyserNode = audioContext.createAnalyser();
-        analyserNode.fftSize = 256;
-        source.connect(analyserNode);
-        analyserNode.connect(audioContext.destination);
-        setAnalyser(analyserNode);
-      } catch (error) {
-        console.error("AudioContext setup failed:", error)
-      }
-    }
-  }, [audioRef]);
-
 
   // Audio event listeners
   useEffect(() => {
