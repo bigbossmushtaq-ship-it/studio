@@ -21,7 +21,7 @@ export function MusicPlayer() {
   } = useApp();
   
   const [isExpanded, setIsExpanded] = useState(false);
-  const [bgColor, setBgColor] = useState("rgb(30,30,30)");
+  const [bgColor, setBgColor] = useState("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
 
   const albumArtUrl = currentSong?.album_art_url || currentSong?.albumArt;
 

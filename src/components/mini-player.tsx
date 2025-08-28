@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
@@ -31,7 +32,10 @@ export default function MiniPlayer({
 
   // Extract blended colors from album art
   useEffect(() => {
-    if (!imgRef.current || !song?.album_art_url) return;
+    if (!song?.album_art_url) {
+      setBgColor("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
+      return;
+    };
 
     const img = new Image();
     img.crossOrigin = "Anonymous";
@@ -59,6 +63,9 @@ export default function MiniPlayer({
       extractColors();
     } else {
       img.onload = extractColors;
+      img.onerror = () => {
+         setBgColor("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
+      }
     }
   }, [song?.album_art_url, setBgColor]);
 

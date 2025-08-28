@@ -81,6 +81,7 @@ export default function FullPlayer({
             <div className="space-y-2">
                 <Slider
                 value={[progress]}
+                max={100}
                 onValueChange={handleSeek}
                 className="w-full"
                 />
