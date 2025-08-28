@@ -78,33 +78,25 @@ export function MusicPlayer() {
       <AnimatePresence>
        {!isExpanded && (
           <motion.div
-            key="mini-player"
-            className="fixed bottom-16 md:bottom-2 left-0 right-0 p-3 z-50 text-white cursor-pointer shadow-lg mx-2 rounded-2xl flex items-center"
+            {...swipeHandlers}
+            className="fixed bottom-16 md:bottom-2 left-0 right-0 mx-2 rounded-2xl shadow-lg flex items-center p-3 cursor-pointer text-white"
+            style={{ backgroundColor: bgColor, transition: "background-color 0.4s ease" }}
             onClick={() => setIsExpanded(true)}
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
             transition={{ duration: 0.3 }}
-            style={{ backgroundColor: bgColor }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            onDragEnd={(event, info) => {
-                if (info.offset.x > 100) playPrevious();
-                if (info.offset.x < -100) playNext();
-            }}
           >
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-               <img
-                ref={imgRef}
-                src={currentSong.album_art_url || ""}
-                alt="cover"
-                crossOrigin="anonymous"
-                className="w-12 h-12 rounded-lg"
-              />
-              <div className="truncate flex-1 ml-3 overflow-hidden cursor-pointer" onClick={() => setIsExpanded(true)}>
-                <p className="text-white font-semibold truncate">{currentSong.title}</p>
-                <p className="text-gray-300 text-sm truncate">{currentSong.artist}</p>
-              </div>
+            <img
+              ref={imgRef}
+              src={currentSong.album_art_url || ""}
+              alt="cover"
+              crossOrigin="anonymous"
+              className="w-12 h-12 rounded-lg"
+            />
+            <div className="flex-1 ml-3 overflow-hidden" >
+              <p className="font-semibold truncate">{currentSong.title}</p>
+              <p className="text-gray-300 text-sm truncate">{currentSong.artist}</p>
             </div>
             <button
               onClick={(e) => {
