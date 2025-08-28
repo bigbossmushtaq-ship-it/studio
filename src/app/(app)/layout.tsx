@@ -204,7 +204,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
-  const mainContentPadding = currentSong ? "pb-32 md:pb-24" : "pb-24 md:pb-8";
+  const mainContentPadding = currentSong ? "pb-40 md:pb-24" : "pb-24 md:pb-8";
 
 
   return (

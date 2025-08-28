@@ -26,14 +26,18 @@ export function MusicPlayer() {
   const [bgColor, setBgColor] = useState("#121212");
   const imgRef = useRef<HTMLImageElement>(null);
 
+  const albumArtUrl = currentSong?.album_art_url || currentSong?.albumArt;
+
   useEffect(() => {
-    if (currentSong?.album_art_url && imgRef.current) {
-        imgRef.current.crossOrigin = "Anonymous";
+    if (albumArtUrl && imgRef.current) {
+        const img = imgRef.current;
+        img.crossOrigin = "Anonymous";
+        
         const extractColor = () => {
-            if (!imgRef.current) return;
+            if (!img) return;
             try {
                 const colorThief = new ColorThief();
-                const result = colorThief.getColor(imgRef.current);
+                const result = colorThief.getColor(img);
                 setBgColor(`rgb(${result[0]}, ${result[1]}, ${result[2]})`);
             } catch (err) {
                 console.warn("ColorThief failed, using default background:", err);
@@ -41,15 +45,13 @@ export function MusicPlayer() {
             }
         };
 
-        // If image is already loaded (e.g. from cache), extract color immediately
-        if (imgRef.current.complete) {
+        if (img.complete) {
              extractColor();
         } else {
-            // Otherwise, wait for it to load
-            imgRef.current.onload = extractColor;
+            img.onload = extractColor;
         }
     }
-  }, [currentSong]);
+  }, [albumArtUrl]);
 
 
   const handleSeek = (value: number[]) => {
@@ -82,19 +84,19 @@ export function MusicPlayer() {
           <motion.div
             {...swipeHandlers}
             onClick={() => setIsExpanded(true)}
-            className="fixed bottom-16 left-2 right-2 rounded-2xl shadow-lg flex items-center justify-between p-3 cursor-pointer"
+            className="fixed bottom-20 md:bottom-2 left-2 right-2 rounded-2xl shadow-lg flex items-center justify-between p-3 cursor-pointer"
             style={{
               backgroundColor: bgColor,
               transition: "background-color 0.4s ease",
             }}
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            exit={{ y: 100 }}
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
              <img
               ref={imgRef}
-              src={currentSong.album_art_url || "/default-album.png"}
+              src={albumArtUrl || "/default-album.png"}
               alt="cover"
               className="w-12 h-12 rounded-lg object-cover"
             />
@@ -139,7 +141,7 @@ export function MusicPlayer() {
             {...swipeHandlers}
           >
              <div className="absolute inset-0 -z-10">
-                <img src={currentSong.album_art_url} className="w-full h-full object-cover blur-2xl scale-125 opacity-30"/>
+                <img src={albumArtUrl} className="w-full h-full object-cover blur-2xl scale-125 opacity-30"/>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
             <div
@@ -151,7 +153,7 @@ export function MusicPlayer() {
             </div>
             <div className="flex-1 flex flex-col items-center justify-center gap-6 px-4">
                <AlbumArt
-                src={currentSong.album_art_url || ""}
+                src={albumArtUrl || ""}
                 alt={currentSong.title}
                 width={500}
                 height={500}
