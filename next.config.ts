@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/supabase-images/:path*',
+        destination: 'https://kfbdkowaslubunczjjgh.supabase.co/storage/v1/object/public/:path*',
+      },
+    ]
+  }
 };
 
 export default nextConfig;

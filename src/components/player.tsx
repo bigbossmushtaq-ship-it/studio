@@ -37,24 +37,23 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
       audio.load();
 
       const handleCanPlay = () => {
-          audio.play().then(() => {
-              setIsPlaying(true);
-          }).catch(error => {
-              console.error("Autoplay failed", error);
-              setIsPlaying(false);
-          });
-      }
+        audio.play().catch(error => {
+          console.error("Autoplay failed", error);
+          setIsPlaying(false);
+        });
+        setIsPlaying(true);
+      };
 
       audio.addEventListener('canplay', handleCanPlay);
-      
+
       // Cleanup
       return () => {
-          audio.removeEventListener('canplay', handleCanPlay);
-      }
+        audio.removeEventListener('canplay', handleCanPlay);
+      };
     }
   }, [track]);
 
-  // Extract dominant color
+  // Extract dominant color from album art
   useEffect(() => {
     if (!track?.album_art_url) {
       setBgGradient("from-gray-800 to-gray-900");
@@ -62,7 +61,11 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     }
     const img = new Image();
     img.crossOrigin = "Anonymous";
-    img.src = track.album_art_url;
+
+    // Use the proxied URL for ColorThief to avoid CORS issues
+    const supabaseUrl = new URL(track.album_art_url);
+    img.src = `/supabase-images${supabaseUrl.pathname}`;
+
     img.onload = () => {
       const colorThief = new ColorThief();
       try {
@@ -74,9 +77,9 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
       }
     };
     img.onerror = () => {
-        console.error("Failed to load image for color extraction");
-        setBgGradient("from-gray-800 to-gray-900");
-    }
+      console.error("Failed to load image for color extraction");
+      setBgGradient("from-gray-800 to-gray-900");
+    };
   }, [track]);
 
   // Progress bar and song end handler
@@ -86,8 +89,8 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
 
     const updateProgress = () => {
       if (audio.duration) {
-         setProgress((audio.currentTime / audio.duration) * 100);
-         setDuration(audio.duration);
+        setProgress((audio.currentTime / audio.duration) * 100);
+        setDuration(audio.duration);
       }
     };
     const handleSongEnd = () => {
@@ -119,7 +122,7 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     const clickPosition = e.clientX - progressBar.getBoundingClientRect().left;
     const seekTime = (clickPosition / progressBar.offsetWidth) * audio.duration;
     audio.currentTime = seekTime;
-  }
+  };
   
   const swipeHandlers = useSwipeable({
     onSwipedLeft: onNext,
