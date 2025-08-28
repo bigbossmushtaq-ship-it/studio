@@ -27,8 +27,7 @@ export function MusicPlayer() {
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    if (currentSong && imgRef.current) {
-        // Ensure the image is fully loaded, especially with crossOrigin
+    if (currentSong?.album_art_url && imgRef.current) {
         imgRef.current.crossOrigin = "Anonymous";
         const extractColor = () => {
             if (!imgRef.current) return;
@@ -87,7 +86,12 @@ export function MusicPlayer() {
             exit={{ y: 100 }}
             transition={{ duration: 0.3 }}
             style={{ backgroundColor: bgColor }}
-            {...swipeHandlers}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={(event, info) => {
+                if (info.offset.x > 100) playPrevious();
+                if (info.offset.x < -100) playNext();
+            }}
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
                <img
