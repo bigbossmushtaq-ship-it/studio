@@ -252,14 +252,12 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                <MusicAvatar size={32} ringWidth={2}/>
             </SidebarTrigger>
           </header>
-          <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && (currentSong ? "pb-40 md:pb-32" : "pb-24 md:pb-8"))}>
+          <main className={cn("flex-1 overflow-y-auto p-4 md:p-8 pt-6", !isSettingsPage && "pb-24 md:pb-8")}>
             {children}
           </main>
         </SidebarInset>
       </div>
-       <div className={cn("fixed bottom-0 left-0 right-0 w-full z-40 md:left-auto md:w-[calc(100%-4rem)] group-data-[state=expanded]:md:w-[calc(100%-17rem)] transition-transform duration-300 ease-in-out",
-         currentSong ? "translate-y-0" : "translate-y-full"
-       )}>
+       <div className={cn("fixed inset-0 z-50 pointer-events-none", currentSong && "pointer-events-auto")}>
           <MusicPlayer />
        </div>
        {!isSettingsPage && <BottomNavBar />}
