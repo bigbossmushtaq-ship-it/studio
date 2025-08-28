@@ -34,7 +34,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { MusicPlayer } from "@/components/music-player";
+import MiniPlayer from "@/components/mini-player";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { MusicAvatar } from "@/components/music-avatar";
@@ -150,7 +150,7 @@ const BottomNavBar = () => {
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { theme, customColors } = useTheme();
-  const { username, setProfilePic, logout, session, loading, currentSong } = useApp();
+  const { username, setProfilePic, logout, session, loading } = useApp();
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile } = useSidebar();
@@ -204,7 +204,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
-  const mainContentPadding = currentSong ? "pb-44 md:pb-24" : "pb-24 md:pb-8";
+  const mainContentPadding = "pb-24 md:pb-8";
 
 
   return (
@@ -261,7 +261,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         </SidebarInset>
       </div>
        <div className="fixed inset-0 z-50 pointer-events-none">
-          {currentSong && <MusicPlayer />}
+          <MiniPlayer />
        </div>
        {!isSettingsPage && <BottomNavBar />}
     </div>

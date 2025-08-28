@@ -1,156 +1,94 @@
 
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { useSwipeable } from "react-swipeable";
+import React, { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import ColorThief from "colorthief";
-import type { Song } from "@/lib/data";
-import { Play, Pause } from "lucide-react";
-import AlbumArt from "./album-art";
 
-interface MiniPlayerProps {
-  song: Song & { isPlaying: boolean };
-  onPlayPause: () => void;
-  onNext: () => void;
-  onPrev: () => void;
-  onOpen: () => void;
-  bgColor: string;
-  setBgColor: (color: string) => void;
-}
+const songs = [
+  {
+    title: "Test_10",
+    artist: "Test_8",
+    album_art_url: "https://i.scdn.co/image/ab67616d0000b2736b0f4bfc27c71cf1f3f2b1f6",
+    src: "https://storage.googleapis.com/studioprod-project-filesystem-uploads/2024-05-24T18:27:07.135Z-test10.mp3",
+  },
+  {
+    title: "Test_9",
+    artist: "Test_7",
+    album_art_url: "https://i.scdn.co/image/ab67616d0000b27347a7c58f52e2189e50c42e08",
+    src: "https://storage.googleapis.com/studioprod-project-filesystem-uploads/2024-05-24T18:27:07.140Z-test9.mp3",
+  },
+];
 
-export default function MiniPlayer({
-  song,
-  onPlayPause,
-  onNext,
-  onPrev,
-  onOpen,
-  bgColor,
-  setBgColor,
-}: MiniPlayerProps) {
+export default function MiniPlayer() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [bgGradient, setBgGradient] = useState("linear-gradient(to right, #000, #333)");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
-  const [didSwipe, setDidSwipe] = useState(false);
 
-
-  // Extract blended colors from album art
+  // Extract gradient from album art
   useEffect(() => {
-    if (!song?.album_art_url) {
-      setBgColor("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
-      return;
-    };
+    const img = imgRef.current;
+    if (!img) return;
 
-    const img = new Image();
     img.crossOrigin = "Anonymous";
-    img.src = song.album_art_url;
-
-    const extractColors = () => {
+    const handleLoad = () => {
+      const colorThief = new ColorThief();
       try {
-        const colorThief = new ColorThief();
-        const palette = colorThief.getPalette(img, 5); // grab 5 dominant shades
+        const palette = colorThief.getPalette(img, 2);
         if (palette && palette.length >= 2) {
-          const gradient = `linear-gradient(135deg, rgb(${palette[0].join(
-            ","
-          )}), rgb(${palette[1].join(",")}))`;
-          setBgColor(gradient);
-        } else {
-          setBgColor("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
+          setBgGradient(
+            `linear-gradient(to right, rgb(${palette[0].join(",")}), rgb(${palette[1].join(",")}))`
+          );
         }
       } catch (err) {
-        console.warn("Color extraction failed:", err);
-        setBgColor("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
+        console.error("ColorThief failed:", err);
       }
     };
-
+    
     if (img.complete) {
-      extractColors();
+        handleLoad();
     } else {
-      img.onload = extractColors;
-      img.onerror = () => {
-         setBgColor("linear-gradient(135deg, rgb(30,30,30), rgb(50,50,50))");
-      }
+        img.onload = handleLoad;
     }
-  }, [song?.album_art_url, setBgColor]);
+  }, [currentIndex]);
 
-  const handlers = useSwipeable({
-    onSwipedLeft: () => {
-      setDidSwipe(true);
-      onNext();
-    },
-    onSwipedRight: () => {
-      setDidSwipe(true);
-      onPrev();
-    },
-    preventScrollOnSwipe: true,
-    trackMouse: true,
-  });
+  const playNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % songs.length);
+  };
 
-  // Reset swipe state after each gesture
-  useEffect(() => {
-    if (didSwipe) {
-      const timeout = setTimeout(() => setDidSwipe(false), 200); // a bit longer to be safe
-      return () => clearTimeout(timeout);
-    }
-  }, [didSwipe]);
-
-  const handleOpen = () => {
-    if (!didSwipe) {
-      onOpen();
-    }
-  }
-
-  if (!song) return null;
+  const playPrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + songs.length) % songs.length);
+  };
 
   return (
-    <div
-      {...handlers}
-      onClick={handleOpen}
-      className="fixed bottom-20 md:bottom-4 left-2 right-2 md:left-auto md:w-96 rounded-2xl shadow-lg flex items-center justify-between p-3 cursor-pointer z-40"
-      style={{
-        background: bgColor,
-        transition: "background 0.5s ease",
+    <motion.div
+      className="fixed bottom-0 left-0 w-full p-4 text-white cursor-pointer group pointer-events-auto"
+      style={{ background: bgGradient }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.2}
+      onDragEnd={(event, info) => {
+        if (info.offset.x < -100) {
+          playNext(); // swipe left -> next
+        } else if (info.offset.x > 100) {
+          playPrev(); // swipe right -> prev
+        }
       }}
     >
-      {/* Hidden image for color extraction */}
-      <img
-        ref={imgRef}
-        src={song.album_art_url}
-        alt="hidden cover"
-        className="hidden"
-      />
-
-      {/* Cover */}
-      <AlbumArt
-        src={song.album_art_url || ""}
-        alt="cover"
-        width={48}
-        height={48}
-        className="w-12 h-12 rounded-lg object-cover"
-      />
-
-      {/* Song Info */}
-      <div className="flex-1 ml-3 overflow-hidden">
-        <p className="text-white font-semibold truncate text-sm">
-          {song.title || "Unknown Song"}
-        </p>
-        <p className="text-gray-200 text-xs truncate">
-          {song.artist || "Unknown Artist"}
-        </p>
+      <div className="flex items-center gap-4">
+        <img
+          ref={imgRef}
+          src={songs[currentIndex].album_art_url}
+          alt="album art"
+          crossOrigin="anonymous"
+          className="w-12 h-12 rounded-xl"
+        />
+        <div>
+          <p className="font-bold">{songs[currentIndex].title}</p>
+          <p className="text-sm opacity-70">{songs[currentIndex].artist}</p>
+        </div>
       </div>
-
-      {/* Play / Pause */}
-      <div className="flex items-center text-white">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onPlayPause();
-          }}
-          className="p-2 rounded-full hover:bg-white/10"
-        >
-          {song.isPlaying ? (
-            <Pause className="w-6 h-6 fill-current" />
-          ) : (
-            <Play className="w-6 h-6 fill-current" />
-          )}
-        </button>
-      </div>
-    </div>
+      <audio ref={audioRef} src={songs[currentIndex].src} autoPlay />
+    </motion.div>
   );
 }
