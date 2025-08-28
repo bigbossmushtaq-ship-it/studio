@@ -64,8 +64,8 @@ export function MusicPlayer() {
   };
   
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => playNext(),
-    onSwipedRight: () => playPrevious(),
+    onSwipedLeft: () => playPrevious(),
+    onSwipedRight: () => playNext(),
     preventScrollOnSwipe: true,
     trackMouse: true
   });
@@ -89,8 +89,8 @@ export function MusicPlayer() {
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             onDragEnd={(event, info) => {
-                if (info.offset.x > 100) playPrevious();
-                if (info.offset.x < -100) playNext();
+                if (info.offset.x > 100) playNext();
+                if (info.offset.x < -100) playPrevious();
             }}
           >
             <div className="flex items-center gap-3 flex-1 min-w-0">
