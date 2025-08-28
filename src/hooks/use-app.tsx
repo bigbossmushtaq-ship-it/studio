@@ -133,31 +133,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const setupAudioContext = useCallback(() => {
       if (!audioRef) return;
-      // Only create context if it doesn't exist
-      if (!audioContext) {
-        try {
-          const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const analyserNode = context.createAnalyser();
-          analyserNode.fftSize = 256;
-          setAudioContext(context);
-          setAnalyser(analyserNode);
-        } catch (e) {
-          console.error("Failed to create audio context:", e);
-        }
-      }
+      if (audioContext && audioSource) return;
 
-      // Only create source if it doesn't exist
-      if (audioContext && !audioSource) {
-        try {
-            const source = audioContext.createMediaElementSource(audioRef);
+      try {
+        const context = audioContext || new (window.AudioContext || (window as any).webkitAudioContext)();
+        const analyserNode = context.createAnalyser();
+        analyserNode.fftSize = 256;
+        
+        if (!audioSource) {
+            const source = context.createMediaElementSource(audioRef);
             setAudioSource(source);
-            source.connect(analyser!);
-            analyser!.connect(audioContext.destination);
-        } catch (e) {
-            console.error("Failed to create media element source:", e);
+            source.connect(analyserNode);
         }
+        analyserNode.connect(context.destination);
+
+        setAudioContext(context);
+        setAnalyser(analyserNode);
+      } catch (e) {
+        console.error("Failed to setup audio context:", e);
       }
-  }, [audioContext, audioRef, audioSource, analyser]);
+  }, [audioContext, audioRef, audioSource]);
+
 
   const setCurrentSong = (song: Song) => {
     setupAudioContext();
@@ -167,7 +163,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   
   const togglePlayPause = () => {
     if (!currentSong) return;
-    // This is the first interaction, try to resume context
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume();
     }
@@ -177,6 +172,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const playNext = useCallback(() => {
     if (playlist.length === 0 || !currentSong) return;
     const currentIndex = playlist.findIndex(s => s.id === currentSong.id);
+    if (currentIndex === -1) {
+      if (playlist.length > 0) setCurrentSongState(playlist[0]);
+      return;
+    }
     const nextIndex = (currentIndex + 1) % playlist.length;
     setCurrentSongState(playlist[nextIndex]);
     setIsPlayingState(true);
@@ -185,38 +184,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const playPrev = () => {
     if (playlist.length === 0 || !currentSong) return;
     const currentIndex = playlist.findIndex(s => s.id === currentSong.id);
+    if (currentIndex === -1) {
+      if (playlist.length > 0) setCurrentSongState(playlist[0]);
+      return;
+    }
     const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
     setCurrentSongState(playlist[prevIndex]);
     setIsPlayingState(true);
   }
 
-  // Audio event listeners
   useEffect(() => {
-    if (!audioRef) return;
-    const handleEnded = () => playNext();
-    audioRef.addEventListener('ended', handleEnded);
-    return () => {
-      audioRef.removeEventListener('ended', handleEnded);
-    }
-  }, [audioRef, playNext]);
-
-
-  // Update audio source when current song changes
-  useEffect(() => {
-    if (audioRef && currentSong) {
-      if (audioRef.src !== currentSong.song_url) {
-        audioRef.src = currentSong.song_url!;
-        audioRef.load();
-      }
-    }
-  }, [currentSong, audioRef]);
-
-  // Handle play/pause state
-  useEffect(() => {
-    if(audioRef) {
-      if(isPlaying) {
+    if (audioRef) {
+      if (isPlaying) {
          audioRef.play().catch(e => {
-          console.error("Autoplay failed:", e);
+          console.error("Playback failed:", e);
           setIsPlayingState(false);
         });
       } else {
@@ -224,6 +205,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [isPlaying, audioRef]);
+  
+  useEffect(() => {
+    if (audioRef && currentSong?.song_url) {
+      if (audioRef.src !== currentSong.song_url) {
+        audioRef.src = currentSong.song_url;
+        audioRef.load();
+        if(isPlaying) {
+            audioRef.play().catch(e => {
+                console.error("Failed to play new track:", e);
+                setIsPlayingState(false);
+            });
+        }
+      }
+    }
+  }, [currentSong, audioRef, isPlaying]);
 
 
   const contextValue: AppContextType = {
@@ -265,5 +261,3 @@ export const useApp = (): AppContextType => {
   }
   return context;
 };
-
-    
