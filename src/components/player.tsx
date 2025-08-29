@@ -44,9 +44,15 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
       };
       
       audio.addEventListener('canplay', handleCanPlay);
+      audio.addEventListener('loadeddata', () => {
+        setDuration(audio.duration);
+      });
+
 
       return () => {
         audio.removeEventListener('canplay', handleCanPlay);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        audio.removeEventListener('loadeddata', () => setDuration(audio.duration));
       };
     }
   }, [track]);
@@ -61,8 +67,14 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     const img = new Image();
     img.crossOrigin = "Anonymous";
 
-    const supabaseUrl = new URL(track.album_art_url);
-    img.src = `/supabase-images${supabaseUrl.pathname}`;
+    // Use the proxy for Supabase URLs, otherwise use the direct URL
+    if (track.album_art_url.includes('supabase.co')) {
+       const supabaseUrl = new URL(track.album_art_url);
+       img.src = `/supabase-images${supabaseUrl.pathname}`;
+    } else {
+       img.src = track.album_art_url;
+    }
+
 
     img.onload = () => {
       const colorThief = new ColorThief();
