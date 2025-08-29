@@ -27,6 +27,7 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
   const [duration, setDuration] = useState(0);
   const [bgGradient, setBgGradient] = useState("from-gray-800 to-gray-900");
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
 
   // Auto-play when track changes and handle loading
   useEffect(() => {
@@ -134,9 +135,21 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     audio.currentTime = seekTime;
   };
   
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: onNext,
-    onSwipedRight: onPrev,
+   const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      setSwipeDirection("left");
+      setTimeout(() => {
+        onNext();
+        setSwipeDirection(null);
+      }, 300);
+    },
+    onSwipedRight: () => {
+      setSwipeDirection("right");
+      setTimeout(() => {
+        onPrev();
+        setSwipeDirection(null);
+      }, 300);
+    },
     preventScrollOnSwipe: true,
   });
   
@@ -147,11 +160,18 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const getAnimationClass = () => {
+    if (swipeDirection === "left") return "animate-swipe-left";
+    if (swipeDirection === "right") return "animate-swipe-right";
+    return "";
+  };
+
+
   return (
     <>
       <motion.div
         {...swipeHandlers}
-        className={`fixed bottom-[70px] md:bottom-0 left-0 right-0 p-4 bg-gradient-to-r ${bgGradient} shadow-lg cursor-pointer pointer-events-auto`}
+        className={`fixed bottom-[70px] md:bottom-0 left-0 right-0 p-4 bg-gradient-to-r ${bgGradient} shadow-lg cursor-pointer pointer-events-auto ${getAnimationClass()}`}
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100 }}
