@@ -43,10 +43,8 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
         setIsPlaying(true);
       };
       
-      // Use 'canplay' event to start playing
       audio.addEventListener('canplay', handleCanPlay);
 
-      // Clean up the event listener
       return () => {
         audio.removeEventListener('canplay', handleCanPlay);
       };
@@ -63,7 +61,6 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     const img = new Image();
     img.crossOrigin = "Anonymous";
 
-    // Use the proxied URL for ColorThief to avoid CORS issues
     const supabaseUrl = new URL(track.album_art_url);
     img.src = `/supabase-images${supabaseUrl.pathname}`;
 
@@ -201,12 +198,23 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
             </div>
 
             <motion.img
+              key={track.id}
               src={track.album_art_url}
               alt={track.title}
               className="w-full max-w-sm mx-auto aspect-square rounded-2xl shadow-xl mb-6"
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.4 }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              onDragEnd={(e, { offset, velocity }) => {
+                if (offset.x > 100) {
+                  onPrev(); // swipe right
+                } else if (offset.x < -100) {
+                  onNext(); // swipe left
+                }
+              }}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3 }}
             />
 
             <div className="text-center flex-shrink-0">
