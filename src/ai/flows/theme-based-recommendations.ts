@@ -48,10 +48,12 @@ const prompt = ai.definePrompt({
   prompt: `You are a music recommendation expert. Based on the user's listening history and the available song metadata, recommend songs that the user might enjoy.
 
 User Listening History:
-{{#each listeningHistory}}- {{this}}\n{{/each}}
+{{#each listeningHistory}}- {{this}}
+{{/each}}
 
 Available Songs:
-{{#each songMetadata}}- Title: {{this.title}}, Artist: {{this.artist}}, Genre: {{this.genre}}, Theme: {{this.theme}}\n{{/each}}
+{{#each songMetadata}}- Title: {{this.title}}, Artist: {{this.artist}}, Genre: {{this.genre}}, Theme: {{this.theme}}
+{{/each}}
 
 Recommended Songs:`,
 });
