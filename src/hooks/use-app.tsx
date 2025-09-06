@@ -1,6 +1,6 @@
 
 "use client"
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { Session, User } from '@supabase/supabase-js';
 import { Song } from '@/lib/data';
@@ -28,6 +28,7 @@ interface AppContextType {
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
   analyser?: AnalyserNode;
+  audioRef: React.RefObject<HTMLAudioElement>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -42,6 +43,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [profilePic, setProfilePicState] = useState("https://placehold.co/200x200.png");
 
   // Music Player State
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -76,6 +78,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
   
+  useEffect(() => {
+    // Initialize audio element
+    if (audioRef.current === null) {
+      (audioRef as React.MutableRefObject<HTMLAudioElement | null>).current = new Audio();
+      audioRef.current.crossOrigin = 'anonymous';
+    }
+  }, []);
+
   const login = async (email: string, pass: string) => {
       setLoading(true);
       setError(null);
@@ -163,6 +173,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     isPlaying,
     setIsPlaying,
     analyser,
+    audioRef,
   };
 
   return (

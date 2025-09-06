@@ -9,12 +9,17 @@ import { useApp } from "@/hooks/use-app";
 import { cn } from "@/lib/utils";
 
 export function SongCard({ song }: { song: Song }) {
-  const { setCurrentSong, currentSong } = useApp();
+  const { setCurrentSong, currentSong, isPlaying, setIsPlaying } = useApp();
 
-  const isThisSongPlaying = currentSong?.id === song.id;
+  const isThisSongPlaying = currentSong?.id === song.id && isPlaying;
 
   const handlePlayPause = () => {
-      setCurrentSong(song);
+      if (isThisSongPlaying) {
+        setIsPlaying(false);
+      } else {
+        setCurrentSong(song);
+        setIsPlaying(true);
+      }
   };
 
   return (
@@ -35,7 +40,8 @@ export function SongCard({ song }: { song: Song }) {
             handlePlayPause();
           }}
           className={cn(
-            "absolute bottom-2 right-2 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0 transition-opacity"
+            "absolute bottom-2 right-2 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex-shrink-0 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100",
+             isThisSongPlaying && "opacity-100"
           )}
         >
           {isThisSongPlaying ? (

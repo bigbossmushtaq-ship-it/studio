@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
 import type { Song } from "@/lib/data";
+import { useApp } from "@/hooks/use-app";
 
 interface PlayerProps {
   track: Song;
@@ -21,8 +22,7 @@ interface PlayerProps {
 }
 
 export default function Player({ track, onNext, onPrev }: PlayerProps) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const { isPlaying, setIsPlaying, audioRef } = useApp();
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [bgGradient, setBgGradient] = useState("from-gray-800 to-gray-900");
@@ -33,8 +33,10 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio && track?.song_url) {
-      audio.src = track.song_url;
-      audio.load();
+      if (audio.src !== track.song_url) {
+        audio.src = track.song_url;
+        audio.load();
+      }
 
       const handleCanPlay = () => {
         audio.play().catch(error => {
@@ -44,19 +46,13 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
         setIsPlaying(true);
       };
       
-      audio.addEventListener('canplay', handleCanPlay);
-      audio.addEventListener('loadeddata', () => {
-        setDuration(audio.duration);
-      });
-
+      audio.addEventListener('canplaythrough', handleCanPlay);
 
       return () => {
-        audio.removeEventListener('canplay', handleCanPlay);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        audio.removeEventListener('loadeddata', () => setDuration(audio.duration));
+        audio.removeEventListener('canplaythrough', handleCanPlay);
       };
     }
-  }, [track]);
+  }, [track, audioRef, setIsPlaying]);
 
 
   // Extract dominant color from album art
@@ -75,7 +71,6 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
     } else {
        img.src = track.album_art_url;
     }
-
 
     img.onload = () => {
       const colorThief = new ColorThief();
@@ -113,7 +108,7 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
       audio.removeEventListener("timeupdate", updateProgress);
       audio.removeEventListener("ended", handleSongEnd);
     };
-  }, [onNext]);
+  }, [onNext, audioRef]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -148,7 +143,7 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
       setTimeout(() => {
         onPrev();
         setSwipeDirection(null);
-      }, 300);
+        }, 300);
     },
     preventScrollOnSwipe: true,
   });
@@ -309,8 +304,6 @@ export default function Player({ track, onNext, onPrev }: PlayerProps) {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <audio ref={audioRef} onEnded={onNext}/>
     </>
   );
 }
