@@ -25,6 +25,9 @@ interface AppContextType {
   setCurrentSong: (song: Song | null) => void;
   playNext: () => void;
   playPrev: () => void;
+  isPlaying: boolean;
+  setIsPlaying: (playing: boolean) => void;
+  analyser?: AnalyserNode;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -41,6 +44,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Music Player State
   const [playlist, setPlaylist] = useState<Song[]>([]);
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [analyser, setAnalyser] = useState<AnalyserNode | undefined>(undefined);
 
   useEffect(() => {
     const getSession = async () => {
@@ -155,6 +160,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setCurrentSong,
     playNext,
     playPrev,
+    isPlaying,
+    setIsPlaying,
+    analyser,
   };
 
   return (
