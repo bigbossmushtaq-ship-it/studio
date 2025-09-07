@@ -237,7 +237,7 @@ export default function UploadPage() {
                </div>
             </div>
              <div className="space-y-2">
-              <Label htmlFor="theme">Theme</Label>
+              <Label htmlFor="theme">Theme (Optional)</Label>
                <div className="flex gap-2">
                 <Input 
                   id="theme" 
